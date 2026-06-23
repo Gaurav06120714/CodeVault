@@ -32,7 +32,8 @@ Main screens:
 - **Landing** (`/`) — intro + call to action.
 - **Login** (`/login`) — GitHub sign‑in.
 - **Connect** (`/connect`) — add a platform username / authorize sync.
-- **Dashboard** (`/dashboard`) — unified analytics across all platforms.
+- **Dashboard** (`/dashboard`) — your private unified analytics across all platforms.
+- **Public profile** (`/u/[username]`) — a shareable public page showing a user's *total* analysis, built from public stats only (no auth needed).
 
 ### 📊 What the dashboard shows
 
@@ -175,7 +176,8 @@ frontend/
 | `globals.css` | — | Global styles + Tailwind directives. |
 | `(auth)/login/page.tsx` | `/login` | GitHub sign-in. |
 | `connect/page.tsx` | `/connect` | Connect a platform. |
-| `dashboard/page.tsx` | `/dashboard` | Unified stats dashboard. |
+| `dashboard/page.tsx` | `/dashboard` | Private unified stats dashboard. |
+| `u/[username]/page.tsx` | `/u/:username` | Public shareable analysis profile (stats only). |
 
 ### Components
 | File | Purpose |
@@ -189,6 +191,8 @@ frontend/
 | `dashboard/ActivityHeatmap.tsx` | Solve-activity heatmap. |
 | `layout/Navbar.tsx` | Top navigation bar. |
 | `layout/Footer.tsx` | Page footer. |
+| `profile/ProfileHeader.tsx` | Public profile header: avatar, name, handles, headline totals. |
+| `profile/AnalysisSection.tsx` | Public profile body: the full analysis (difficulty, topics, languages, heatmap). |
 
 ### Features / Hooks / Lib / Types / Constants / Styles
 | File | Purpose |
@@ -197,6 +201,8 @@ frontend/
 | `features/stats/types.ts` | TypeScript shapes for stats. |
 | `features/platforms/api.ts` | Connect/list platform calls. |
 | `features/platforms/types.ts` | TypeScript shapes for platforms. |
+| `features/profile/api.ts` | Fetch a user's public total analysis by username (no auth). |
+| `features/profile/types.ts` | TypeScript shapes for the public profile. |
 | `hooks/useStats.ts` | Hook to load & cache dashboard stats. |
 | `hooks/usePlatforms.ts` | Hook to load & manage connections. |
 | `lib/api-client.ts` | Single configured HTTP client (base URL, auth header). |
