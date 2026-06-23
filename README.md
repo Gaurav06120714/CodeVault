@@ -42,29 +42,44 @@ When you solve problems on LeetCode, Codeforces, CodeChef, or HackerRank, all th
 
 ## 🗂 Monorepo layout
 
-CodeVault is split into two independent applications:
+CodeVault is split into **three independent applications** — one UI and two separate backends:
 
 ```
 CodeVault/
 ├── README.md          # ← you are here (project overview)
+├── plan.md            # build spec for every file
 ├── .gitignore
 │
 ├── docs/
 │   └── ARCHITECTURE.md   # shared architecture deep-dive
 │
-├── frontend/          # 🎨 Next.js dashboard UI  →  see frontend/README.md
+├── web-frontend/      # 🎨 Next.js website UI        →  see web-frontend/README.md
 │   └── src/ ...
 │
-└── backend/           # ⚙️ Express + TypeScript API & sync engine  →  see backend/README.md
+├── web-backend/       # 🌐 website API: auth, stats, profiles  →  see web-backend/README.md
+│   └── src/ ...
+│
+└── git-service/       # 📦 GitHub-sync backend: fetch code + push  →  see git-service/README.md
     └── src/ ...
 ```
 
 | App | Stack | What it does | Docs |
 |-----|-------|--------------|------|
-| **frontend/** | Next.js 15 · React 18 · Tailwind | Dashboard UI; connect platforms, view stats | [frontend/README.md](frontend/README.md) |
-| **backend/** | Node.js · Express · Prisma | Fetches stats & code, runs scheduled syncs, pushes to GitHub | [backend/README.md](backend/README.md) |
+| **web-frontend/** | Next.js 15 · React 18 · Tailwind | Website UI; connect platforms, view analysis, public profiles | [web-frontend/README.md](web-frontend/README.md) |
+| **web-backend/** | Node.js · Express · Prisma | Auth, platform connections, multi‑platform stats, public profiles | [web-backend/README.md](web-backend/README.md) |
+| **git-service/** | Node.js · Express · Prisma · node‑cron | Fetches the user's code + question, pushes the per‑problem folder to GitHub, runs scheduled syncs | [git-service/README.md](git-service/README.md) |
 
-> The frontend is a **pure presentation layer** that talks to the backend over REST. The backend owns the database and all external integrations. This separation keeps each side simple and independently deployable.
+### How they connect
+
+The **web‑frontend talks to both backends** directly over REST:
+
+```
+web-frontend ──REST──▶ web-backend   (auth, stats, public profiles)
+             └─REST──▶ git-service   (sync solution code to GitHub)
+```
+
+- The **web‑backend** powers the analytics website (works from a **username alone**).
+- The **git‑service** is a dedicated, separate backend for GitHub sync (needs the **one‑time connect**), so syncing scales and fails independently of the website.
 
 ---
 
@@ -129,25 +144,21 @@ One-time connect ──▶ Submission Fetcher ──▶ Organizer ──▶ GitH
 
 ## 🛠 Tech stack & versions
 
-| Side | Technology | Version |
-|------|-----------|---------|
-| Frontend | **Next.js** (App Router) | `15.x` |
-| Frontend | **React** | `18.3.x` |
-| Frontend | **Tailwind CSS** | `3.4.x` |
-| Backend | **Express** | `4.19.x` |
-| Backend | **Prisma** | `5.18.x` |
-| Backend | **node-cron / Zod / axios / pino** | latest |
-| Shared | **TypeScript** | `5.5.x` |
-| Shared | **Node.js** | `≥ 18.18` |
+| App | Technology | Version |
+|-----|-----------|---------|
+| web-frontend | **Next.js** (App Router) · **React** · **Tailwind CSS** | `15.x` · `18.3.x` · `3.4.x` |
+| web-backend | **Express** · **Prisma** · **Zod** | `4.19.x` · `5.18.x` · `3.x` |
+| git-service | **Express** · **Prisma** · **node-cron** · **axios** | `4.19.x` · `5.18.x` · `3.x` · `1.x` |
+| Shared | **TypeScript** · **Node.js** | `5.5.x` · `≥ 18.18` |
 | Database | **SQLite** (dev) → **PostgreSQL** (prod) | — |
 
-> Per‑app details live in [frontend/README.md](frontend/README.md) and [backend/README.md](backend/README.md).
+> Per‑app details live in [web-frontend/README.md](web-frontend/README.md), [web-backend/README.md](web-backend/README.md), and [git-service/README.md](git-service/README.md).
 
 ---
 
 ## 📐 Project rules & conventions
 
-1. **Clear separation** — UI in `frontend/`, all logic & data in `backend/`. The frontend only calls the backend API.
+1. **Clear separation** — UI in `web-frontend/`, website logic in `web-backend/`, GitHub sync in `git-service/`. The frontend calls both backends over REST.
 2. **Each app is self‑contained** — its own `package.json`, config, and README.
 3. **Two data paths stay separate** — public stats (Path A) never depend on an authorized session (Path B).
 4. **Secrets only in `.env`** — never commit real tokens; each app has its own `.env.example`.
@@ -160,17 +171,21 @@ One-time connect ──▶ Submission Fetcher ──▶ Organizer ──▶ GitH
 ## 🚀 Getting started
 
 ```bash
-# Backend (API)
-cd backend
-npm install
-cp .env.example .env
-npx prisma db push
+# 1) Web backend (website API)
+cd web-backend
+npm install && cp .env.example .env && npx prisma db push
 npm run dev          # http://localhost:4000
 
-# Frontend (UI) — in a second terminal
-cd frontend
+# 2) Git service (sync engine) — new terminal
+cd git-service
+npm install && cp .env.example .env && npx prisma db push
+npm run dev          # http://localhost:5000
+
+# 3) Web frontend (UI) — new terminal
+cd web-frontend
 npm install
-cp .env.example .env.local   # set NEXT_PUBLIC_API_URL=http://localhost:4000
+cp .env.example .env.local   # NEXT_PUBLIC_API_URL=http://localhost:4000
+                             # NEXT_PUBLIC_GIT_SERVICE_URL=http://localhost:5000
 npm run dev          # http://localhost:3000
 ```
 
@@ -178,11 +193,11 @@ npm run dev          # http://localhost:3000
 
 ## 🗺 Roadmap
 
-- [x] Monorepo skeleton (frontend + backend) & architecture
-- [ ] Backend: LeetCode stats (Path A)
-- [ ] Backend: Codeforces stats (official API)
-- [ ] Backend: LeetCode code sync (Path B) → GitHub push + README index
-- [ ] Frontend: dashboard + connect flow
+- [x] Monorepo skeleton (web-frontend + web-backend + git-service) & architecture
+- [ ] web-backend: LeetCode stats (Path A)
+- [ ] web-backend: Codeforces stats (official API)
+- [ ] git-service: LeetCode code sync (Path B) → GitHub push + README index
+- [ ] web-frontend: dashboard + connect flow
 - [ ] Unified multi‑platform dashboard
 - [ ] AI explanation & next‑problem recommendation
 - [ ] Gamification (streaks, goals, shareable cards)
