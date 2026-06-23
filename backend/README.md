@@ -221,6 +221,7 @@ backend/
 | `user.routes.ts` | `user.controller.ts` | User profile & settings. |
 | `platform.routes.ts` | `platform.controller.ts` | Connect a platform, list connections. |
 | `sync.routes.ts` | `sync.controller.ts` | Trigger a manual sync run. |
+| `public.routes.ts` | `public.controller.ts` | Public, no‑auth analysis by username (powers the shareable profile website). |
 | `stats.routes.ts` | `stats.controller.ts` | Return aggregated dashboard stats. |
 
 ### Services
@@ -271,7 +272,8 @@ backend/
 | `POST` | `/api/platforms/connect` | Connect a platform (username + optional session). |
 | `GET`  | `/api/platforms` | List the user's connections. |
 | `POST` | `/api/sync` | Trigger a sync run now. |
-| `GET`  | `/api/stats` | Aggregated multi‑platform dashboard stats. |
+| `GET`  | `/api/stats` | Aggregated multi‑platform dashboard stats (auth). |
+| `GET`  | `/api/public/:username` | Public total analysis for the shareable profile (no auth). |
 
 ---
 
