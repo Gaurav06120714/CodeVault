@@ -74,9 +74,10 @@ CodeVault/
 ├── plan.md            # per-file build spec (THE blueprint)
 ├── context.md         # this file
 ├── docs/ARCHITECTURE.md   # (currently empty skeleton)
-├── web-frontend/      # Next.js UI  (see web-frontend/README.md)
-├── web-backend/       # website API (see web-backend/README.md)
-└── git-service/       # GitHub sync (see git-service/README.md)
+├── frontendHtml/      # ✅ clickable HTML prototype, 15 pages (see frontendHtml/README.md)
+├── web-frontend/      # Next.js UI skeleton (see web-frontend/README.md)
+├── web-backend/       # website API skeleton (see web-backend/README.md)
+└── git-service/       # GitHub sync skeleton (see git-service/README.md)
 ```
 
 Each service has its own README documenting structure, versions, file‑by‑file purpose, and rules. `plan.md` says **what code to write in every file**.
@@ -85,11 +86,10 @@ Each service has its own README documenting structure, versions, file‑by‑fil
 
 ## 7. Current status
 
-- ✅ **Skeleton only.** Every planned file exists but is **empty** (no code yet) — the structure is the deliverable so far.
-- ✅ All **READMEs** (root + 3 services) and **plan.md** are fully written and are the source of truth.
-- ✅ Repo is on GitHub: **https://github.com/Gaurav06120714/CodeVault** (branch `main`).
-- ✅ A **sample landing page** exists at `web-frontend/landing-example.html` (standalone HTML/CSS/JS, finmate‑inspired: mint bg, purple/yellow/teal). **This file was intentionally NOT committed to git.**
-- ⏳ **No application code implemented yet.** Next step is to build from `plan.md`, Phase 1.
+- ✅ **Backend/Next.js = skeleton only.** Every planned file in `web-backend/`, `git-service/`, `web-frontend/` exists but is **empty** (no app code yet) — the structure + READMEs + `plan.md` are the source of truth.
+- ✅ **Full HTML prototype committed** in **`frontendHtml/`** — 15 clickable pages (landing, login, overview, analytics, repositories, public-profile, sync-status, settings, notifications, connect, problem, public profile view, privacy, terms, contact). Every button is wired. See `frontendHtml/README.md`. Pricing page was created then **removed** (to be added later).
+- ✅ Repo on GitHub: **https://github.com/Gaurav06120714/CodeVault** (branch `main`).
+- ⏳ **No backend/Next.js code implemented yet.** Next step: build the real Next.js pages from the prototype, then `plan.md` Phase 1.
 
 ---
 
@@ -97,7 +97,7 @@ Each service has its own README documenting structure, versions, file‑by‑fil
 
 1. **Git commits authored solely by the user — NO Claude/AI co‑author trailer.** Git identity: name `Gaurav06120714`, email `gauravganeshteegulla@gmail.com`.
 2. **Commit per file / per logical change**, with prefixes: `feat:`, `fix:`, `chore:`, `docs:`, `style:`, `refactor:`. The user likes granular history.
-3. **Push after committing** (unless the user says not to — e.g. the landing page sample was kept uncommitted on request).
+3. **Push after committing** — the user often says "push one by one after creating each file", so commit + push per file.
 4. **Strict layering** in backends: Routes (wiring) → Controllers (HTTP I/O) → Services (logic) → Integrations/DB. Controllers never touch the DB.
 5. **One integration per file** (one platform = one service file).
 6. **Secrets only in `.env`**; each service has its own `.env.example`. Never commit tokens.
@@ -124,8 +124,8 @@ Each service has its own README documenting structure, versions, file‑by‑fil
 
 - The user builds incrementally and wants **per‑file commits, no AI co‑author**.
 - When implementing, follow `plan.md` exactly; keep each service self‑contained.
-- The design language for UI: see `web-frontend/landing-example.html` (mint background, white rounded cards, purple `#5a40d4` primary, yellow `#f5b942` + teal `#19b6a2` accents, Plus Jakarta Sans).
-- Likely next request: implement Phase 1, or convert the sample landing page into `web-frontend/src/app/page.tsx`.
+- The design language for UI: see `frontendHtml/` (warm paper `#f8f6f1`; **coral `#f1543f`** primary + **gold `#e8a200`** + **rose `#e0457b`** accents; NO purple/blue/green theme; Inter + JetBrains Mono; consistent inline-SVG icons, no emoji; platform badges keep real brand colors). The user rejected purple, blue, and green themes.
+- Likely next request: convert the `frontendHtml/` prototype pages into real `web-frontend/src/app` Next.js pages/components (1:1 mapping).
 - Platforms to support first: **LeetCode, CodeChef, Codeforces, HackerRank**; designed so adding more later = adding one service file per platform.
 
 ---
