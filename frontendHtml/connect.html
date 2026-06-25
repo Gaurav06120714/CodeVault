@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="description" content="Connect a coding platform to CodeVault." />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23f1543f'/%3E%3Ctext x='16' y='22' font-family='monospace' font-size='15' fill='white' text-anchor='middle' font-weight='bold'%3ECV%3C/text%3E%3C/svg%3E" />
+<title>Connect a platform · CodeVault</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+<style>
+  :root{--paper:#f8f6f1;--card:#fff;--ink:#1a160f;--ink-2:#3a352c;--muted:#6f6a5f;--faint:#7a7568;--border:#ece7dc;--border-2:#e2dccd;
+    --brand:#f1543f;--brand-d:#d8431f;--brand-soft:#fdeae4;--amber:#e8a200;--rose:#e0457b;--rose-d:#c43368;--rose-soft:#fce3ee;
+    --mono:'JetBrains Mono',ui-monospace,monospace;--r:14px;--shadow:0 1px 2px rgba(30,20,10,.04),0 10px 28px -16px rgba(30,20,10,.18);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Inter',system-ui,sans-serif;color:var(--ink);background:var(--paper);-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}.mono{font-family:var(--mono)}
+  :focus-visible{outline:2px solid var(--brand);outline-offset:2px;border-radius:6px}
+  .top{display:flex;align-items:center;gap:12px;padding:18px 28px;border-bottom:1px solid var(--border);background:#fff;position:sticky;top:0}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:16px}
+  .mark{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,var(--brand),var(--rose));color:#fff;display:grid;place-items:center;font-family:var(--mono);font-weight:800;font-size:14px}
+  .top .back{margin-left:auto;font-size:13.5px;color:var(--muted);font-weight:600}.top .back:hover{color:var(--ink)}
+  .wrap{max-width:680px;margin:40px auto;padding:0 24px}
+  .step-label{font-family:var(--mono);font-size:12px;color:var(--brand-d);font-weight:700}
+  h1{font-size:26px;letter-spacing:-.02em;margin:8px 0 6px}
+  .sub{color:var(--muted);font-size:15px;margin-bottom:24px}
+  .panel{background:#fff;border:1px solid var(--border);border-radius:var(--r);padding:22px;box-shadow:var(--shadow)}
+  .plats{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .pcard{display:flex;align-items:center;gap:12px;border:1px solid var(--border-2);border-radius:12px;padding:14px;cursor:pointer;transition:.12s;background:#fff}
+  .pcard:hover{border-color:var(--brand);background:var(--brand-soft)}
+  .pcard.sel{border-color:var(--brand);background:var(--brand-soft);box-shadow:0 0 0 3px var(--brand-soft)}
+  .pcard .b{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;color:#fff;font-weight:800;font-family:var(--mono);font-size:13px;flex:none}
+  .lc{background:#ffa116}.cf{background:#1f8acb}.cc{background:#7a5230}.hr{background:#1aa260}
+  .pcard .nm{font-size:14.5px;font-weight:700}.pcard .m{font-size:12px;color:var(--faint)}
+  .field{margin-top:20px}
+  label{display:block;font-size:13px;font-weight:600;margin-bottom:7px}
+  .inwrap{display:flex;border:1px solid var(--border-2);border-radius:11px;overflow:hidden}
+  .inwrap .pfx{background:var(--paper);padding:12px 12px;font-family:var(--mono);font-size:13px;color:var(--faint);border-right:1px solid var(--border-2)}
+  .inwrap input{flex:1;border:0;outline:0;padding:12px 14px;font-family:inherit;font-size:14.5px;color:var(--ink)}
+  .modes{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:20px}
+  .mode{border:1px solid var(--border-2);border-radius:12px;padding:16px}
+  .mode .mt{font-size:13.5px;font-weight:700;display:flex;align-items:center;gap:8px}
+  .mode .md{font-size:12.5px;color:var(--faint);margin:6px 0 12px;line-height:1.5}
+  .tag{font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:999px}
+  .tag.free{background:var(--brand-soft);color:var(--brand-d)}.tag.auth{background:#eef0f3;color:#555}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;width:100%;font-family:inherit;font-weight:700;font-size:14px;border-radius:10px;border:1px solid var(--border-2);background:#fff;padding:11px;cursor:pointer;color:var(--ink)}
+  .btn:hover{background:var(--paper)} .btn.brand{background:var(--brand);color:#fff;border-color:var(--brand)} .btn.brand:hover{background:var(--brand-d)}
+  .note{font-size:12px;color:var(--faint);margin-top:14px;text-align:center}
+  @media (max-width:560px){.plats,.modes{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+  <div class="top">
+    <a class="brand" href="overview.html"><span class="mark">CV</span> CodeVault</a>
+    <a class="back" href="settings.html">← Back to settings</a>
+  </div>
+  <div class="wrap">
+    <div class="step-label">Step 1 of 2</div>
+    <h1>Connect a platform</h1>
+    <p class="sub">Pick a platform to add to your dashboard. Stats start instantly; code sync needs a one-time authorization.</p>
+
+    <div class="panel">
+      <div class="plats">
+        <button class="pcard sel" type="button" data-p="LeetCode"><span class="b lc">LC</span><div><div class="nm">LeetCode</div><div class="m">leetcode.com/u/…</div></div></button>
+        <button class="pcard" type="button" data-p="Codeforces"><span class="b cf">CF</span><div><div class="nm">Codeforces</div><div class="m">codeforces.com/profile/…</div></div></button>
+        <button class="pcard" type="button" data-p="CodeChef"><span class="b cc">CC</span><div><div class="nm">CodeChef</div><div class="m">codechef.com/users/…</div></div></button>
+        <button class="pcard" type="button" data-p="HackerRank"><span class="b hr">HR</span><div><div class="nm">HackerRank</div><div class="m">hackerrank.com/…</div></div></button>
+      </div>
+
+      <div class="field">
+        <label for="uname">Your <span id="pname">LeetCode</span> username</label>
+        <div class="inwrap"><span class="pfx">@</span><input id="uname" type="text" placeholder="gaurav" autocomplete="off" /></div>
+      </div>
+
+      <div class="modes">
+        <div class="mode">
+          <div class="mt">Stats only <span class="tag free">no login</span></div>
+          <div class="md">Pull public stats for your dashboard. Nothing is pushed to GitHub.</div>
+          <button class="btn" type="button" onclick="location.href='overview.html'">Add for stats</button>
+        </div>
+        <div class="mode">
+          <div class="mt">Stats + code sync <span class="tag auth">authorize once</span></div>
+          <div class="md">Also push your accepted solutions to GitHub, organized by problem number.</div>
+          <button class="btn brand" type="button" onclick="location.href='sync-status.html'">Authorize &amp; sync</button>
+        </div>
+      </div>
+      <div class="note">Your password is never shared with CodeVault.</div>
+    </div>
+  </div>
+<script>
+  const cards=document.querySelectorAll('.pcard'),pname=document.getElementById('pname');
+  cards.forEach(c=>c.addEventListener('click',()=>{cards.forEach(x=>x.classList.remove('sel'));c.classList.add('sel');pname.textContent=c.dataset.p;}));
+</script>
+</body>
+</html>
