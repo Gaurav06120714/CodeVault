@@ -2,6 +2,8 @@ import { Router } from 'express';
 import healthRoutes from './health.routes';
 import authRoutes from './auth.routes';
 import userRoutes from './user.routes';
+import platformRoutes from './platform.routes';
+import statsRoutes from './stats.routes';
 
 /**
  * API router — mounts every feature router under /api/v1.
@@ -11,7 +13,9 @@ const router = Router();
 
 router.use('/auth', authRoutes);
 router.use('/users', userRoutes);
-// More feature routers land here (platforms, stats, public, settings, notifications...).
+router.use('/platforms', platformRoutes);
+router.use('/stats', statsRoutes);
+// More feature routers land here (public, settings, notifications...).
 
 export default router;
 export { healthRoutes };
