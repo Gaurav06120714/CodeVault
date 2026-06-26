@@ -150,6 +150,7 @@ CI/CD, dependencies, secrets                                      (high — supp
 - ★ **Secure cookies:** Secure, httpOnly, SameSite; scoped path/domain.
 - ★ **Input validation/output encoding:** validate forms (Zod) client+server; encode all dynamic output.
 - ★ **No secrets in client bundle:** only `NEXT_PUBLIC_*` non-secret config; **the git-service key must never reach the browser** (see §1 S1).
+- ★ **Search bar is read-only (no mutations):** the top/topbar search input is a **query-only** control — typing or editing in it MUST NEVER edit, save, delete, or otherwise change any data. It only filters/navigates via safe **GET** requests; it issues no POST/PATCH/PUT/DELETE and triggers no state change. Treat its value as untrusted: sanitize/encode before display, never interpolate it into a request path/host (anti-SSRF/injection), and never bind it to an editable field. Pressing Enter performs a search, not a submit-and-save.
 - ◇ **SRI** for any third-party scripts (prefer self-hosting fonts to drop external origins).
 
 ---
