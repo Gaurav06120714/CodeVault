@@ -104,8 +104,7 @@ CodeVault/
 ├── context.md         # AI handoff / full project context
 ├── .gitignore
 │
-├── docs/
-│   └── ARCHITECTURE.md   # shared architecture deep-dive
+├── docs/                # 📚 architecture, plans & security docs (see Documentation below)
 │
 ├── frontendHtml/      # 🎨 Clickable HTML/CSS/JS prototype (15 pages)  →  see frontendHtml/README.md
 │
@@ -127,6 +126,46 @@ CodeVault/
 | **git-service/** | Node.js · Express · Prisma · node‑cron | Fetches the user's code + question, pushes the per‑problem folder to GitHub, runs scheduled syncs | [git-service/README.md](git-service/README.md) |
 
 > 🎨 **Design language:** warm "paper" background with a **coral `#f1543f` + gold `#e8a200` + rose `#e0457b`** mix (no purple/blue/green theme). Inter + JetBrains Mono. See the live look in [frontendHtml/](frontendHtml/README.md).
+
+---
+
+## 📚 Documentation
+
+All design, planning, and security documentation lives in [`docs/`](docs/).
+
+**Architecture & planning**
+| Doc | Purpose |
+|-----|---------|
+| [ARCHITECTURE.md](docs/ARCHITECTURE.md) | Shared system architecture, topology, layers, lifecycles |
+| [BACKEND_PLAN.md](docs/BACKEND_PLAN.md) · [FRONTEND_PLAN.md](docs/FRONTEND_PLAN.md) | Per-service build blueprints |
+| [DATABASE_PLAN.md](docs/DATABASE_PLAN.md) | Schema, ERD, indexing, scalability |
+| [API_CONTRACT.md](docs/API_CONTRACT.md) | Frozen FE↔BE contract (endpoints, models, errors) |
+| [PLATFORM_INTEGRATION.md](docs/PLATFORM_INTEGRATION.md) | LeetCode/CF/CC/HR + GitHub integration specs |
+| [DEVOPS_PLAN.md](docs/DEVOPS_PLAN.md) · [TESTING_PLAN.md](docs/TESTING_PLAN.md) · [OBSERVABILITY_PLAN.md](docs/OBSERVABILITY_PLAN.md) | Delivery, QA, monitoring strategy |
+| [ROADMAP.md](docs/ROADMAP.md) | Consolidated M0–M6 roadmap |
+
+**Security & operations** (enterprise-grade, CodeVault-specific)
+| Doc | Topic |
+|-----|-------|
+| [SECURITY_PLAN.md](docs/SECURITY_PLAN.md) | Master security blueprint (OWASP, threat model) |
+| [DATABASE_SECURITY.md](docs/DATABASE_SECURITY.md) | Postgres, encryption, roles, backups |
+| [BACKEND_SECURITY.md](docs/BACKEND_SECURITY.md) | Express hardening, validation, errors |
+| [AUTH_SECURITY.md](docs/AUTH_SECURITY.md) | OAuth, JWT, refresh rotation, RBAC |
+| [API_SECURITY.md](docs/API_SECURITY.md) | OWASP API Top 10, idempotency, HMAC |
+| [REDIS_SECURITY.md](docs/REDIS_SECURITY.md) | ACL, TLS, caching, locks |
+| [QUEUE_SECURITY.md](docs/QUEUE_SECURITY.md) | BullMQ, DLQ, backoff, locking |
+| [GITHUB_SECURITY.md](docs/GITHUB_SECURITY.md) | OAuth, token encryption, webhooks |
+| [INFRASTRUCTURE_SECURITY.md](docs/INFRASTRUCTURE_SECURITY.md) | Docker, networking, deploys |
+| [CLOUD_SECURITY.md](docs/CLOUD_SECURITY.md) | Cloudflare WAF, DDoS, TLS, bots |
+| [MONITORING.md](docs/MONITORING.md) | Metrics, logging, security alerts |
+| [DEVSECOPS.md](docs/DEVSECOPS.md) | CI/CD security, scanning, supply chain |
+| [FILE_UPLOAD_SECURITY.md](docs/FILE_UPLOAD_SECURITY.md) | No-upload default + hardened blueprint |
+| [SECRETS.md](docs/SECRETS.md) | Env, KMS, rotation, validation |
+| [SCALABILITY.md](docs/SCALABILITY.md) | Stateless scaling, caching, replicas |
+| [DISASTER_RECOVERY.md](docs/DISASTER_RECOVERY.md) | Backups, PITR, RTO/RPO, failover |
+| [SECURITY_TESTING.md](docs/SECURITY_TESTING.md) | BOLA/CSRF/SSRF suites, DAST, pentest |
+| [COMPLIANCE.md](docs/COMPLIANCE.md) | GDPR-ready, deletion, retention |
+| [ATTACK_PREVENTION.md](docs/ATTACK_PREVENTION.md) | 40+ attacks mapped to CodeVault |
 
 ### How they connect
 
