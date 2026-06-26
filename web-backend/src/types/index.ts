@@ -86,6 +86,57 @@ export interface PublicProfile {
   bestStreak: number;
 }
 
+// ----------------------------- settings -----------------------------
+
+export interface AppSettings {
+  sync: {
+    autoSync: boolean;
+    frequency: '3h' | '6h' | 'daily';
+    includeQuestion: boolean;
+    maintainReadme: boolean;
+    onlyAccepted: boolean;
+  };
+  publicProfile: { enabled: boolean; visibleSections: string[] };
+  notifications: { syncFailures: boolean; weeklySummary: boolean; productUpdates: boolean };
+  appearance: { theme: 'light' | 'dark' | 'system' };
+}
+
+export const DEFAULT_SETTINGS: AppSettings = {
+  sync: {
+    autoSync: false,
+    frequency: '6h',
+    includeQuestion: true,
+    maintainReadme: true,
+    onlyAccepted: true,
+  },
+  publicProfile: { enabled: true, visibleSections: ['stats', 'topics', 'languages'] },
+  notifications: { syncFailures: true, weeklySummary: false, productUpdates: false },
+  appearance: { theme: 'system' },
+};
+
+export interface RepoMappingDto {
+  platform: PlatformName;
+  repoFullName: string;
+  visibility: 'public' | 'private';
+  folderConvention: 'number' | 'difficulty' | 'topic';
+  defaultBranch: string;
+  fileCount: number;
+  lastSyncAt: string | null;
+}
+
+// ----------------------------- notifications -----------------------------
+
+export type NotificationType = 'sync' | 'expiry' | 'badge' | 'repo' | 'system';
+
+export interface NotificationDto {
+  id: string;
+  type: NotificationType;
+  title: string;
+  body: string | null;
+  read: boolean;
+  createdAt: string;
+}
+
 // ----------------------------- health -----------------------------
 
 export interface HealthStatus {
