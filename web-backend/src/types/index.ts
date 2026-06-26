@@ -70,6 +70,22 @@ export interface AggregatedStats {
   degraded: PlatformName[];
 }
 
+// ----------------------------- public profile -----------------------------
+
+/** Public, no-auth profile for /u/[username]. NEVER includes email or tokens. */
+export interface PublicProfile {
+  handle: string;
+  displayName: string | null;
+  avatarUrl: string | null;
+  totalSolved: number;
+  byDifficulty: { easy: number; medium: number; hard: number };
+  byPlatform: Array<{ platform: PlatformName; solved: number; pct: number }>;
+  byTopic: Array<{ name: string; count: number }>;
+  byLanguage: Array<{ name: string; count: number }>;
+  ratings: Array<{ platform: PlatformName; current: number; peak: number }>;
+  bestStreak: number;
+}
+
 // ----------------------------- health -----------------------------
 
 export interface HealthStatus {
