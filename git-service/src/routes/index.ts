@@ -1,10 +1,15 @@
 import { Router } from 'express';
 import healthRoutes from './health.routes';
+import syncRoutes from './sync.routes';
+import repoRoutes from './repo.routes';
+import problemRoutes from './problem.routes';
 
-/** API router — feature routers (sync, repos, problems) mount here under /api/v1. */
+/** API router — all feature routers under /api/v1. */
 const router = Router();
 
-// Added in the sync stage: /sync, /repos, /problems.
+router.use('/sync', syncRoutes);
+router.use('/repos', repoRoutes);
+router.use('/problems', problemRoutes);
 
 export default router;
 export { healthRoutes };
