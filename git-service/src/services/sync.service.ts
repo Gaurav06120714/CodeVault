@@ -1,17 +1,42 @@
 import { prisma } from '../lib/prisma';
 import { redis } from '../lib/redis';
 import { logger } from '../lib/logger';
+import { env } from '../config/env';
 import { decrypt } from '../lib/crypto';
 import { getSubmissionAdapter } from './submissions';
-import { pushFiles } from './github/github.service';
+import { pushFiles, verifyRepoAccess } from './github/github.service';
 import { generateReadme } from './github/readme.generator';
 import { padNumber, langToExt } from '../utils/helpers';
 import { ExpiredSessionError, NotFoundError } from '../utils/errors';
+import type { PlatformName } from '../types';
 import type { SyncResult, SolutionToSync } from '../types/sync.types';
 import type { RepoFileEntry, GithubFile } from '../types/github.types';
 
 const LOCK_TTL_SECONDS = 1800; // 30 min safety
 const lockKey = (connectionId: string) => `lock:sync:${connectionId}`;
+const semaKey = (platform: PlatformName) => `sema:platform:${platform}`;
+const SEMA_TTL_SECONDS = 1800;
+
+/**
+ * Best-effort per-platform concurrency cap (Redis counter). Waits briefly for a
+ * free slot; if none frees up it proceeds anyway (soft cap — never deadlocks a job).
+ */
+async function acquirePlatformSlot(platform: PlatformName): Promise<boolean> {
+  const key = semaKey(platform);
+  for (let attempt = 0; attempt < 20; attempt += 1) {
+    const count = await redis.incr(key);
+    if (count === 1) await redis.expire(key, SEMA_TTL_SECONDS);
+    if (count <= env.SYNC_PLATFORM_CONCURRENCY) return true;
+    await redis.decr(key);
+    await new Promise((r) => setTimeout(r, 500));
+  }
+  logger.warn({ platform }, 'platform concurrency cap busy — proceeding (soft cap)');
+  return false;
+}
+
+async function releasePlatformSlot(platform: PlatformName, held: boolean): Promise<void> {
+  if (held) await redis.decr(semaKey(platform)).catch(() => undefined);
+}
 
 /**
  * Run one connection's sync end-to-end. Idempotent (diffs against `problems`),
@@ -34,6 +59,9 @@ export async function runSync(
     data: { userId, connectionId, trigger, status: 'running', startedAt: new Date() },
   });
 
+  let heldPlatform: PlatformName | null = null;
+  let slotHeld = false;
+
   try {
     const connection = await prisma.connection.findFirst({
       where: { id: connectionId, userId, deletedAt: null },
@@ -41,6 +69,10 @@ export async function runSync(
     });
     if (!connection) throw new NotFoundError('Connection not found');
     if (!connection.secret) throw new ExpiredSessionError('No sync token — authorize first');
+
+    // Best-effort per-platform concurrency cap.
+    heldPlatform = connection.platform;
+    slotHeld = await acquirePlatformSlot(connection.platform);
 
     const repo = await prisma.githubRepo.findUnique({
       where: { userId_platform: { userId, platform: connection.platform } },
@@ -116,6 +148,7 @@ export async function runSync(
     });
     return { itemsFetched: 0, itemsPushed: 0, status: 'failed' };
   } finally {
+    if (heldPlatform) await releasePlatformSlot(heldPlatform, slotHeld);
     await redis.del(lockKey(connectionId));
   }
 }
@@ -128,6 +161,9 @@ async function publish(
   platform: SolutionToSync['platform'],
   solutions: SolutionToSync[],
 ): Promise<string> {
+  // Verify push access to the target repo BEFORE writing anything.
+  await verifyRepoAccess(githubToken, repo.repoFullName);
+
   const files: GithubFile[] = [];
   for (const s of solutions) {
     const folder = padNumber(s.number);
