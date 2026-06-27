@@ -1,0 +1,46 @@
+-- ============================================================================
+-- CodeVault — DBMS feature: PARTITIONING (reference / threshold-triggered)
+-- ----------------------------------------------------------------------------
+-- High-volume append-mostly tables (sync_runs, audit_logs, notifications) are
+-- range-partitioned BY MONTH; problems can be HASH-partitioned by userId past
+-- ~100M rows (DATABASE_PLAN §9, §12).
+--
+-- ⚠️ Reference only — do NOT run against the current Prisma-managed tables.
+-- Partitioning requires recreating the table as partitioned + migrating data
+-- (expand→migrate→contract). Apply at scale, after the row thresholds justify it.
+-- ============================================================================
+
+-- ---------------------------------------------------------------------------
+-- A) RANGE partitioning by month — pattern for audit_logs / sync_runs.
+--    (Shown for audit_logs; sync_runs/notifications follow the same shape.)
+-- ---------------------------------------------------------------------------
+-- 1. Create the partitioned parent (mirrors current columns):
+-- CREATE TABLE audit_logs_part (LIKE audit_logs INCLUDING ALL)
+--   PARTITION BY RANGE ("createdAt");
+--
+-- 2. Create monthly partitions (automate via a scheduled job / pg_partman):
+-- CREATE TABLE audit_logs_2026_06 PARTITION OF audit_logs_part
+--   FOR VALUES FROM ('2026-06-01') TO ('2026-07-01');
+-- CREATE TABLE audit_logs_2026_07 PARTITION OF audit_logs_part
+--   FOR VALUES FROM ('2026-07-01') TO ('2026-08-01');
+--
+-- 3. Backfill + swap (expand→contract):
+-- INSERT INTO audit_logs_part SELECT * FROM audit_logs;
+-- ALTER TABLE audit_logs RENAME TO audit_logs_old;
+-- ALTER TABLE audit_logs_part RENAME TO audit_logs;
+--
+-- 4. Archive cold partitions:
+-- ALTER TABLE audit_logs DETACH PARTITION audit_logs_2025_01;  -- then move to cold storage
+
+-- ---------------------------------------------------------------------------
+-- B) HASH partitioning by userId — pattern for problems past ~100M rows.
+-- ---------------------------------------------------------------------------
+-- CREATE TABLE problems_part (LIKE problems INCLUDING ALL)
+--   PARTITION BY HASH ("userId");
+-- CREATE TABLE problems_p0 PARTITION OF problems_part FOR VALUES WITH (MODULUS 4, REMAINDER 0);
+-- CREATE TABLE problems_p1 PARTITION OF problems_part FOR VALUES WITH (MODULUS 4, REMAINDER 1);
+-- CREATE TABLE problems_p2 PARTITION OF problems_part FOR VALUES WITH (MODULUS 4, REMAINDER 2);
+-- CREATE TABLE problems_p3 PARTITION OF problems_part FOR VALUES WITH (MODULUS 4, REMAINDER 3);
+
+-- Recommended tooling: pg_partman for automatic partition creation + retention.
+-- Until thresholds are hit, the unpartitioned tables + good indexes are sufficient.
