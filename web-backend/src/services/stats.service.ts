@@ -2,11 +2,28 @@ import { prisma } from '../lib/prisma';
 import { redis } from '../lib/redis';
 import { logger } from '../lib/logger';
 import { getStatsProvider } from './platforms';
-import type { AggregatedStats, PlatformName } from '../types';
+import type { AggregatedStats, PlatformName, SubmissionSummary, Paginated } from '../types';
 import type { PlatformStats } from '../types/platform.types';
 
 const CACHE_TTL_SECONDS = 600; // 10 minutes (PLATFORM_INTEGRATION §7)
 const cacheKey = (userId: string, platform: PlatformName) => `stats:${userId}:${platform}`;
+
+const PLATFORMS_FOR_INVALIDATION: PlatformName[] = [
+  'leetcode',
+  'codeforces',
+  'codechef',
+  'hackerrank',
+];
+
+/**
+ * Drop a user's cached stats (all platforms) + their cached public profile.
+ * Called whenever connections change so the dashboard reflects reality fast.
+ */
+export async function invalidateUserStats(userId: string, handle?: string): Promise<void> {
+  const keys = PLATFORMS_FOR_INVALIDATION.map((p) => cacheKey(userId, p));
+  if (handle) keys.push(`public:${handle.toLowerCase()}`);
+  await redis.del(...keys).catch(() => undefined);
+}
 
 /** Fetch one platform's stats: Redis cache -> live provider -> snapshot fallback. */
 async function fetchPlatform(
@@ -106,4 +123,32 @@ export async function getAggregatedStats(userId: string): Promise<AggregatedStat
   stats.syncedToGit = { count: synced, pct: total ? Math.round((synced / total) * 100) : 0 };
 
   return stats;
+}
+
+/** Recent solved problems (cursor-paginated, newest first) for GET /stats/recent. */
+export async function getRecentSubmissions(
+  userId: string,
+  opts: { cursor?: string; limit?: number },
+): Promise<Paginated<SubmissionSummary>> {
+  const limit = Math.min(Math.max(opts.limit ?? 20, 1), 50);
+  const rows = await prisma.problem.findMany({
+    where: { userId },
+    orderBy: [{ solvedAt: 'desc' }, { createdAt: 'desc' }],
+    take: limit + 1,
+    ...(opts.cursor ? { cursor: { id: opts.cursor }, skip: 1 } : {}),
+  });
+  const hasMore = rows.length > limit;
+  const items = rows.slice(0, limit);
+  return {
+    items: items.map((p) => ({
+      title: p.title,
+      platform: p.platform,
+      number: p.number,
+      difficulty: p.difficulty,
+      language: p.language,
+      solvedAt: p.solvedAt ? p.solvedAt.toISOString() : null,
+      syncedPath: p.solutionPath,
+    })),
+    nextCursor: hasMore ? items[items.length - 1].id : null,
+  };
 }
