@@ -55,6 +55,11 @@ export class UpstreamError extends AppError {
     super(message, 502, 'UPSTREAM_ERROR');
   }
 }
+export class ServiceUnavailableError extends AppError {
+  constructor(message = 'Service temporarily unavailable') {
+    super(message, 503, 'SERVICE_UNAVAILABLE');
+  }
+}
 export class InternalError extends AppError {
   constructor(message = 'Internal server error') {
     super(message, 500, 'INTERNAL');
