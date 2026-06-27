@@ -9,7 +9,7 @@
 **Product:** CodeVault — competitive programming analytics + GitHub sync platform.  
 **Team:** 2 developers (FE lead + BE lead) working in parallel.  
 **Services:** web-frontend (Next.js) + web-backend (Express) + git-service (Express + workers).  
-**Total milestones:** 7 (M0 → M6), from empty repo to production launch.  
+**Total milestones:** 7 (M0 → M6), from empty repo to production launch, **+ M7 (browser extension, Path B v2)** as a parallel track gated on M1.  
 **Critical path:** JWT contract → Auth → Connections → Stats → Sync → All 15 pages live → Hardening → Deploy.
 
 ---
@@ -169,6 +169,22 @@ Legend: BE=backend tasks · FE=frontend tasks · ·=parallel work ongoing
 | **Go-live** | Staged rollout (10% → 50% → 100%); monitor error budget; on-call defined; runbooks linked in alerts |
 
 **Completion criteria:** All checklists in DEVOPS_PLAN §7, TESTING_PLAN §8, SECURITY_PLAN §17, OBSERVABILITY_PLAN §7 satisfied. Error budget healthy. Smoke tests passing. Rollback verified.
+
+---
+
+### M7 — Browser Extension (Path B v2) — *parallel track, gated on M1 auth*
+**Objective:** Capture the user's own accepted code in-browser and feed git-service, signed in as the same user. Reverses the original "no extension" stance and becomes the **preferred** Path B. Blueprint: [EXTENSION_PLAN.md](EXTENSION_PLAN.md); security: [EXTENSION_SECURITY.md](EXTENSION_SECURITY.md).
+
+| Sub-milestone | Deliverables |
+|---------------|-------------|
+| **E0 — Auth** | `browser-extension/` scaffold; PKCE handoff → `client=extension` JWT; refresh; `GET /users/me` works (depends on M1 + new `/auth/extension/*` endpoints) |
+| **E1 — LeetCode E2E** | content script captures Accepted; background `POST /api/ingest`; GitHub push (proves the full loop) — depends on M4 GitHub publish |
+| **E2 — More platforms** | Codeforces, then CodeChef + HackerRank capture |
+| **E3 — Cross-browser** | Firefox build (`browser_specific_settings`), then Safari conversion (Apple Developer account) |
+| **E4 — UX & control** | Popup (toggles, recent captures, Sync now), options page, session revocation in Settings |
+| **E5 — Hardening + stores** | Least-privilege manifest review; Chrome Web Store, Firefox AMO, Edge Add-ons, App Store ([BROWSER_EXTENSION_STORES](../CERTIFICATES_BEFORE_LAUNCH/BROWSER_EXTENSION_STORES.md)) |
+
+**Backend prerequisite:** `/auth/extension/*` (web-backend) + `POST /api/ingest` (git-service) + `client` column on `auth_sessions` — see [API_CONTRACT.md](API_CONTRACT.md) §1.1b, §1.8b.
 
 ---
 
