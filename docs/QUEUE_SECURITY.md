@@ -120,14 +120,14 @@ SYNC_CONCURRENCY=3
 
 ## 12. Checklist
 
-- [ ] Job payloads carry IDs only; secrets decrypted in-memory
-- [ ] Per-connection lock (NX EX); idempotent upsert
-- [ ] Bounded concurrency + per-platform caps
-- [ ] Retry attempts capped with exponential backoff + jitter
-- [ ] Expired session → mark + notify, no blind retry
-- [ ] Stalled-job detection; DLQ/failed-set alerts
-- [ ] Kill switch to pause sync
-- [ ] Queue depth + failure monitoring
+- [x] Job payloads carry IDs only; secrets decrypted in-memory
+- [x] Per-connection lock (NX EX); idempotent upsert
+- [ ] Bounded concurrency + per-platform caps *(global concurrency cap done; per-platform caps pending)*
+- [x] Retry attempts capped with exponential backoff *(jitter not explicit)*
+- [x] Expired session → mark + notify, no blind retry
+- [ ] Stalled-job detection; DLQ/failed-set alerts *(failed-set retained; no alerting/DLQ tooling)*
+- [ ] Kill switch to pause sync *(`SYNC_ENABLED` flag not yet added)*
+- [ ] Queue depth + failure monitoring *(deploy-time)*
 
 ---
 
