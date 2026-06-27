@@ -22,6 +22,7 @@ Browser → web-backend & git-service: send cookie/Bearer → both verify SAME J
 - **Access token:** short-lived JWT (≈30 min) in `httpOnly Secure SameSite=Lax` cookie.
 - **Refresh token:** opaque random, **SHA-256 hashed** in `auth_sessions`, rotated on use.
 - **git-service trust boundary (S1):** verifies the *user's* JWT — never a static internal key in the browser.
+- **Browser extension (`client=extension`):** the cross-browser extension signs in as the **same user** via a PKCE OAuth handoff and receives its **own** JWT access + rotating refresh (session tagged `client=extension` in `auth_sessions`). It is **not** the website cookie — extensions can't (and shouldn't) read the httpOnly cookie — so it is stored in `chrome.storage.local` and **independently revocable**. The same git-service S1 verify accepts it. See [EXTENSION_SECURITY.md](EXTENSION_SECURITY.md) + [EXTENSION_PLAN.md](EXTENSION_PLAN.md) §3.
 
 ---
 
@@ -125,10 +126,11 @@ GITHUB_CALLBACK_URL=http://localhost:4000/api/v1/auth/github/callback
 - [x] Logout revokes session; deletion purges tokens
 - [x] GitHub scope minimized
 - [x] Auth endpoints rate-limited
+- [ ] Extension session (`client=extension`) issued via PKCE, stored in `chrome.storage.local`, independently revocable (Settings)
 
 ---
 
 ## 13. References
 
-- [SECURITY_PLAN.md](SECURITY_PLAN.md) §2–3 · [GITHUB_SECURITY.md](GITHUB_SECURITY.md) · [REDIS_SECURITY.md](REDIS_SECURITY.md) · [ATTACK_PREVENTION.md](ATTACK_PREVENTION.md)
+- [SECURITY_PLAN.md](SECURITY_PLAN.md) §2–3 · [GITHUB_SECURITY.md](GITHUB_SECURITY.md) · [REDIS_SECURITY.md](REDIS_SECURITY.md) · [ATTACK_PREVENTION.md](ATTACK_PREVENTION.md) · [EXTENSION_SECURITY.md](EXTENSION_SECURITY.md)
 - OWASP Authentication / Session Management Cheat Sheets · RFC 6749 (OAuth 2.0) · RFC 7636 (PKCE)
