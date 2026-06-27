@@ -117,14 +117,14 @@ GITHUB_CALLBACK_URL=http://localhost:4000/api/v1/auth/github/callback
 
 ## 12. Checklist
 
-- [ ] OAuth `state` single-use (Redis); redirect-URI allowlisted
-- [ ] Access JWT short-lived, httpOnly Secure SameSite cookie
-- [ ] Refresh hashed, rotated, reuse-detection revokes family
-- [ ] Both services verify the same JWT (no static key in browser)
-- [ ] `req.user.id` from token only; ownership filter everywhere
-- [ ] Logout revokes session; deletion purges tokens
-- [ ] GitHub scope minimized
-- [ ] Auth endpoints rate-limited
+- [x] OAuth `state` single-use (Redis); redirect-URI allowlisted
+- [x] Access JWT short-lived, httpOnly Secure SameSite cookie
+- [x] Refresh hashed, rotated, reuse-detection revokes family
+- [x] Both services verify the same JWT (no static key in browser)
+- [x] `req.user.id` from token only; ownership filter everywhere
+- [x] Logout revokes session; deletion purges tokens
+- [x] GitHub scope minimized
+- [ ] Auth endpoints rate-limited *(not yet — `/auth/*` not behind the rate limiter)*
 
 ---
 
