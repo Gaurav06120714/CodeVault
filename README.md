@@ -139,6 +139,7 @@ All design, planning, and security documentation lives in [`docs/`](docs/).
 | [ARCHITECTURE.md](docs/ARCHITECTURE.md) | Shared system architecture, topology, layers, lifecycles |
 | [BACKEND_PLAN.md](docs/BACKEND_PLAN.md) · [FRONTEND_PLAN.md](docs/FRONTEND_PLAN.md) | Per-service build blueprints |
 | [DATABASE_PLAN.md](docs/DATABASE_PLAN.md) | Schema, ERD, indexing, scalability |
+| [DBMS_CONCEPTS.md](docs/DBMS_CONCEPTS.md) | Every DBMS topic → CodeVault artifact (SQL in [`database/`](database/)) |
 | [API_CONTRACT.md](docs/API_CONTRACT.md) | Frozen FE↔BE contract (endpoints, models, errors) |
 | [PLATFORM_INTEGRATION.md](docs/PLATFORM_INTEGRATION.md) | LeetCode/CF/CC/HR + GitHub integration specs |
 | [DEVOPS_PLAN.md](docs/DEVOPS_PLAN.md) · [TESTING_PLAN.md](docs/TESTING_PLAN.md) · [OBSERVABILITY_PLAN.md](docs/OBSERVABILITY_PLAN.md) | Delivery, QA, monitoring strategy |
