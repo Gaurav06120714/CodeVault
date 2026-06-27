@@ -114,14 +114,14 @@ maxmemory-policy allkeys-lru   # cache instance only
 
 ## 12. Checklist
 
-- [ ] Redis on private network, no public ingress
-- [ ] AUTH/ACL enabled; TLS (`rediss://`) in prod
-- [ ] All cache keys namespaced + TTL'd; include userId/handle
-- [ ] No tokens/PII/secrets in Redis; queue payloads carry IDs only
-- [ ] Cache vs queue/lock isolated; queue durable, no eviction
-- [ ] Locks use `NX EX`; released in `finally`
-- [ ] Invalidation wired to connect/disconnect/settings changes
-- [ ] Memory + hit-rate + eviction monitoring
+- [ ] Redis on private network, no public ingress *(deploy-time; dev publishes host port)*
+- [ ] AUTH/ACL enabled; TLS (`rediss://`) in prod *(deploy-time)*
+- [x] All cache keys namespaced + TTL'd; include userId/handle
+- [x] No tokens/PII/secrets in Redis; queue payloads carry IDs only
+- [ ] Cache vs queue/lock isolated; queue durable, no eviction *(single dev instance)*
+- [x] Locks use `NX EX`; released in `finally`
+- [ ] Invalidation wired to connect/disconnect/settings changes *(TTL only; explicit invalidation not yet wired)*
+- [ ] Memory + hit-rate + eviction monitoring *(deploy-time)*
 
 ---
 
