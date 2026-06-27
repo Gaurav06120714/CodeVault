@@ -12,6 +12,8 @@ A cross-browser **WebExtension (Manifest V3)** that detects when *you* get an **
 
 > ⚠️ **This folder is a planning skeleton — no extension code yet.** This README and [`../docs/EXTENSION_PLAN.md`](../docs/EXTENSION_PLAN.md) are the source of truth for the architecture. Build module-by-module like the other services.
 
+> 🚫 **No separate backend.** The extension has **no backend of its own** and never will. It reuses the two existing services: **[web-backend](../web-backend)** for auth (the `/auth/extension/*` routes are *added to* it) and **[git-service](../git-service)** for code (`POST /api/ingest` is *added to* it). The extension is a thin client only — do not create an `extension-backend`/`extension-server`.
+
 ---
 
 ## 📑 Table of Contents
@@ -179,7 +181,7 @@ See [`../docs/EXTENSION_PLAN.md`](../docs/EXTENSION_PLAN.md), [`../docs/EXTENSIO
 
 ## 📐 Rules & conventions
 
-1. **Same user, same backend** — never a separate account or auth system; reuse web-backend identity + JWT.
+1. **Same user, same backend — no extension backend** — the extension reuses **web-backend** (auth) and **git-service** (ingest); it never gets its own server, account, or auth system. New endpoints are *added to* the existing two services only.
 2. **Own-data-only** — capture only the user's own accepted submissions, with consent.
 3. **Least-privilege manifest** — scope host permissions to the four platforms + the API domain.
 4. **No secrets in the bundle** — only public API base URLs; tokens live in `chrome.storage.local`.
