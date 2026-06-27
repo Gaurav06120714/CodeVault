@@ -454,6 +454,7 @@ This blueprint is the master security reference; detailed controls live in compa
 - [DATABASE_SECURITY.md](DATABASE_SECURITY.md) — Prisma/SQL-injection prevention, roles, encryption
 - [REDIS_SECURITY.md](REDIS_SECURITY.md) · [QUEUE_SECURITY.md](QUEUE_SECURITY.md) — cache/queue
 - [GITHUB_SECURITY.md](GITHUB_SECURITY.md) — OAuth + sync token handling
+- [EXTENSION_SECURITY.md](EXTENSION_SECURITY.md) — browser extension (Path B v2): token scoping, least-privilege manifest, ingest validation
 - [SECRETS.md](SECRETS.md) — API keys, env vars, secret storage
 - [FILE_UPLOAD_SECURITY.md](FILE_UPLOAD_SECURITY.md) — upload validation/limits
 - [CLOUD_SECURITY.md](CLOUD_SECURITY.md) — DDoS, WAF, TLS at the edge
