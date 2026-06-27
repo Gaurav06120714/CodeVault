@@ -422,7 +422,7 @@ FE marketing/UI-kit run alongside M0–M1 (no BE dep).
 - [ ] All endpoints conform to this contract (conformance tests pass) *(endpoints built; automated conformance tests pending)*
 - [ ] AuthN/Z: JWT verified both services; ownership/BOLA; CSRF; refresh rotation *(JWT+ownership+refresh done; anti-CSRF token middleware pending)*
 - [x] Tokens envelope-encrypted; no secrets in logs/bundle; git-service not browser-keyed
-- [ ] Rate limits + queue caps + SSRF egress allowlist *(rate limits + queue caps done; egress allowlist pending)*
+- [x] Rate limits + queue caps + SSRF egress allowlist
 - [ ] Every page: loading + empty + error + success verified *(frontend not built yet)*
 - [ ] Public profile: no PII, enumeration-hardened, SSR/ISR + OG *(API: no-PII + uniform 404 done; SSR/ISR+OG = frontend)*
 - [ ] TLS + security headers + strict CORS *(headers + CORS done; TLS deploy-time)*
