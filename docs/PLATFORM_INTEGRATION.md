@@ -14,9 +14,16 @@ Path B — Code sync (one-time authorized session)
   User authorizes ──session token──▶ encrypted in DB
   git-service worker ──decrypt token──▶ platform authed API ──▶ accepted submissions + source + question
                                      ──▶ GitHub push (folder per problem) ──▶ DB update
+
+Path B v2 — Code sync (browser extension, preferred)
+  User signed in to platform in own browser
+  content script ──detect Accepted──▶ capture number/slug/code/question (intercept platform response; DOM fallback)
+  background SW ──user JWT──▶ git-service POST /api/ingest ──▶ same GitHub push (folder per problem) ──▶ DB update
 ```
 
 Path A and Path B are **independent failure domains** — if Path B's session expires, Path A (the dashboard) keeps working.
+
+> 🧩 **Path B v2 (extension)** is the **preferred** code-sync source: it captures the user's own accepted code in their own authenticated browser, so there is **no server-side session token to store or replay**. The per-platform "Path B — Code sync" subsections below describe the server-side approach; for B v2 the **same captured fields** (number, slug, title, difficulty, tags, language, source, question) are read client-side and posted to `POST /api/ingest`, which runs the identical GitHub push. See [EXTENSION_PLAN.md](EXTENSION_PLAN.md) §4 and [browser-extension/README.md](../browser-extension/README.md). Per-platform capture signal: **LeetCode** submission-check GraphQL response · **Codeforces** verdict poll · **CodeChef / HackerRank** submission-result DOM/network.
 
 ---
 
