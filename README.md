@@ -114,7 +114,10 @@ CodeVault/
 ├── web-backend/       # 🌐 website API: auth, stats, profiles  →  see web-backend/README.md
 │   └── src/ ...
 │
-└── git-service/       # 📦 GitHub-sync backend: fetch code + push  →  see git-service/README.md
+├── git-service/       # 📦 GitHub-sync backend: fetch code + push  →  see git-service/README.md
+│   └── src/ ...
+│
+└── browser-extension/ # 🧩 Cross-browser extension: capture accepted code (Path B v2)  →  see browser-extension/README.md
     └── src/ ...
 ```
 
@@ -124,6 +127,7 @@ CodeVault/
 | **web-frontend/** | Next.js 15 · React 18 · Tailwind | Production website UI; connect platforms, view analysis, public profiles | [web-frontend/README.md](web-frontend/README.md) |
 | **web-backend/** | Node.js · Express · Prisma | Auth, platform connections, multi‑platform stats, public profiles | [web-backend/README.md](web-backend/README.md) |
 | **git-service/** | Node.js · Express · Prisma · node‑cron | Fetches the user's code + question, pushes the per‑problem folder to GitHub, runs scheduled syncs | [git-service/README.md](git-service/README.md) |
+| **browser-extension/** | Manifest V3 · TypeScript · WebExtensions | Captures *your own* accepted solutions in-browser and feeds git-service (same CodeVault user) | [browser-extension/README.md](browser-extension/README.md) |
 
 > 🎨 **Design language:** warm "paper" background with a **coral `#f1543f` + gold `#e8a200` + rose `#e0457b`** mix (no purple/blue/green theme). Inter + JetBrains Mono. See the live look in [frontendHtml/](frontendHtml/README.md).
 
@@ -142,6 +146,7 @@ All design, planning, and security documentation lives in [`docs/`](docs/).
 | [DBMS_CONCEPTS.md](docs/DBMS_CONCEPTS.md) | Every DBMS topic → CodeVault artifact (SQL in [`database/`](database/)) |
 | [API_CONTRACT.md](docs/API_CONTRACT.md) | Frozen FE↔BE contract (endpoints, models, errors) |
 | [PLATFORM_INTEGRATION.md](docs/PLATFORM_INTEGRATION.md) | LeetCode/CF/CC/HR + GitHub integration specs |
+| [EXTENSION_PLAN.md](docs/EXTENSION_PLAN.md) | Cross-browser extension blueprint (Path B v2, same-user auth, ingest) |
 | [DEVOPS_PLAN.md](docs/DEVOPS_PLAN.md) · [TESTING_PLAN.md](docs/TESTING_PLAN.md) · [OBSERVABILITY_PLAN.md](docs/OBSERVABILITY_PLAN.md) | Delivery, QA, monitoring strategy |
 | [ROADMAP.md](docs/ROADMAP.md) | Consolidated M0–M6 roadmap |
 
@@ -152,6 +157,7 @@ All design, planning, and security documentation lives in [`docs/`](docs/).
 | [DATABASE_SECURITY.md](docs/DATABASE_SECURITY.md) | Postgres, encryption, roles, backups |
 | [BACKEND_SECURITY.md](docs/BACKEND_SECURITY.md) | Express hardening, validation, errors |
 | [AUTH_SECURITY.md](docs/AUTH_SECURITY.md) | OAuth, JWT, refresh rotation, RBAC |
+| [EXTENSION_SECURITY.md](docs/EXTENSION_SECURITY.md) | Extension token scoping, least-privilege manifest, ingest validation |
 | [API_SECURITY.md](docs/API_SECURITY.md) | OWASP API Top 10, idempotency, HMAC |
 | [REDIS_SECURITY.md](docs/REDIS_SECURITY.md) | ACL, TLS, caching, locks |
 | [QUEUE_SECURITY.md](docs/QUEUE_SECURITY.md) | BullMQ, DLQ, backoff, locking |
@@ -188,6 +194,7 @@ web-frontend ──REST──▶ web-backend   (auth, stats, public profiles)
 - 📊 **Unified analytics dashboard** — every platform in one view: total solved, difficulty & topic breakdown, language usage, streaks, rankings, activity heatmap, and progress over time.
 - 🔄 **Auto‑sync to GitHub** — the moment you solve a problem, it is pushed to your linked repo as a **folder named by its problem number**, holding the **question** and your **answer**, plus an auto‑updated README index.
 - 🔐 **Connect once, automate forever** — authorize a platform a single time; syncing then runs on a schedule.
+- 🧩 **Cross-browser extension (Path B v2)** — captures *your own* accepted solutions in the browser as you solve them and feeds the sync engine, signed in as the **same CodeVault user** (Chrome, Edge, Brave, Opera, Firefox; Safari later).
 - 🤖 **(Planned) AI layer** — auto‑explain solutions, auto‑tag problem type, recommend the next problem by your weakest topic.
 
 ---
@@ -232,6 +239,7 @@ CodeVault is built on one key insight: **public stats and private source code ar
 - **Input:** an authorized session you grant **once** per platform.
 - **Source:** *your own* accepted submissions, including source code.
 - **Auth:** required once — syncing is automatic thereafter.
+- **Path B v2 (browser extension):** the cleaner alternative — because you're already signed in to the platform in your own browser, the extension captures your accepted code at solve-time and feeds the sync engine. No server-side session replay. See [browser-extension/README.md](browser-extension/README.md).
 
 ```
 Public username ───▶ Stats Poller ──────────▶ Unified Dashboard
@@ -298,6 +306,7 @@ npm run dev          # http://localhost:3000
 - [ ] web-backend: LeetCode stats (Path A)
 - [ ] web-backend: Codeforces stats (official API)
 - [ ] git-service: LeetCode code sync (Path B) → GitHub push + README index
+- [ ] browser-extension: capture-at-source (Path B v2) → git-service ingest, same-user auth
 - [ ] web-frontend: build real pages from the prototype
 - [ ] Pricing / plans page (deferred)
 - [ ] Unified multi‑platform dashboard
