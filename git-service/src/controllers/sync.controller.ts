@@ -1,11 +1,13 @@
 import type { Request, Response } from 'express';
 import { prisma } from '../lib/prisma';
+import { env } from '../config/env';
 import { enqueueSync } from '../jobs/queue';
 import { triggerSyncSchema, listQuerySchema } from '../validators/sync.validator';
-import { NotFoundError, ExpiredSessionError } from '../utils/errors';
+import { NotFoundError, ExpiredSessionError, ServiceUnavailableError } from '../utils/errors';
 
 /** POST /sync — enqueue sync for one owned connection, or all sync-enabled ones. */
 export async function trigger(req: Request, res: Response): Promise<void> {
+  if (!env.SYNC_ENABLED) throw new ServiceUnavailableError('Sync is temporarily disabled');
   const userId = req.user!.id;
   const { connectionId } = triggerSyncSchema.parse(req.body ?? {});
 
