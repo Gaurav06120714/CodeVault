@@ -116,14 +116,14 @@ crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(`sha256=${mac}`));
 
 ## 12. Checklist
 
-- [ ] GitHub token envelope-encrypted; in-memory only; never logged/returned
-- [ ] Minimal scope; per-repo where possible
-- [ ] Repo ownership verified before push
-- [ ] One commit per run via Git Data API
-- [ ] Rate-limit budget monitored; bulk sync throttled
-- [ ] Secret scanning + push protection on target repos
-- [ ] Webhook HMAC verification (when added)
-- [ ] Token revoked on logout/delete; rotation supported
+- [x] GitHub token envelope-encrypted; in-memory only; never logged/returned
+- [x] Minimal scope requested *(per-repo via GitHub App pending)*
+- [ ] Repo ownership verified before push *(not yet — repoFullName trusted from mapping)*
+- [x] One commit per run via Git Data API
+- [ ] Rate-limit budget monitored; bulk sync throttled *(not yet)*
+- [ ] Secret scanning + push protection on target repos *(deploy/config-time)*
+- [ ] Webhook HMAC verification (when added) *(no webhooks yet)*
+- [ ] Token revoked on logout/delete; rotation supported *(rotation via keyVersion ready; explicit GitHub-token revoke on delete pending)*
 
 ---
 
