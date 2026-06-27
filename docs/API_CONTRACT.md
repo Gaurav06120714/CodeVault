@@ -36,6 +36,19 @@ FE: Login page, AuthProvider, Topbar. BE: OAuth exchange, JWT issue/verify, refr
 
 *Validation:* `state` must match; `code` present. *Public vs protected:* start/callback public (CSRF via state), rest protected.
 
+### 1.1b Extension Auth module (WEB) — *purpose:* sign the browser extension in as the **same user**
+FE: browser-extension popup. BE: PKCE OAuth handoff → JWT for a `client=extension` session; list/revoke. See [EXTENSION_PLAN.md](EXTENSION_PLAN.md) §3, [AUTH_SECURITY.md](AUTH_SECURITY.md).
+
+| Method | Endpoint | Auth | Req | Res | Errors | Notes |
+|--------|----------|------|-----|-----|--------|-------|
+| POST | `/auth/extension/start` | public | `{ challenge }` (PKCE) | `{ authorizeUrl }` | `VALIDATION` | Opens via `launchWebAuthFlow`; `client=extension`; redirect allowlist |
+| POST | `/auth/extension/token` | public | `{ code, verifier }` | `{ accessToken, refreshToken }` | `VALIDATION`,`UNAUTHENTICATED` | One-time code → JWT pair (same shape) |
+| POST | `/auth/extension/refresh` | refresh token | `{ refreshToken }` | new pair | `UNAUTHENTICATED` | Rotate; reuse-detection; family revoke |
+| GET | `/auth/extension/sessions` | protected | — | `{ items: ExtensionSession[] }` | `UNAUTHENTICATED` | List active extension sessions (userAgent/ip/lastSeen) |
+| DELETE | `/auth/extension/sessions/:id` | protected | — | `204` | `FORBIDDEN`,`NOT_FOUND` | Revoke one extension session |
+
+*Validation:* PKCE `challenge`/`verifier` required; ownership from JWT only. *Note:* extension token is **not** the website's httpOnly cookie — independently revocable; stored in `chrome.storage.local`.
+
 ### 1.2 User module (WEB) — *purpose:* profile & account
 FE: Settings (Account), ProfileHeader. BE: read/update/delete user.
 
@@ -108,6 +121,15 @@ FE: Sync status, Connect (authorize), Repositories ("Re-sync"). BE(git-service):
 | GET | `/sync/activity` | protected | `cursor?`,`limit?` | `{ items: ActivityEvent[], nextCursor }` | `UNAUTHENTICATED` |
 
 *authZ:* `connectionId` (if provided) must be owned by caller (verify from JWT, not body). *SESSION_EXPIRED* surfaces "Reconnect". *Rate-limit:* per-user trigger cooldown + queue caps.
+
+### 1.8b Ingest (GIT) — *purpose:* receive captures from the browser extension (Path B v2)
+FE: browser-extension background SW. BE(git-service): validate → ownership-check → dedupe → existing GitHub push. See [EXTENSION_PLAN.md](EXTENSION_PLAN.md) §5, [EXTENSION_SECURITY.md](EXTENSION_SECURITY.md).
+
+| Method | Endpoint | Auth | Req | Res | Errors |
+|--------|----------|------|-----|-----|--------|
+| POST | `/ingest` | protected (same JWT, `client=extension`) | `{ captures: CapturedSubmission[], idempotencyKey? }` | `{ accepted: n, pushed: n, skipped: n }` (202) | `VALIDATION`,`FORBIDDEN`,`RATE_LIMITED` |
+
+*Validation:* Zod-validate each capture; **code size cap**; `platform`/`language` ∈ enum. *authZ:* derive owner from JWT; cross-check against the user's connection — reject foreign data. *Idempotency:* `idempotencyKey` + dedupe vs `problems`/`ingest_log` prevents double-push. *Reuses* the identical GitHub push as `/sync`.
 
 ### 1.9 Repositories (GIT) — *purpose:* synced repo view
 FE: Repositories. BE(git-service): GitHub metadata + synced problems.
@@ -256,6 +278,10 @@ Public-only subset: `displayName`, `handle`, `avatarUrl`, `byPlatform`, `byDiffi
 - **ActivityEvent:** `id`,`type`(push,fetch,refresh,expire,error),`message`,`createdAt`,`refPath?`.
 - **TriggerSync (request):** `connectionId?`(string; omit = all owned).
 - **Notification:** `id`,`type`(sync,expiry,badge,repo),`title`,`body`,`read`(boolean),`createdAt`.
+
+### ExtensionSession · CapturedSubmission (Path B v2)
+- **ExtensionSession:** `id`,`client`(="extension"),`userAgent`,`ip`,`createdAt`,`lastSeenAt`,`revoked`(boolean).
+- **CapturedSubmission (request item):** `platform`(enum),`number`(string),`slug`(string),`title`(string),`difficulty`(enum),`tags`[],`language`(string),`solutionCode`(text; size-capped),`questionMarkdown`(string),`solvedAt`(datetime). Normalized client-side to the same `SolutionToSync` shape git-service already pushes.
 
 ---
 
