@@ -112,14 +112,14 @@ if (!crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(`sha256=${expected}`))
 
 ## 12. Checklist
 
-- [ ] All routes under `/api/v1`; consistent success/error envelopes
-- [ ] JWT verified in both services; ownership from token
-- [ ] `.strict()` validation; mass-assignment blocked
-- [ ] Rate limits + cooldowns + body/time limits
-- [ ] Cursor pagination with allowlisted params
-- [ ] Idempotent mutations; per-connection lock
-- [ ] Uniform 404 on public lookups
-- [ ] API inventory maintained; old versions retired
+- [x] All routes under `/api/v1`; consistent success/error envelopes
+- [x] JWT verified in both services; ownership from token
+- [x] `.strict()` validation; mass-assignment blocked
+- [x] Rate limits + cooldowns + body/time limits *(Redis rate-limit + sync cooldown + 1mb body; time limits at proxy pending)*
+- [x] Cursor pagination with allowlisted params
+- [x] Idempotent mutations; per-connection lock
+- [x] Uniform 404 on public lookups
+- [ ] API inventory maintained; old versions retired *(no formal inventory/versioning process yet)*
 
 ---
 
