@@ -124,9 +124,9 @@ router.post('/', rateLimit({ windowSec: 900, max: 5, keyPrefix: 'sync-trigger' }
 - [x] Helmet + strict CORS + 1mb body limit on both services
 - [x] Zod `.strict()` on every input; unknown fields rejected
 - [x] `requireAuth` + ownership filter on every protected route
-- [ ] SSRF: username validated, platform hosts hard-coded, egress allowlist *(username + hosts done; egress allowlist pending)*
+- [x] SSRF: username validated, platform hosts hard-coded, egress allowlist
 - [x] Central error handler; no stack traces in prod
-- [ ] Rate limits on auth/public/sync; queue concurrency caps *(public/stats/sync + queue caps done; auth endpoints not yet)*
+- [x] Rate limits on auth/public/sync; queue concurrency caps
 - [x] requestId correlation end-to-end
 - [x] Graceful shutdown drains DB/Redis
 
