@@ -13,5 +13,10 @@ router.get(
   rateLimit({ windowSec: 60, max: 30, keyPrefix: 'stats' }),
   asyncHandler(statsController.getStats),
 );
+router.get(
+  '/recent',
+  rateLimit({ windowSec: 60, max: 60, keyPrefix: 'stats-recent' }),
+  asyncHandler(statsController.getRecent),
+);
 
 export default router;
