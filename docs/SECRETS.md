@@ -122,4 +122,48 @@ DATABASE_URL=postgresql://cv_web:***@db:5432/codevault?sslmode=verify-full
 ## 13. References
 
 - [SECURITY_PLAN.md](SECURITY_PLAN.md) §5, §10 · [DATABASE_SECURITY.md](DATABASE_SECURITY.md) · [GITHUB_SECURITY.md](GITHUB_SECURITY.md) · [DEVSECOPS.md](DEVSECOPS.md)
+
+---
+
+## 14. Environment-variable contract (captured before skeleton reset — 2026-06-27)
+
+> Both `.env.example` files were emptied. The exact env contract (validated at boot by each `config/env.ts`, fail-fast) is preserved here. `.env` itself was never committed (gitignored) and is left untouched locally. Build scripts captured too.
+
+### web-backend (`PORT=4000`)
+```env
+NODE_ENV=development            # development | production
+PORT=4000
+LOG_LEVEL=debug
+DATABASE_URL=postgresql://codevault:codevault@localhost:5432/codevault   # Docker overrides host→postgres
+REDIS_URL=redis://localhost:6379
+# CROWN JEWELS — never commit real values:
+JWT_SECRET=<long random>        # shared with git-service (same-JWT verify)
+JWT_ACCESS_TTL=1800             # 30 min
+JWT_REFRESH_TTL=1209600         # 14 days
+ENCRYPTION_KEY=base64:<32-byte> # AES-256-GCM envelope key for platform/GitHub tokens
+GITHUB_CLIENT_ID=...
+GITHUB_CLIENT_SECRET=...
+GITHUB_CALLBACK_URL=http://localhost:4000/api/v1/auth/github/callback
+CORS_ORIGIN=http://localhost:3000
+```
+Scripts: `dev`=nodemon · `build`=`prisma generate && tsc` · `start`=`node dist/index.js` · `typecheck` · `lint` · `prisma:generate|migrate|deploy|studio`.
+
+### git-service (`PORT=5050` local; binds 5000 in Docker)
+```env
+NODE_ENV=development
+PORT=5050                        # macOS AirPlay owns 5000 locally
+LOG_LEVEL=debug
+DATABASE_URL=postgresql://codevault:codevault@localhost:5433/codevault   # SAME DB; writes only problems + sync_runs
+REDIS_URL=redis://localhost:6380
+JWT_SECRET=<must match web-backend>        # verify the user's access token
+ENCRYPTION_KEY=base64:<must match web-backend>  # DECRYPT platform/GitHub tokens
+SYNC_CRON=0 */6 * * *
+SYNC_CONCURRENCY=3
+SYNC_PLATFORM_CONCURRENCY=2
+SYNC_ENABLED=true                # kill switch — false pauses scheduler + manual sync
+CORS_ORIGIN=http://localhost:3000
+```
+Scripts: `dev`=nodemon · `build`=`prisma generate && tsc` · `start` · `typecheck` · `lint` · `prisma:generate`.
+
+> Local host ports (per [[project_codevault]] env): Postgres 5433, Redis 6380, web-backend 4000, git-service 5050. `JWT_SECRET` + `ENCRYPTION_KEY` **must be identical** across both services.
 - OWASP Secrets Management Cheat Sheet · 12-Factor App: Config
