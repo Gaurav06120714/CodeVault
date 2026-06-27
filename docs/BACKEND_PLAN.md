@@ -488,7 +488,7 @@ GitHub publish ─┴─▶ Sync orchestrator ─▶ Scheduler/jobs ─▶ Sync 
 
 **Code & tests**
 - [ ] Unit + integration tests on services, repos, generators; CI green *(verified manually; automated suites + CI pending)*
-- [ ] Lint + typecheck enforced in CI *(typecheck passes locally; CI not set up)*
+- [x] Lint + typecheck enforced in CI *(.github/workflows/ci.yml)*
 - [x] No `TODO`/secrets/`console.log` in shipped code *(only intentional console.error in env fail-fast)*
 
 **Config & secrets**
@@ -503,7 +503,7 @@ GitHub publish ─┴─▶ Sync orchestrator ─▶ Scheduler/jobs ─▶ Sync 
 
 **Security**
 - [ ] HTTPS/HSTS, secure cookies, CORS allowlist, security headers *(secure cookies + CORS + helmet done; HTTPS/HSTS deploy-time)*
-- [ ] Rate limits on auth/public/sync; OAuth state+redirect allowlist *(public/sync + state done; auth endpoints not rate-limited)*
+- [x] Rate limits on auth/public/sync; OAuth state+redirect allowlist
 - [x] Token encryption verified; nothing sensitive in logs
 - [ ] `npm audit` clean / triaged *(not run in CI yet)*
 
