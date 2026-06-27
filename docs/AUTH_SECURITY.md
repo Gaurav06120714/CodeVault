@@ -124,7 +124,7 @@ GITHUB_CALLBACK_URL=http://localhost:4000/api/v1/auth/github/callback
 - [x] `req.user.id` from token only; ownership filter everywhere
 - [x] Logout revokes session; deletion purges tokens
 - [x] GitHub scope minimized
-- [ ] Auth endpoints rate-limited *(not yet — `/auth/*` not behind the rate limiter)*
+- [x] Auth endpoints rate-limited
 
 ---
 
