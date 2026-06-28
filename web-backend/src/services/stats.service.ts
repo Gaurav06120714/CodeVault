@@ -1,7 +1,7 @@
 import { ConnectionService } from './connection.service';
 import { LeetCodeService } from './platforms/leetcode';
 import { CodeforcesService } from './platforms/codeforces';
-import redis from '../lib/redis';
+import { redis } from '../lib/redis';
 import { PlatformType } from '@prisma/client';
 import logger from '../lib/logger';
 
