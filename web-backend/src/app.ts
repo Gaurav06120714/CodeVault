@@ -5,6 +5,8 @@ import pinoHttp from 'pino-http';
 import logger from './lib/logger';
 import { env } from './config/env';
 import authRoutes from './routes/auth.routes';
+import platformRoutes from './routes/platform.routes';
+import statsRoutes from './routes/stats.routes';
 
 export const createApp = (): Application => {
   const app = express();
@@ -29,6 +31,8 @@ export const createApp = (): Application => {
 
   // Routes
   app.use('/api/auth', authRoutes);
+  app.use('/api/platforms', platformRoutes);
+  app.use('/api/stats', statsRoutes);
 
   // Basic Error Handler (will be expanded later)
   app.use((err: any, req: Request, res: Response, next: NextFunction) => {
