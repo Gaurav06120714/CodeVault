@@ -252,15 +252,17 @@ One-time connect ──▶ Submission Fetcher ──▶ Organizer ──▶ GitH
 
 ## 🛠 Tech stack & versions
 
+> 📌 **Canonical source: [docs/TECH_STACK.md](docs/TECH_STACK.md).** The stack was upgraded (2026-06-28) — the table below now matches it.
+
 | App | Technology | Version |
 |-----|-----------|---------|
-| web-frontend | **Next.js** (App Router) · **React** · **Tailwind CSS** | `15.x` · `18.3.x` · `3.4.x` |
-| web-backend | **Express** · **Prisma** · **Zod** | `4.19.x` · `5.18.x` · `3.x` |
-| git-service | **Express** · **Prisma** · **node-cron** · **axios** | `4.19.x` · `5.18.x` · `3.x` · `1.x` |
-| Shared | **TypeScript** · **Node.js** | `5.5.x` · `≥ 18.18` |
-| Database | **SQLite** (dev) → **PostgreSQL** (prod) | — |
+| web-frontend | **Next.js** (App Router) · **React** · **Tailwind CSS** · **TanStack Query** | `15.x` · `18.3.x` · `4.x` · `5.x` |
+| web-backend | **Express** · **Prisma** · **Zod** | `5.x` · `5.18.x` · `3.x` |
+| git-service | **Express** · **Prisma** · **node-cron** · **axios** · **BullMQ** | `5.x` · `5.18.x` · `3.x` · `1.x` · `5.x` |
+| Shared | **TypeScript** · **Node.js** | `5.5.x` · `≥ 20.x LTS` |
+| Database | **PostgreSQL** · **Redis** | `16.x` · `7.x` |
 
-> Per‑app details live in [web-frontend/README.md](web-frontend/README.md), [web-backend/README.md](web-backend/README.md), and [git-service/README.md](git-service/README.md).
+> Upgrades vs the original plan: Node `18.18`→`20 LTS`, Express `4.19`→`5`, Tailwind `3.4`→`4`, added TanStack Query. Rationale in [docs/TECH_STACK.md](docs/TECH_STACK.md). Per‑app details: [web-frontend/README.md](web-frontend/README.md), [web-backend/README.md](web-backend/README.md), [git-service/README.md](git-service/README.md).
 
 ---
 
