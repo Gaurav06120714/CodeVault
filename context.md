@@ -94,6 +94,7 @@ Each service has its own README documenting structure, versions, file‑by‑fil
 - ✅ Repo on GitHub: **https://github.com/Gaurav06120714/CodeVault** (branch `main`).
 - ⏳ **No backend/Next.js code implemented yet.** Next step: build the real Next.js pages from the prototype, then `plan.md` Phase 1.
 - 🧩 **Browser extension = planned, docs only.** `browser-extension/` holds a planning README; full blueprint in [docs/EXTENSION_PLAN.md](docs/EXTENSION_PLAN.md) + security in [docs/EXTENSION_SECURITY.md](docs/EXTENSION_SECURITY.md). No extension code yet.
+- ♻️ **2026-06-27: all three services reset to empty skeletons.** Implementation preserved in docs — schema in [docs/DATABASE_PLAN.md](docs/DATABASE_PLAN.md) §17, file interfaces in [docs/BACKEND_PLAN.md](docs/BACKEND_PLAN.md) §15, env contract in [docs/SECRETS.md](docs/SECRETS.md) §14 (and full source in git history).
 
 ---
 
