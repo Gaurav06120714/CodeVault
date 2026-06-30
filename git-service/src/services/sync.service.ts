@@ -109,6 +109,20 @@ export async function runSync(connectionId: string, trigger: Trigger = 'manual')
     });
     await finishRun(run.id, 'success', submissions.length, items.length);
 
+    // Notify the user (feeds web-backend's notifications feature).
+    if (items.length > 0) {
+      await prisma.notification
+        .create({
+          data: {
+            userId: connection.userId,
+            type: 'sync',
+            title: `Synced ${items.length} problem(s) from ${connection.platform}`,
+            body: `Pushed to ${repo.repoFullName}.`,
+          },
+        })
+        .catch(() => undefined);
+    }
+
     return { itemsFetched: submissions.length, itemsPushed: items.length, skipped: submissions.length - fresh.length };
   } catch (err) {
     if (err instanceof ExpiredSessionError) {
@@ -212,7 +226,7 @@ async function finishRun(
 }
 
 async function onExpired(runId: string, connectionId: string): Promise<void> {
-  await prisma.connection.update({
+  const connection = await prisma.connection.update({
     where: { id: connectionId },
     data: { tokenStatus: 'expired' },
   });
@@ -220,5 +234,15 @@ async function onExpired(runId: string, connectionId: string): Promise<void> {
     where: { id: runId },
     data: { status: 'expired', errorCode: 'SESSION_EXPIRED', finishedAt: new Date() },
   });
+  await prisma.notification
+    .create({
+      data: {
+        userId: connection.userId,
+        type: 'expiry',
+        title: `${connection.platform} session expired`,
+        body: 'Reconnect to resume code sync — your stats keep working from public data.',
+      },
+    })
+    .catch(() => undefined);
   logger.warn({ connectionId }, 'Sync stopped — platform session expired (reconnect required)');
 }
