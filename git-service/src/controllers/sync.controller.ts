@@ -62,3 +62,72 @@ export async function status(req: Request, res: Response): Promise<void> {
 
   res.json({ items });
 }
+
+type ActivityType = 'push' | 'fetch' | 'refresh' | 'expire' | 'error';
+
+function activityType(status: string): ActivityType {
+  switch (status) {
+    case 'success':
+    case 'partial':
+      return 'push';
+    case 'failed':
+      return 'error';
+    case 'expired':
+      return 'expire';
+    default:
+      return 'fetch'; // queued / running
+  }
+}
+
+function activityMessage(run: {
+  status: string;
+  itemsPushed: number;
+  itemsFetched: number;
+  errorCode: string | null;
+  connection: { platform: string };
+}): string {
+  const p = run.connection.platform;
+  switch (run.status) {
+    case 'success':
+      return `Synced ${run.itemsPushed} problem(s) from ${p}`;
+    case 'partial':
+      return `Partially synced ${p} (${run.itemsPushed}/${run.itemsFetched})`;
+    case 'failed':
+      return `Sync failed for ${p}${run.errorCode ? ` (${run.errorCode})` : ''}`;
+    case 'expired':
+      return `${p} session expired — reconnect required`;
+    case 'running':
+      return `Syncing ${p}…`;
+    default:
+      return `Sync queued for ${p}`;
+  }
+}
+
+// GET /api/sync/activity — real sync log feed (cursor-paginated, newest first).
+export async function activity(req: Request, res: Response): Promise<void> {
+  const userId = req.user!.userId;
+  const limitRaw = Number(req.query.limit);
+  const limit = Number.isFinite(limitRaw) ? Math.min(Math.max(limitRaw, 1), 100) : 20;
+  const cursor = typeof req.query.cursor === 'string' ? req.query.cursor : undefined;
+
+  const runs = await prisma.syncRun.findMany({
+    where: { userId },
+    include: { connection: { select: { platform: true, username: true } } },
+    orderBy: { createdAt: 'desc' },
+    take: limit + 1,
+    ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
+  });
+
+  const hasMore = runs.length > limit;
+  const page = hasMore ? runs.slice(0, limit) : runs;
+
+  const items = page.map((r) => ({
+    id: r.id,
+    type: activityType(r.status),
+    message: activityMessage(r),
+    platform: r.connection.platform,
+    createdAt: r.createdAt,
+  }));
+
+  res.json({ items, nextCursor: hasMore ? page[page.length - 1]!.id : null });
+}
