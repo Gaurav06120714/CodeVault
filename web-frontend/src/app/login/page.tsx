@@ -43,6 +43,17 @@ export default function Login() {
           </button>
           <p className="why">GitHub is required to create and update your synced repository.</p>
 
+          <div className="divider">or use a sign-in link</div>
+
+          <form onSubmit={(e) => { e.preventDefault(); handleGitHubLogin(); }}>
+            <div className="field">
+              <label htmlFor="email">Email</label>
+              <input id="email" name="email" type="email" autoComplete="email" placeholder="you@example.com" required />
+            </div>
+            <button className="submit" type="submit">Email me a sign-in link</button>
+            <p className="nopass">Passwordless — we'll email you a secure one-time link. No password to remember.</p>
+          </form>
+
           <div className="alt">New to CodeVault? <a href="#" onClick={(e) => { e.preventDefault(); handleGitHubLogin(); }}>Create an account</a> — it's the same GitHub sign-in.</div>
         </div>
       </div>
