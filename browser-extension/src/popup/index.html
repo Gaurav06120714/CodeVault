@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>CodeVault</title>
+    <style>
+      body { font-family: system-ui, sans-serif; width: 280px; padding: 16px; margin: 0; color: #1a160f; }
+      h1 { font-size: 15px; margin: 0 0 12px; }
+      .row { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+      .dot { width: 8px; height: 8px; border-radius: 50%; }
+      .on { background: #22c55e; }
+      .off { background: #9ca3af; }
+      button { width: 100%; padding: 9px; border-radius: 8px; border: 1px solid #e5e7eb; font-weight: 600; cursor: pointer; background: #fff; }
+      .brand { background: #f1543f; color: #fff; border-color: #f1543f; }
+      .muted { color: #6b7280; font-size: 12px; margin-top: 12px; }
+    </style>
+  </head>
+  <body>
+    <h1>🗄️ CodeVault</h1>
+    <div class="row"><span id="dot" class="dot off"></span><span id="status">Checking…</span></div>
+    <button id="action" class="brand">Sign in</button>
+    <p class="muted">Captures your accepted solutions and syncs them to GitHub.</p>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>
