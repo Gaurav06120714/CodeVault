@@ -46,20 +46,20 @@ export function RepoHeader({
             href={githubUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-[var(--brand-d)] font-mono text-[13px] hover:underline"
+            className="text-brand-d font-mono text-[13px] hover:underline"
           >
             {repoName}
           </a>{" "}
           {isPublic && (
-            <span className="ml-1 text-[11px] font-bold px-[9px] py-[3px] rounded-full bg-[var(--brand-soft)] text-[var(--brand-d)] inline-block">
+            <span className="ml-1 text-[11px] font-bold px-[9px] py-[3px] rounded-full bg-brand-soft text-brand-d inline-block">
               Public
             </span>
           )}
         </div>
         
-        <div className="text-[12.5px] text-[var(--faint)] mt-[3px] flex gap-[14px] flex-wrap">
+        <div className="text-[12.5px] text-faint mt-[3px] flex gap-[14px] flex-wrap">
           <span>
-            default branch <b className="text-[var(--ink)] font-semibold">{branch}</b>
+            default branch <b className="text-ink font-semibold">{branch}</b>
           </span>
           <span>{fileCount} files</span>
           <span>last sync {lastSync}</span>
@@ -72,13 +72,13 @@ export function RepoHeader({
           href={githubUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-[7px] font-semibold text-[13.5px] rounded-[9px] border border-[var(--border-2)] bg-white px-[14px] py-[9px] cursor-pointer text-[var(--ink)] transition-colors hover:bg-[var(--paper)]"
+          className="inline-flex items-center gap-[7px] font-semibold text-[13.5px] rounded-[9px] border border-border-2 bg-white px-[14px] py-[9px] cursor-pointer text-ink transition-colors hover:bg-paper"
         >
-          Open on GitHub <ExternalLink size={14} className="text-[var(--faint)]" />
+          Open on GitHub <ExternalLink size={14} className="text-faint" />
         </a>
         <button
           type="button"
-          className="inline-flex items-center gap-[7px] font-semibold text-[13.5px] rounded-[9px] border border-[var(--brand)] bg-[var(--brand)] text-white px-[14px] py-[9px] cursor-pointer transition-colors hover:bg-[var(--brand-d)]"
+          className="inline-flex items-center gap-[7px] font-semibold text-[13.5px] rounded-[9px] border border-brand bg-brand text-white px-[14px] py-[9px] cursor-pointer transition-colors hover:bg-brand-d"
         >
           <RefreshCw size={14} />
           Re-sync now
