@@ -104,6 +104,8 @@ svg.ico.sm{width:14px;height:14px}
 .form{width:100%;max-width:380px}
 .m-brand{display:none;align-items:center;gap:10px;font-weight:700;font-size:17px;margin-bottom:22px}
 .m-brand .mark{background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#fff}
+.side .mark,.m-brand .mark,a.brand .mark{background:url('/codevault-icon.png') center/contain no-repeat;border-radius:0;color:transparent;font-size:0;width:34px;height:34px;display:inline-grid}
+.auth-panel a.brand .mark{background:none;color:#fff;font-size:15px;width:auto;height:auto}
 .form h2{font-size:26px;letter-spacing:-.02em;margin:16px 0 6px}
 .form .sub{color:var(--muted);font-size:14.5px;margin-bottom:26px}
 .gh{width:100%;display:flex;align-items:center;justify-content:center;gap:10px;background:var(--ink);color:#fff;border:0;padding:14px;border-radius:11px;font-family:inherit;font-weight:600;font-size:15px;cursor:pointer;transition:.15s}
