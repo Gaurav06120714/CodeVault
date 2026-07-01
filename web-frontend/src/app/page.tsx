@@ -26,7 +26,8 @@ export default function Home() {
 
 
 <section className={styles['hero']}>
-  <div className={styles['wrap']}>
+  <div className={styles['wrap'] + " " + styles['hero-grid']}>
+    <div className={styles['hero-text']}>
     <span className={styles['eyebrow']}><span className={styles['dot']}></span> For competitive programmers</span>
     <h1>You've solved 1,000+ problems.<br/><span className={styles['dim']}>Nothing online proves it.</span></h1>
     <p className={styles['sub']}>CodeVault pulls your stats from LeetCode, Codeforces, CodeChef and HackerRank into one dashboard — and pushes every accepted solution to GitHub, organized by problem number.</p>
@@ -46,8 +47,8 @@ export default function Home() {
       <span className={styles['hp']}><span className={styles['hpb'] + " " + styles['hr']}>HR</span> HackerRank</span>
       <span className={styles['hp'] + " " + styles['more']}>+ more soon</span>
     </div>
+    </div>
 
-    
     <div className={styles['window']}>
       <div className={styles['win-bar']}>
         <div className={styles['win-dots']}><i></i><i></i><i></i></div>
