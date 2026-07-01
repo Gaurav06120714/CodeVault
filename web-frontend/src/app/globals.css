@@ -135,7 +135,11 @@ svg.ico.sm{width:14px;height:14px}
 .phead .pid .chips{display:flex;gap:7px;margin-top:11px;flex-wrap:wrap}
 .pchip{display:flex;align-items:center;gap:7px;border:1px solid var(--border-2);border-radius:8px;padding:5px 9px;font-size:12px;font-weight:600;background:#fff}
 .pchip .b{width:16px;height:16px;border-radius:4px;display:grid;place-items:center;font-size:8px;font-weight:800;font-family:var(--mono);color:#fff}
-.lc{background:#ffa116}.cf{background:#1f8acb}.cc{background:#7a5230}.hr{background:#1aa260}
+.lc,.cf,.cc,.hr{color:transparent;font-size:0;background-color:#fff;background-repeat:no-repeat;background-position:center;background-size:68%;box-shadow:inset 0 0 0 1px rgba(0,0,0,.08)}
+.lc{background-image:url('/logos/leetcode.svg')}
+.cf{background-image:url('/logos/codeforces.svg')}
+.cc{background-image:url('/logos/codechef.svg')}
+.hr{background-image:url('/logos/hackerrank.svg')}
 .pchip .h{color:var(--faint);font-weight:500;font-family:var(--mono);font-size:11px}
 .phead .pa{margin-left:auto;position:relative;z-index:2;display:flex;gap:10px}
 
