@@ -6,6 +6,7 @@
 
 - **Two services / two base URLs:** `WEB = web-backend (/api/v1)` · `GIT = git-service (/api/v1)`. The frontend calls **both**.
 - **Versioning:** all routes under `/api/v1`. Breaking changes → `/v2`, never silent.
+  > ⚠️ **Implementation note:** the shipped code currently mounts routes under **`/api`** (no `v1` segment) in both services. Treat `/api/v1` as the target; add the version prefix before public launch. See [FEATURES.md](FEATURES.md) for live endpoint status.
 - **Auth transport:** access JWT in an **httpOnly Secure cookie** (same parent domain) **or** `Authorization: Bearer <accessToken>`. **Both** web-backend and git-service verify the same JWT (per SECURITY_PLAN). Mutations also require **`X-CSRF-Token`**.
 - **Standard headers (requests):** `Content-Type: application/json`, `Authorization`/cookie, `X-CSRF-Token` (mutations), optional `X-Request-Id`.
 - **Standard headers (responses):** `X-Request-Id`, rate-limit headers, security headers (SECURITY_PLAN §11).
