@@ -1,6 +1,6 @@
 # 🧩 CodeVault — Browser Extension Security
 
-> Security model for the cross-browser **WebExtension** that captures the user's own accepted solutions (**Path B v2**). Companion to [EXTENSION_PLAN](EXTENSION_PLAN.md), [AUTH_SECURITY](AUTH_SECURITY.md), [SECURITY_PLAN](SECURITY_PLAN.md), and [API_SECURITY](API_SECURITY.md). Target folder: `browser-extension/` (planning skeleton — no code yet).
+> Security model for the cross-browser **WebExtension** that captures the user's own accepted solutions (**Path B v2**). Companion to [EXTENSION_PLAN](EXTENSION_PLAN.md), [AUTH_SECURITY](AUTH_SECURITY.md), [SECURITY_PLAN](SECURITY_PLAN.md), and [API_SECURITY](API_SECURITY.md). Target folder: `browser-extension/` (built with CRXJS + Vite — background worker, content scripts, popup/options, and JWT capture are implemented; not yet build-verified and selectors need live testing).
 
 ---
 
