@@ -1,8 +1,10 @@
 # 🎨 CodeVault — Frontend Development Blueprint
 
-> Senior Frontend Architect plan. **Planning only — no code.** The approved prototype in [`/frontendHtml`](../frontendHtml/README.md) (15 pages, coral/gold/rose theme) is the **final UI reference**. This blueprint plans how to build it as the production `web-frontend` (Next.js 15 · App Router · TypeScript · Tailwind), preserving the design language exactly.
+> Senior Frontend Architect plan. **Planning only — no code.** The approved prototype in [`/frontendHtml`](../frontendHtml/README.md) (15 pages, coral/gold/rose theme) is the **final UI reference**. This blueprint plans how to build it as the production `web-frontend` (Next.js 16 · App Router · TypeScript · Tailwind), preserving the design language exactly.
 
-**Target stack (fixed by the project):** Next.js 15 (App Router) · React 18 · TypeScript · Tailwind CSS. **Server state:** TanStack Query (React Query). **Forms:** React Hook Form + Zod. Talks to **two backends** (web-backend, git-service).
+**Target stack (fixed by the project):** Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS 4. **Server state:** TanStack Query (React Query). **Forms:** React Hook Form + Zod. Talks to **two backends** (web-backend, git-service).
+
+> 🧭 **Live status:** this is the *plan*. What's actually built — which pages call real APIs vs. still render mock data, per-page owners, and gaps — is tracked in **[FEATURES.md](FEATURES.md)**. The shipped `web-frontend` runs **Next 16.2.9 / React 19.2.4 / Tailwind 4**; any older "Next 15 / React 18" mention below is superseded.
 
 ---
 
