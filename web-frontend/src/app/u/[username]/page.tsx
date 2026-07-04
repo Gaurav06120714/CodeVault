@@ -2,6 +2,7 @@
 
 import React, { useState, use, useMemo } from "react";
 import Link from "next/link";
+import { PlatformChip } from "@/components/PlatformChip";
 
 export default function PublicProfileView({ params }: { params: Promise<{ username: string }> }) {
   const resolvedParams = use(params);
@@ -60,10 +61,10 @@ export default function PublicProfileView({ params }: { params: Promise<{ userna
             <h1 style={{ fontSize: "24px" }}>{username}</h1>
             <div className="ln">codevault.dev/u/{username}</div>
             <div className="chips" style={{ marginTop: "12px" }}>
-              <span className="pchip"><span className="b lc">LC</span> @{username}</span>
-              <span className="pchip"><span className="b cf">CF</span> @{username}_t</span>
-              <span className="pchip"><span className="b cc">CC</span> @{username}06</span>
-              <span className="pchip"><span className="b hr">HR</span> @{username}g</span>
+              <span className="pchip"><PlatformChip platformId="leetcode" size="sm" showName={false} variant="ghost" /> @{username}</span>
+              <span className="pchip"><PlatformChip platformId="codeforces" size="sm" showName={false} variant="ghost" /> @{username}_t</span>
+              <span className="pchip"><PlatformChip platformId="codechef" size="sm" showName={false} variant="ghost" /> @{username}06</span>
+              <span className="pchip"><PlatformChip platformId="hackerrank" size="sm" showName={false} variant="ghost" /> @{username}g</span>
             </div>
           </div>
           <div className="pa">
@@ -100,22 +101,22 @@ export default function PublicProfileView({ params }: { params: Promise<{ userna
             <h2>By platform</h2>
             <div className="pf">
               <div className="pf-row">
-                <span className="lab"><span className="badge-ic lc">LC</span>LeetCode</span>
+                <span className="lab"><PlatformChip platformId="leetcode" size="sm" showName={false} variant="ghost" />LeetCode</span>
                 <span className="pf-bar"><i style={{ width: "100%", background: "#ffa116" }}></i></span>
                 <span className="val">612</span>
               </div>
               <div className="pf-row">
-                <span className="lab"><span className="badge-ic cf">CF</span>Codeforces</span>
+                <span className="lab"><PlatformChip platformId="codeforces" size="sm" showName={false} variant="ghost" />Codeforces</span>
                 <span className="pf-bar"><i style={{ width: "56%", background: "#1f8acb" }}></i></span>
                 <span className="val">341</span>
               </div>
               <div className="pf-row">
-                <span className="lab"><span className="badge-ic cc">CC</span>CodeChef</span>
+                <span className="lab"><PlatformChip platformId="codechef" size="sm" showName={false} variant="ghost" />CodeChef</span>
                 <span className="pf-bar"><i style={{ width: "30%", background: "#7a5230" }}></i></span>
                 <span className="val">184</span>
               </div>
               <div className="pf-row">
-                <span className="lab"><span className="badge-ic hr">HR</span>HackerRank</span>
+                <span className="lab"><PlatformChip platformId="hackerrank" size="sm" showName={false} variant="ghost" />HackerRank</span>
                 <span className="pf-bar"><i style={{ width: "18%", background: "#1aa260" }}></i></span>
                 <span className="val">111</span>
               </div>

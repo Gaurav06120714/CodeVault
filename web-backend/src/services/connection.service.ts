@@ -6,17 +6,16 @@ import { encryptToken } from '../lib/crypto';
 export class ConnectionService {
   static async addConnection(userId: string, platform: PlatformType, username: string, sessionToken?: string) {
     try {
-      const existing = await prisma.connection.findUnique({
-        where: { userId_platform: { userId, platform } }
-      });
-
-      if (existing) {
-        throw new Error(`Already connected to ${platform}`);
-      }
-
       const connection = await prisma.$transaction(async (tx) => {
-        const conn = await tx.connection.create({
-          data: {
+        // Upsert the connection (allow updating username/sync status)
+        const conn = await tx.connection.upsert({
+          where: { userId_platform: { userId, platform } },
+          update: {
+            username,
+            syncEnabled: !!sessionToken,
+            tokenStatus: sessionToken ? 'active' : 'none',
+          },
+          create: {
             userId,
             platform,
             username,
@@ -27,8 +26,14 @@ export class ConnectionService {
 
         if (sessionToken) {
           const { cipher, iv } = encryptToken(sessionToken);
-          await tx.connectionSecret.create({
-            data: {
+          // Upsert the secret
+          await tx.connectionSecret.upsert({
+            where: { connectionId: conn.id },
+            update: {
+              tokenCipher: cipher,
+              tokenIv: iv,
+            },
+            create: {
               connectionId: conn.id,
               tokenCipher: cipher,
               tokenIv: iv,

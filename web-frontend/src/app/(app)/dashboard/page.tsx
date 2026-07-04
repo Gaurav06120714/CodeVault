@@ -3,15 +3,19 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { PlatformChip } from "@/components/PlatformChip";
 
-export default function Dashboard() {
+export default function DashboardPage() {
   const router = useRouter();
   const [user, setUser] = useState<{ id: string; githubLogin: string; displayName: string | null } | null>(null);
-  const [copied, setCopied] = useState(false);
+  const [stats, setStats] = useState<any>(null);
   const [heatmapCells, setHeatmapCells] = useState<string[]>([]);
+  const [recentSubs, setRecentSubs] = useState<any[]>([]);
+
+  const [isLoading, setIsLoading] = useState(true);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    // Check if the user is logged in
     const token = localStorage.getItem("token");
     const storedUser = localStorage.getItem("user");
 
@@ -25,56 +29,107 @@ export default function Dashboard() {
     } catch (e) {
       console.error("Failed to parse user data", e);
     }
+
+    const fetchStats = async () => {
+      try {
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
+        const res = await fetch(`${API_URL}/stats`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        
+        if (res.ok) {
+          const data = await res.json();
+          setStats(data);
+          
+          // Merge Heatmap
+          const mergedHeatmap: Record<string, number> = {};
+          let allRecent: any[] = [];
+          
+          Object.keys(data?.platforms || {}).forEach((pKey) => {
+            const p = data.platforms[pKey];
+            
+            // Heatmap
+            if (p.heatmap) {
+              const pHeatmap = typeof p.heatmap === 'string' ? JSON.parse(p.heatmap) : p.heatmap;
+              Object.entries(pHeatmap).forEach(([ts, count]) => {
+                const dateStr = new Date(parseInt(ts) * 1000).toISOString().split('T')[0];
+                mergedHeatmap[dateStr] = (mergedHeatmap[dateStr] || 0) + (count as number);
+              });
+            }
+            
+            // Recent
+            if (p.recent) {
+              const recents = p.recent.map((r: any) => ({
+                ...r,
+                platform: pKey
+              }));
+              allRecent = allRecent.concat(recents);
+            }
+          });
+          
+          // Generate 365 cells
+          const cells = [];
+          const today = new Date();
+          for (let i = 364; i >= 0; i--) {
+            const d = new Date(today);
+            d.setDate(today.getDate() - i);
+            const dStr = d.toISOString().split('T')[0];
+            const count = mergedHeatmap[dStr] || 0;
+            
+            if (count >= 5) cells.push("l4");
+            else if (count >= 3) cells.push("l3");
+            else if (count >= 2) cells.push("l2");
+            else if (count >= 1) cells.push("l1");
+            else cells.push("");
+          }
+          setHeatmapCells(cells);
+          
+          // Sort recent
+          allRecent.sort((a, b) => b.timestamp - a.timestamp);
+          setRecentSubs(allRecent.slice(0, 15));
+          
+        } else if (res.status === 404) {
+          router.push("/connect");
+        }
+      } catch (err) {
+        console.error("Failed to fetch stats", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchStats();
   }, [router]);
 
-  // Seeded deterministic heatmap generator (exactly matches overview.html script)
-  useEffect(() => {
-    const lv = ["", "l1", "l2", "l3", "l4"];
-    let seed = 1337;
-    const rand = () => {
-      seed = (seed * 1103515245 + 12345) & 0x7fffffff;
-      return seed / 0x7fffffff;
-    };
-    const cells = [];
-    for (let i = 0; i < 53 * 7; i++) {
-      const r = rand();
-      const recent = i > 53 * 7 * 0.62;
-      let l = 0;
-      if (r > 0.5) l = 1;
-      if (r > 0.7) l = 2;
-      if (r > 0.85) l = 3;
-      if (r > 0.93 || (recent && r > 0.72)) l = 4;
-      cells.push(lv[l]);
-    }
-    setHeatmapCells(cells);
-  }, []);
-
   const handleCopyLink = () => {
-    if (!user) return;
-    navigator.clipboard.writeText(`https://codevault.dev/u/${user.githubLogin}`);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1300);
+    if (user) {
+      navigator.clipboard.writeText(`http://localhost:3000/u/${user.githubLogin}`);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
   };
 
-  if (!user) {
-    return <div style={{ padding: "40px", textAlign: "center" }}>Loading dashboard...</div>;
+  if (isLoading || !user) {
+    return <div style={{ padding: "40px", textAlign: "center", color: "var(--faint)" }}>Loading your data...</div>;
   }
-
-  const initial = (user.displayName || user.githubLogin).charAt(0).toUpperCase();
 
   return (
     <>
       {/* PROFILE HEADER */}
       <section className="phead">
-        <div className="pav">{initial}</div>
+        <div className="pav">{user.displayName?.charAt(0).toUpperCase() || user.githubLogin.charAt(0).toUpperCase()}</div>
         <div className="pid">
           <div className="nm">{user.displayName || user.githubLogin}</div>
           <div className="ln">codevault.dev/u/{user.githubLogin}</div>
           <div className="chips">
-            <span className="pchip"><span className="b lc">LC</span> LeetCode <span className="h">@{user.githubLogin}</span></span>
-            <span className="pchip"><span className="b cf">CF</span> Codeforces <span className="h">@{user.githubLogin}_t</span></span>
-            <span className="pchip"><span className="b cc">CC</span> CodeChef <span className="h">@{user.githubLogin}06</span></span>
-            <span className="pchip"><span className="b hr">HR</span> HackerRank <span className="h">@{user.githubLogin}g</span></span>
+            {Object.keys(stats?.platforms || {}).map(platformId => {
+              if (!stats.platforms[platformId]) return null;
+              return (
+                <span className="pchip" key={platformId}>
+                  <PlatformChip platformId={platformId} size="sm" showName={false} variant="ghost" /> {platformId}
+                </span>
+              );
+            })}
           </div>
         </div>
         <div className="pa">
@@ -92,42 +147,41 @@ export default function Dashboard() {
       <section className="stats" aria-label="Key stats">
         <div className="stat">
           <div className="l"><svg className="ico sm" aria-hidden="true"><use href="#ic-analytics"/></svg> Total solved</div>
-          <div className="n">1,248</div>
-          <div className="d">+37 this week</div>
+          <div className="n">{stats?.totalSolved?.toLocaleString() || "0"}</div>
+          <div className="d">across all platforms</div>
         </div>
-        <div className="stat">
-          <div className="l"><svg className="ico sm a" aria-hidden="true"><use href="#ic-flame"/></svg> Current streak</div>
-          <div className="n">47 days</div>
-          <div className="d warm">Longest 89 days</div>
-        </div>
-        <div className="stat">
-          <div className="l"><svg className="ico sm r" aria-hidden="true"><use href="#ic-bolt"/></svg> Codeforces rating</div>
-          <div className="n">1,623</div>
-          <div className="d pink">Peak 1,711</div>
-        </div>
-        <div className="stat">
-          <div className="l"><svg className="ico sm" aria-hidden="true"><use href="#ic-github"/></svg> Synced to GitHub</div>
-          <div className="n">1,190</div>
-          <div className="d">95% of solved</div>
-        </div>
+        {stats?.platforms?.codeforces && (
+          <div className="stat">
+            <div className="l"><svg className="ico sm r" aria-hidden="true"><use href="#ic-bolt"/></svg> Codeforces</div>
+            <div className="n">{stats.platforms.codeforces.total?.toLocaleString() || "0"}</div>
+            <div className="d pink">Total Solved</div>
+          </div>
+        )}
       </section>
 
       {/* ROW: ring + heatmap + platforms */}
       <div className="grid g-3">
-        {/* LeetCode-style difficulty ring */}
-        <section className="panel">
-          <h2 className="h">Difficulty <span className="tag">solved</span></h2>
-          <div className="ringwrap">
-            <div className="ring" role="img" aria-label="Difficulty breakdown: 540 Easy, 560 Medium, 148 Hard, 1248 total">
-              <div className="rc"><b>1,248</b><span>solved</span></div>
+        {/* LeetCode-style difficulty ring (only if LeetCode connected) */}
+        {stats?.platforms?.leetcode ? (
+          <section className="panel">
+            <h2 className="h">Difficulty <span className="tag">LeetCode</span></h2>
+            <div className="ringwrap">
+              <div className="ring" role="img" aria-label="Difficulty breakdown">
+                <div className="rc"><b>{stats.platforms.leetcode.total?.toLocaleString() || "0"}</b><span>solved</span></div>
+              </div>
+              <div className="rleg">
+                <div className="r"><span className="sw e"></span> Easy <span className="v">{stats.platforms.leetcode.easy || 0}</span></div>
+                <div className="r"><span className="sw m"></span> Medium <span className="v">{stats.platforms.leetcode.medium || 0}</span></div>
+                <div className="r"><span className="sw h"></span> Hard <span className="v">{stats.platforms.leetcode.hard || 0}</span></div>
+              </div>
             </div>
-            <div className="rleg">
-              <div className="r"><span className="sw e"></span> Easy <span className="v">540</span></div>
-              <div className="r"><span className="sw m"></span> Medium <span className="v">560</span></div>
-              <div className="r"><span className="sw h"></span> Hard <span className="v">148</span></div>
-            </div>
-          </div>
-        </section>
+          </section>
+        ) : (
+          <section className="panel" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--muted)', minHeight: 200, flexDirection: 'column' }}>
+            <svg className="ico mb-2" aria-hidden="true" style={{ width: 32, height: 32, opacity: 0.5 }}><use href="#ic-plus"/></svg>
+            <p style={{ fontSize: 14 }}>Connect LeetCode for difficulty breakdown</p>
+          </section>
+        )}
 
         {/* GitHub-style heatmap */}
         <section className="panel">
@@ -150,135 +204,83 @@ export default function Dashboard() {
         <section className="panel">
           <h2 className="h">By platform</h2>
           <div className="pf">
-            <div className="pf-row">
-              <span className="lab"><span className="badge-ic lc">LC</span>LeetCode</span>
-              <span className="pf-bar"><i style={{ width: "100%", background: "#ffa116" }}></i></span>
-              <span className="val">612</span>
-            </div>
-            <div className="pf-row">
-              <span className="lab"><span className="badge-ic cf">CF</span>Codeforces</span>
-              <span className="pf-bar"><i style={{ width: "56%", background: "#1f8acb" }}></i></span>
-              <span className="val">341</span>
-            </div>
-            <div className="pf-row">
-              <span className="lab"><span className="badge-ic cc">CC</span>CodeChef</span>
-              <span className="pf-bar"><i style={{ width: "30%", background: "#7a5230" }}></i></span>
-              <span className="val">184</span>
-            </div>
-            <div className="pf-row">
-              <span className="lab"><span className="badge-ic hr">HR</span>HackerRank</span>
-              <span className="pf-bar"><i style={{ width: "18%", background: "#1aa260" }}></i></span>
-              <span className="val">111</span>
-            </div>
-          </div>
-        </section>
-      </div>
+            {Object.keys(stats?.platforms || {}).map(platformId => {
+              const pData = stats.platforms[platformId];
+              if (!pData || !pData.total) return null;
+              
+              const platformConfig: Record<string, { name: string, color: string }> = {
+                leetcode: { name: 'LeetCode', color: '#ffa116' },
+                codeforces: { name: 'Codeforces', color: '#1f8acb' },
+                codechef: { name: 'CodeChef', color: '#7a5230' },
+                hackerrank: { name: 'HackerRank', color: '#1aa260' }
+              };
+              
+              const config = platformConfig[platformId];
+              if (!config) return null;
+              
+              const width = Math.min(100, Math.max(1, (pData.total / (stats.totalSolved || 1)) * 100));
 
-      {/* ROW: topics + HackerRank badges */}
-      <div className="grid g-2">
-        <section className="panel">
-          <h2 className="h">Topic strengths</h2>
-          <div className="chips2">
-            <span className="tchip">Arrays <b>210</b></span>
-            <span className="tchip">Dynamic Programming <b>142</b></span>
-            <span className="tchip">Graphs <b>118</b></span>
-            <span className="tchip">Trees <b>96</b></span>
-            <span className="tchip">Greedy <b>84</b></span>
-            <span className="tchip">Binary Search <b>71</b></span>
-            <span className="tchip">Strings <b>63</b></span>
-            <span className="tchip">Math <b>58</b></span>
-            <span className="tchip">Sliding Window <b>44</b></span>
-          </div>
-        </section>
-
-        <section className="panel">
-          <h2 className="h">Skill badges</h2>
-          <div className="badges">
-            <div className="bdg">
-              <div className="hex">DSA</div>
-              <div className="bt">
-                <div className="n">Problem Solving</div>
-                <div className="m">Gold · 1,248 solved</div>
+              return (
+                <div className="pf-row" key={platformId}>
+                  <span className="lab"><PlatformChip platformId={platformId} size="sm" showName={false} variant="ghost" />{config.name}</span>
+                  <span className="pf-bar"><i style={{ width: `${width}%`, background: config.color }}></i></span>
+                  <span className="val">{pData.total.toLocaleString()}</span>
+                </div>
+              );
+            })}
+            
+            {(!stats?.platforms || Object.keys(stats.platforms).length === 0) && (
+              <div style={{ padding: 20, textAlign: 'center', color: 'var(--muted)', fontSize: 14 }}>
+                No platforms connected yet.
               </div>
-              <div className="stars" aria-label="5 out of 5 stars">★★★★★</div>
-            </div>
-            <div className="bdg">
-              <div className="hex a">DP</div>
-              <div className="bt">
-                <div className="n">Dynamic Programming</div>
-                <div className="m">Silver · 142 solved</div>
-              </div>
-              <div className="stars" aria-label="4 out of 5 stars">★★★★☆</div>
-            </div>
-            <div className="bdg">
-              <div className="hex r">GR</div>
-              <div className="bt">
-                <div className="n">Graphs</div>
-                <div className="m">Silver · 118 solved</div>
-              </div>
-              <div className="stars" aria-label="4 out of 5 stars">★★★★☆</div>
-            </div>
+            )}
           </div>
         </section>
       </div>
 
       {/* Codeforces-style recent submissions table */}
       <section className="panel">
-        <h2 className="h">Recent accepted submissions <span className="tag">auto-synced to GitHub</span></h2>
-        <table>
-          <thead>
-            <tr>
-              <th scope="col">Problem</th>
-              <th scope="col">Source</th>
-              <th scope="col">Difficulty</th>
-              <th scope="col">Verdict</th>
-              <th scope="col">Synced</th>
-              <th scope="col" className="tright">When</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td className="prob-name">369 · Plus One Linked List</td>
-              <td><span className="src"><span className="badge-ic lc">LC</span>LeetCode</span></td>
-              <td><span className="pill-d med">Medium</span></td>
-              <td className="verd">Accepted</td>
-              <td><Link className="gh-link" href="/repositories">0369/solution.py</Link></td>
-              <td className="tright">2h ago</td>
-            </tr>
-            <tr>
-              <td className="prob-name">Dijkstra: Shortest Reach 2</td>
-              <td><span className="src"><span className="badge-ic hr">HR</span>HackerRank</span></td>
-              <td><span className="pill-d hard">Hard</span></td>
-              <td className="verd">Accepted</td>
-              <td><Link className="gh-link" href="/repositories">dijkstra/solution.cpp</Link></td>
-              <td className="tright">5h ago</td>
-            </tr>
-            <tr>
-              <td className="prob-name">Edu Round 168 — C</td>
-              <td><span className="src"><span className="badge-ic cf">CF</span>Codeforces</span></td>
-              <td><span className="pill-d rate">1400</span></td>
-              <td className="verd">Accepted</td>
-              <td><Link className="gh-link" href="/repositories">1968C/solution.cpp</Link></td>
-              <td className="tright">yesterday</td>
-            </tr>
-            <tr>
-              <td className="prob-name">Chef and Subarrays</td>
-              <td><span className="src"><span className="badge-ic cc">CC</span>CodeChef</span></td>
-              <td><span className="pill-d easy">Easy</span></td>
-              <td className="verd">Accepted</td>
-              <td><Link className="gh-link" href="/repositories">SUBARR/solution.py</Link></td>
-              <td className="tright">yesterday</td>
-            </tr>
-            <tr>
-              <td className="prob-name">704 · Binary Search</td>
-              <td><span className="src"><span className="badge-ic lc">LC</span>LeetCode</span></td>
-              <td><span className="pill-d easy">Easy</span></td>
-              <td className="verd">Accepted</td>
-              <td><Link className="gh-link" href="/repositories">0704/solution.java</Link></td>
-              <td className="tright">2 days ago</td>
-            </tr>
-          </tbody>
-        </table>
+        <h2 className="h">Recent accepted submissions <span className="tag">across all platforms</span></h2>
+        {recentSubs.length === 0 ? (
+          <div style={{ padding: 40, textAlign: 'center', color: 'var(--muted)' }}>No recent submissions found.</div>
+        ) : (
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Problem</th>
+                <th scope="col">Source</th>
+                <th scope="col">Rating/Diff</th>
+                <th scope="col">Verdict</th>
+                <th scope="col" className="tright">When</th>
+              </tr>
+            </thead>
+            <tbody>
+              {recentSubs.map((sub, i) => {
+                const date = new Date(sub.timestamp * 1000);
+                return (
+                  <tr key={i}>
+                    <td className="prob-name">{sub.title}</td>
+                    <td>
+                      <span className="src">
+                        <PlatformChip platformId={sub.platform} size="sm" showName={false} variant="ghost" />
+                        <span style={{ textTransform: 'capitalize' }}>{sub.platform}</span>
+                      </span>
+                    </td>
+                    <td>
+                      {sub.rating ? (
+                        <span className="pill-d rate">{sub.rating}</span>
+                      ) : (
+                        <span className="pill-d med" style={{ opacity: 0.5 }}>-</span>
+                      )}
+                    </td>
+                    <td className="verd">Accepted</td>
+                    <td className="tright">{date.toLocaleDateString()}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        )}
       </section>
     </>
   );

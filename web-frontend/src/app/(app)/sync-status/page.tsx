@@ -3,6 +3,9 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { PLATFORMS } from "@/constants/platforms";
+import { PlatformChip } from "@/components/PlatformChip";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
 
 const GIT_URL = process.env.NEXT_PUBLIC_GIT_SERVICE_URL || "http://localhost:5050/api";
 
@@ -24,12 +27,7 @@ type ActivityItem = {
   createdAt: string;
 };
 
-const PLAT: Record<string, { short: string; cls: string; name: string }> = {
-  leetcode: { short: "LC", cls: "lc", name: "LeetCode" },
-  codeforces: { short: "CF", cls: "cf", name: "Codeforces" },
-  codechef: { short: "CC", cls: "cc", name: "CodeChef" },
-  hackerrank: { short: "HR", cls: "hr", name: "HackerRank" },
-};
+// Using centralized PLATFORMS
 
 function timeAgo(iso: string | null): string {
   if (!iso) return "never";
@@ -112,7 +110,7 @@ export default function SyncStatusPage() {
   };
 
   if (conns === null) {
-    return <div style={{ padding: "40px", textAlign: "center" }}>Loading sync status...</div>;
+    return <LoadingSpinner text="Loading sync status..." fullPage />;
   }
 
   const activeCount = conns.filter((c) => c.status === "active" && c.syncEnabled).length;
@@ -164,12 +162,12 @@ export default function SyncStatusPage() {
             </thead>
             <tbody>
               {conns.map((c) => {
-                const meta = PLAT[c.platform] ?? { short: "?", cls: "", name: c.platform };
+                const meta = PLATFORMS[c.platform] ?? { shortName: "?", iconClass: "", name: c.platform };
                 return (
                   <tr key={c.connectionId}>
                     <td>
                       <span className="who2">
-                        <span className={`badge-ic ${meta.cls}`}>{meta.short}</span> {meta.name}{" "}
+                        <PlatformChip platformId={c.platform} size="sm" showName={false} variant="ghost" /> {meta.name}{" "}
                         <span className="h">@{c.username}</span>
                       </span>
                     </td>

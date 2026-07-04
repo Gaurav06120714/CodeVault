@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { PlatformChip } from "@/components/PlatformChip";
 
 export default function PublicProfileSettings() {
   const router = useRouter();
@@ -103,10 +104,10 @@ export default function PublicProfileSettings() {
             <div className="st"><div className="n">89</div><div className="l">Best streak</div></div>
           </div>
           <div className="pc-foot">
-            <span className="pchip"><span className="b lc">LC</span> 612</span>
-            <span className="pchip"><span className="b cf">CF</span> 341</span>
-            <span className="pchip"><span className="b cc">CC</span> 184</span>
-            <span className="pchip"><span className="b hr">HR</span> 111</span>
+            <span className="pchip"><PlatformChip platformId="leetcode" size="sm" showName={false} variant="ghost" /> 612</span>
+            <span className="pchip"><PlatformChip platformId="codeforces" size="sm" showName={false} variant="ghost" /> 341</span>
+            <span className="pchip"><PlatformChip platformId="codechef" size="sm" showName={false} variant="ghost" /> 184</span>
+            <span className="pchip"><PlatformChip platformId="hackerrank" size="sm" showName={false} variant="ghost" /> 111</span>
           </div>
         </div>
       </section>

@@ -1,4 +1,5 @@
 import styles from "./page.module.css";
+import { PlatformChip } from "../components/PlatformChip";
 
 export default function Home() {
   return (
@@ -8,7 +9,7 @@ export default function Home() {
 
 <header className={styles['nav']}>
   <div className={styles['wrap'] + " " + styles['nav-in']}>
-    <a className={styles['brand']}><span className={styles['mark']}>CV</span> CodeVault</a>
+    <a className={styles['brand']} href="/"><span className={styles['mark']} role="img" aria-label="CodeVault Logo">CV</span> CodeVault</a>
     <nav className={styles['nav-links']} id="navLinks">
       <a href="#problem">Problem</a>
       <a href="#dashboard">Dashboard</a>
@@ -18,7 +19,7 @@ export default function Home() {
     </nav>
     <div className={styles['nav-right']}>
       <a className={styles['btn'] + " " + styles['btn-ghost']} href="/login">Sign in</a>
-      <a className={styles['btn'] + " " + styles['btn-primary']} href="/login">Connect Accounts</a>
+      <a className={styles['btn'] + " " + styles['btn-secondary']} href="/login">Connect Accounts</a>
       <button className={styles['menu-btn']} type="button" id="menuBtn" aria-label="Toggle menu" aria-expanded="false" aria-controls="navLinks"><span></span></button>
     </div>
   </div>
@@ -41,10 +42,10 @@ export default function Home() {
       <span><span className={styles['tick']}>✓</span> Free to start</span>
     </div>
     <div className={styles['hero-plats']} aria-label="Supported platforms">
-      <span className={styles['hp']}><span className={styles['hpb'] + " " + styles['lc']}>LC</span> LeetCode</span>
-      <span className={styles['hp']}><span className={styles['hpb'] + " " + styles['cf']}>CF</span> Codeforces</span>
-      <span className={styles['hp']}><span className={styles['hpb'] + " " + styles['cc']}>CC</span> CodeChef</span>
-      <span className={styles['hp']}><span className={styles['hpb'] + " " + styles['hr']}>HR</span> HackerRank</span>
+      <PlatformChip platformId="leetcode" />
+      <PlatformChip platformId="codeforces" />
+      <PlatformChip platformId="codechef" />
+      <PlatformChip platformId="hackerrank" />
       <span className={styles['hp'] + " " + styles['more']}>+ more soon</span>
     </div>
     </div>
@@ -61,10 +62,10 @@ export default function Home() {
             <div className={styles['big-num']}>1,248</div>
             <div className={styles['delta']}>+37 this week · 47-day streak</div>
             <div style={{ marginTop: '16px' }} className={styles['pf']}>
-              <div className={styles['pf-row']}><span className={styles['lab']}><span className={styles['badge-ic'] + " " + styles['lc']}>LC</span>LeetCode</span><span className={styles['pf-bar']}><i className={styles['lc']} style={{ width: '100%' }}></i></span><span className={styles['val']}>612</span></div>
-              <div className={styles['pf-row']}><span className={styles['lab']}><span className={styles['badge-ic'] + " " + styles['cf']}>CF</span>Codeforces</span><span className={styles['pf-bar']}><i className={styles['cf']} style={{ width: '56%' }}></i></span><span className={styles['val']}>341</span></div>
-              <div className={styles['pf-row']}><span className={styles['lab']}><span className={styles['badge-ic'] + " " + styles['cc']}>CC</span>CodeChef</span><span className={styles['pf-bar']}><i className={styles['cc']} style={{ width: '30%' }}></i></span><span className={styles['val']}>184</span></div>
-              <div className={styles['pf-row']}><span className={styles['lab']}><span className={styles['badge-ic'] + " " + styles['hr']}>HR</span>HackerRank</span><span className={styles['pf-bar']}><i className={styles['hr']} style={{ width: '18%' }}></i></span><span className={styles['val']}>111</span></div>
+              <div className={styles['pf-row']}><span className={styles['lab']}><PlatformChip platformId="leetcode" size="sm" showName={false} variant="ghost" />LeetCode</span><span className={styles['pf-bar']}><i className={styles['lc']} style={{ width: '100%' }}></i></span><span className={styles['val']}>612</span></div>
+              <div className={styles['pf-row']}><span className={styles['lab']}><PlatformChip platformId="codeforces" size="sm" showName={false} variant="ghost" />Codeforces</span><span className={styles['pf-bar']}><i className={styles['cf']} style={{ width: '56%' }}></i></span><span className={styles['val']}>341</span></div>
+              <div className={styles['pf-row']}><span className={styles['lab']}><PlatformChip platformId="codechef" size="sm" showName={false} variant="ghost" />CodeChef</span><span className={styles['pf-bar']}><i className={styles['cc']} style={{ width: '30%' }}></i></span><span className={styles['val']}>184</span></div>
+              <div className={styles['pf-row']}><span className={styles['lab']}><PlatformChip platformId="hackerrank" size="sm" showName={false} variant="ghost" />HackerRank</span><span className={styles['pf-bar']}><i className={styles['hr']} style={{ width: '18%' }}></i></span><span className={styles['val']}>111</span></div>
             </div>
           </div>
           <div className={styles['card']}>
@@ -177,10 +178,10 @@ export default function Home() {
           <div className={styles['card'] + " " + styles['span2']}>
             <div className={styles['ch']}>Platform breakdown</div>
             <div className={styles['pf']}>
-              <div className={styles['pf-row']}><span className={styles['lab']}><span className={styles['badge-ic'] + " " + styles['lc']}>LC</span>LeetCode</span><span className={styles['pf-bar']}><i className={styles['lc']} style={{ width: '100%' }}></i></span><span className={styles['val']}>612</span></div>
-              <div className={styles['pf-row']}><span className={styles['lab']}><span className={styles['badge-ic'] + " " + styles['cf']}>CF</span>Codeforces</span><span className={styles['pf-bar']}><i className={styles['cf']} style={{ width: '56%' }}></i></span><span className={styles['val']}>341</span></div>
-              <div className={styles['pf-row']}><span className={styles['lab']}><span className={styles['badge-ic'] + " " + styles['cc']}>CC</span>CodeChef</span><span className={styles['pf-bar']}><i className={styles['cc']} style={{ width: '30%' }}></i></span><span className={styles['val']}>184</span></div>
-              <div className={styles['pf-row']}><span className={styles['lab']}><span className={styles['badge-ic'] + " " + styles['hr']}>HR</span>HackerRank</span><span className={styles['pf-bar']}><i className={styles['hr']} style={{ width: '18%' }}></i></span><span className={styles['val']}>111</span></div>
+              <div className={styles['pf-row']}><span className={styles['lab']}><PlatformChip platformId="leetcode" size="sm" showName={false} variant="ghost" />LeetCode</span><span className={styles['pf-bar']}><i className={styles['lc']} style={{ width: '100%' }}></i></span><span className={styles['val']}>612</span></div>
+              <div className={styles['pf-row']}><span className={styles['lab']}><PlatformChip platformId="codeforces" size="sm" showName={false} variant="ghost" />Codeforces</span><span className={styles['pf-bar']}><i className={styles['cf']} style={{ width: '56%' }}></i></span><span className={styles['val']}>341</span></div>
+              <div className={styles['pf-row']}><span className={styles['lab']}><PlatformChip platformId="codechef" size="sm" showName={false} variant="ghost" />CodeChef</span><span className={styles['pf-bar']}><i className={styles['cc']} style={{ width: '30%' }}></i></span><span className={styles['val']}>184</span></div>
+              <div className={styles['pf-row']}><span className={styles['lab']}><PlatformChip platformId="hackerrank" size="sm" showName={false} variant="ghost" />HackerRank</span><span className={styles['pf-bar']}><i className={styles['hr']} style={{ width: '18%' }}></i></span><span className={styles['val']}>111</span></div>
             </div>
           </div>
           

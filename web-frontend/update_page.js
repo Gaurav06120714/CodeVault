@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 const fs = require('fs');
 let pageContent = fs.readFileSync('C:\\Users\\aishw\\OneDrive\\Desktop\\CodeVault\\web-frontend\\src\\app\\page.tsx', 'utf8');
 

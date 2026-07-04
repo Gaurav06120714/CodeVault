@@ -1,0 +1,74 @@
+.chip {
+  display: inline-flex;
+  align-items: center;
+  font-weight: 600;
+  text-decoration: none;
+  transition: 0.15s;
+}
+.chip.default {
+  border: 1px solid var(--border);
+  background: #fff;
+  color: var(--ink-2);
+}
+.chip.default:hover {
+  background: var(--subtle);
+}
+.chip.dark {
+  border: 1px solid rgba(255,255,255,.28);
+  background: rgba(255,255,255,.08);
+  color: #fff;
+}
+.chip.dark:hover {
+  background: rgba(255,255,255,.16);
+  transform: translateY(-1px);
+}
+.chip.ghost {
+  border: none;
+  background: transparent;
+  padding: 0 !important;
+  color: inherit;
+}
+.size-sm {
+  gap: 6px;
+  padding: 4px 8px;
+  font-size: 12px;
+  border-radius: 8px;
+}
+.size-md {
+  gap: 8px;
+  padding: 8px 12px;
+  font-size: 13px;
+  border-radius: 10px;
+}
+.size-lg {
+  gap: 9px;
+  padding: 9px 12px;
+  font-size: 13px;
+  border-radius: 11px;
+}
+.icon {
+  display: inline-grid;
+  place-items: center;
+  color: transparent;
+  font-size: 0;
+  background-color: #fff;
+  background-repeat: no-repeat;
+  background-position: center;
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,.06);
+  flex: none;
+}
+.icon-sm {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+}
+.icon-md {
+  width: 24px;
+  height: 24px;
+  border-radius: 5px;
+}
+.icon-lg {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+}

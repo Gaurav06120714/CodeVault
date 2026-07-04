@@ -29,4 +29,15 @@ export class GithubRepoController {
       res.status(500).json({ error: 'Failed to configure repository' });
     }
   }
+
+  static async getRepos(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = req.user!.userId;
+      const repos = await GithubRepoService.getRepos(userId);
+      res.status(200).json(repos);
+    } catch (error: any) {
+      logger.error(error, 'Get repos error');
+      res.status(500).json({ error: 'Failed to fetch repositories' });
+    }
+  }
 }

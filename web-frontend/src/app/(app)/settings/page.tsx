@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { PlatformChip } from "@/components/PlatformChip";
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -124,7 +125,7 @@ export default function SettingsPage() {
           <h2>Connected platforms</h2>
           <p className="desc">Stats come from public profiles; code sync needs an authorized connection.</p>
           <div className="row">
-            <span className="badge-ic lc">LC</span>
+            <PlatformChip platformId="leetcode" size="sm" showName={false} variant="ghost" />
             <div className="rt">
               <div className="n">LeetCode <span className="st-pill ok">Connected</span></div>
               <div className="m">@{user.githubLogin} · 612 solved</div>
@@ -132,7 +133,7 @@ export default function SettingsPage() {
             <button className="btn danger sm right" type="button">Disconnect</button>
           </div>
           <div className="row">
-            <span className="badge-ic cf">CF</span>
+            <PlatformChip platformId="codeforces" size="sm" showName={false} variant="ghost" />
             <div className="rt">
               <div className="n">Codeforces <span className="st-pill ok">Connected</span></div>
               <div className="m">@{user.githubLogin}_t · 341 solved</div>
@@ -140,7 +141,7 @@ export default function SettingsPage() {
             <button className="btn danger sm right" type="button">Disconnect</button>
           </div>
           <div className="row">
-            <span className="badge-ic cc">CC</span>
+            <PlatformChip platformId="codechef" size="sm" showName={false} variant="ghost" />
             <div className="rt">
               <div className="n">CodeChef <span className="st-pill ok">Connected</span></div>
               <div className="m">@{user.githubLogin}06 · 184 solved</div>
@@ -148,7 +149,7 @@ export default function SettingsPage() {
             <button className="btn danger sm right" type="button">Disconnect</button>
           </div>
           <div className="row">
-            <span className="badge-ic hr">HR</span>
+            <PlatformChip platformId="hackerrank" size="sm" showName={false} variant="ghost" />
             <div className="rt">
               <div className="n">HackerRank <span className="st-pill exp">Session expired</span></div>
               <div className="m">@{user.githubLogin}g · 111 solved</div>

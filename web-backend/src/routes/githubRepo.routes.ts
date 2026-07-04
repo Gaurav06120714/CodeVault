@@ -6,5 +6,6 @@ const router = Router();
 
 router.use(requireAuth);
 router.post('/', GithubRepoController.setupRepo);
+router.get('/', GithubRepoController.getRepos);
 
 export default router;

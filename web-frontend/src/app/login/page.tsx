@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { PlatformChip } from "../../components/PlatformChip";
 
 const GITHUB_CLIENT_ID = process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID || '';
 const REDIRECT_URI = `${typeof window !== 'undefined' ? window.location.origin : ''}/login/callback`;
@@ -51,15 +52,15 @@ export default function Login() {
       <div className="auth-panel">
         <div className="glow2" aria-hidden="true"></div>
         <a className="brand" href="/">
-          <span className="mark">CV</span> CodeVault
+          <span className="mark" role="img" aria-label="CodeVault Logo">CV</span> CodeVault
         </a>
         <h1>Every problem you solve, finally in one place.</h1>
         <p>Connect your coding accounts once. Your stats stay in sync and your accepted solutions land in GitHub automatically.</p>
         <div className="plats">
-          <a href="https://leetcode.com" target="_blank" rel="noopener noreferrer" className="plat"><span className="b lc">LC</span> LeetCode</a>
-          <a href="https://codeforces.com" target="_blank" rel="noopener noreferrer" className="plat"><span className="b cf">CF</span> Codeforces</a>
-          <a href="https://www.codechef.com" target="_blank" rel="noopener noreferrer" className="plat"><span className="b cc">CC</span> CodeChef</a>
-          <a href="https://www.hackerrank.com" target="_blank" rel="noopener noreferrer" className="plat"><span className="b hr">HR</span> HackerRank</a>
+          <PlatformChip platformId="leetcode" variant="dark" size="lg" href="https://leetcode.com" className="plat" />
+          <PlatformChip platformId="codeforces" variant="dark" size="lg" href="https://codeforces.com" className="plat" />
+          <PlatformChip platformId="codechef" variant="dark" size="lg" href="https://www.codechef.com" className="plat" />
+          <PlatformChip platformId="hackerrank" variant="dark" size="lg" href="https://www.hackerrank.com" className="plat" />
         </div>
         <div className="quote">“I had three years of solved problems and nothing to link. Now there's one page that shows all of it.”</div>
       </div>
@@ -68,7 +69,7 @@ export default function Login() {
       <div className="form-side">
         <div className="form">
           <a className="back" href="/">← Back to home</a>
-          <div className="m-brand"><span className="mark">CV</span> CodeVault</div>
+          <div className="m-brand"><span className="mark" role="img" aria-label="CodeVault Logo">CV</span> CodeVault</div>
           <span className="tag">Get started</span>
           <h2>Sign in to CodeVault</h2>
           <div className="sub">We use GitHub so we can sync your solutions to a repository you own — no passwords to manage.</div>

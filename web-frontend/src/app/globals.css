@@ -51,7 +51,7 @@ body {
 /* Base resets */
 *{box-sizing:border-box;margin:0;padding:0}
 a{color:inherit;text-decoration:none}
-:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:8px}
+button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:8px}
 
 /* Button Reset used in multiple places */
 .btn{display:inline-flex;align-items:center;gap:8px;font-family:inherit;font-weight:600;font-size:14.5px;border-radius:10px;border:1px solid transparent;cursor:pointer;padding:11px 18px;transition:.15s;white-space:nowrap}
@@ -105,6 +105,7 @@ svg.ico.sm{width:14px;height:14px}
 .m-brand{display:none;align-items:center;gap:10px;font-weight:700;font-size:17px;margin-bottom:22px}
 .m-brand .mark{background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#fff}
 .side .mark,.m-brand .mark,a.brand .mark{background:url('/codevault-icon.png') center/contain no-repeat;border-radius:0;color:transparent;font-size:0;width:34px;height:34px;display:inline-grid}
+.auth-panel .brand{font-size:20px;font-weight:800;display:inline-flex;align-items:center;gap:10px;color:#fff;text-decoration:none}
 .auth-panel a.brand .mark{background:#fff url('/codevault-icon.png') center/80% no-repeat;color:transparent;font-size:0;width:40px;height:40px;border-radius:11px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.06)}
 .plat .b{width:30px;height:30px;border-radius:8px;display:inline-grid;flex:none}
 .plat{display:flex;align-items:center;gap:9px;padding:9px 12px;border:1px solid rgba(255,255,255,.28);border-radius:11px;background:rgba(255,255,255,.08);color:#fff;font-weight:600;font-size:13px;transition:.14s}
@@ -141,7 +142,7 @@ svg.ico.sm{width:14px;height:14px}
 .lc,.cf,.cc,.hr{color:transparent;font-size:0;background-color:#fff;background-repeat:no-repeat;background-position:center;background-size:82%;box-shadow:inset 0 0 0 1px rgba(0,0,0,.06)}
 .lc{background-image:url('/logos/leetcode.svg')}
 .cf{background-image:url('/logos/codeforces.svg')}
-.cc{background-image:url('/logos/codechef.svg')}
+.cc{background-image:url('/logos/codechef.svg');background-size:100%}
 .hr{background-image:url('/logos/hackerrank.svg')}
 .pchip .h{color:var(--faint);font-weight:500;font-family:var(--mono);font-size:11px}
 .phead .pa{margin-left:auto;position:relative;z-index:2;display:flex;gap:10px}

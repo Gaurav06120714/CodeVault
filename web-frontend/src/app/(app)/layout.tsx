@@ -62,7 +62,7 @@ export default function AppLayout({
       {/* SIDEBAR */}
       <div className="side">
         <Link href="/dashboard" className="brand">
-          <div className="mark">CV</div> CodeVault
+          <div className="mark" role="img" aria-label="CodeVault Logo">CV</div> CodeVault
         </Link>
         <div className="nav">
           <Link href="/dashboard" className={pathname === "/dashboard" ? "active" : ""}>

@@ -52,7 +52,8 @@
   /* nav */
   :global(header).nav{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.8);backdrop-filter:saturate(180%) blur(12px);border-bottom:1px solid var(--border)}
   .nav-in{display:flex;align-items:center;justify-content:space-between;height:64px}
-  .brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:16px;letter-spacing:-.01em}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:16px;letter-spacing:-.01em;padding:6px 12px;border-radius:10px;transition:background 0.15s;}
+  .brand:hover{background:var(--subtle);}
   .mark{width:32px;height:32px;background:url('/codevault-icon.png') center/contain no-repeat;color:transparent;display:grid;place-items:center;font-size:0}
   .nav-links{display:flex;gap:28px}
   .nav-links a{font-size:14.5px;color:var(--muted);font-weight:500}
@@ -120,7 +121,7 @@
   .pf-row .val{text-align:right;color:var(--muted);font-family:var(--mono);font-size:12px}
   .badge-ic{width:18px;height:18px;border-radius:5px;display:grid;place-items:center;color:#fff;font-size:9px;font-weight:800;font-family:var(--mono)}
   .lc,.cf,.cc,.hr{color:transparent;font-size:0;background-color:#fff;background-repeat:no-repeat;background-position:center;background-size:82%;box-shadow:inset 0 0 0 1px rgba(0,0,0,.06)}
-  .lc{background-image:url('/logos/leetcode.svg')}.cf{background-image:url('/logos/codeforces.svg')}.cc{background-image:url('/logos/codechef.svg')}.hr{background-image:url('/logos/hackerrank.svg')}
+  .lc{background-image:url('/logos/leetcode.svg')}.cf{background-image:url('/logos/codeforces.svg')}.cc{background-image:url('/logos/codechef.svg');background-size:100%}.hr{background-image:url('/logos/hackerrank.svg')}
 
   /* difficulty */
   .diff{display:flex;gap:10px}

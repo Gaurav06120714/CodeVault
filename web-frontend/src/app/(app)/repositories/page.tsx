@@ -3,10 +3,13 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { PlatformChip } from "@/components/PlatformChip";
 
 export default function RepositoriesPage() {
   const router = useRouter();
   const [user, setUser] = useState<{ id: string; githubLogin: string; displayName: string | null } | null>(null);
+  const [repos, setRepos] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -22,103 +25,74 @@ export default function RepositoriesPage() {
     } catch (e) {
       console.error("Failed to parse user data", e);
     }
+
+    const fetchRepos = async () => {
+      try {
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
+        const res = await fetch(`${API_URL}/github-repos`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setRepos(data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch repos", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchRepos();
   }, [router]);
 
-  if (!user) {
-    return <div style={{ padding: "40px", textAlign: "center" }}>Loading repositories...</div>;
+  if (isLoading || !user) {
+    return <div style={{ padding: "40px", textAlign: "center", color: "var(--faint)" }}>Loading repositories...</div>;
   }
 
   return (
-    <>
-      <section className="panel">
-        <div className="repohead">
-          <div className="ghmark"><svg viewBox="0 0 24 24"><use href="#ic-github"/></svg></div>
-          <div>
-            <div className="nm">{user.githubLogin} / <a href="#">LeetCodeQuestions</a> <span className="pubpill">Public</span></div>
-            <div className="meta"><span>default branch <b>main</b></span><span>612 files</span><span>last sync 2h ago</span><span>auto-sync on</span></div>
-          </div>
-          <div className="acts">
-            <a className="btn" href={`https://github.com/${user.githubLogin}/LeetCodeQuestions`} target="_blank" rel="noopener noreferrer">Open on GitHub ↗</a>
-            <Link className="btn brand" href="/sync-status">
-              <svg className="ico sm" aria-hidden="true"><use href="#ic-sync"/></svg> Re-sync now
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      <div className="grid g-2">
-        <section className="panel">
-          <h2 className="h">Files <span style={{ fontFamily: "var(--mono)", fontSize: "11px", color: "var(--faint)" }}>LeetCodeQuestions/</span></h2>
-          <div className="fl">
-            <div className="fl-bar">
-              <svg className="ico sm" aria-hidden="true"><use href="#ic-repos"/></svg> main · 612 problems
-            </div>
-            <div className="fl-row" style={{ cursor: "pointer" }}>
-              <span className="nm"><span className="fold">▸</span> 0001 · Two Sum</span>
-              <span className="lang">solution.py</span>
-              <span className="when">3 mo ago</span>
-            </div>
-            <div className="fl-row" style={{ cursor: "pointer" }}>
-              <span className="nm"><span className="fold">▸</span> 0011 · Container With Most Water</span>
-              <span className="lang">solution.cpp</span>
-              <span className="when">3 mo ago</span>
-            </div>
-            <div className="fl-row" style={{ cursor: "pointer" }}>
-              <span className="nm"><span className="fold">▸</span> 0369 · Plus One Linked List</span>
-              <span className="lang">solution.py</span>
-              <span className="when">2h ago</span>
-            </div>
-            <div className="fl-row" style={{ cursor: "pointer" }}>
-              <span className="nm"><span className="fold">▸</span> 0704 · Binary Search</span>
-              <span className="lang">solution.java</span>
-              <span className="when">2d ago</span>
-            </div>
-            <div className="fl-row" style={{ cursor: "pointer" }}>
-              <span className="nm"><span className="fold">▸</span> 1143 · Longest Common Subsequence</span>
-              <span className="lang">solution.cpp</span>
-              <span className="when">1w ago</span>
-            </div>
-            <div className="fl-row" style={{ cursor: "pointer" }}>
-              <span className="nm">README.md</span>
-              <span className="lang" style={{ background: "var(--brand-soft)", color: "var(--brand-d)" }}>index</span>
-              <span className="when">2h ago</span>
-            </div>
-          </div>
+    <div style={{ maxWidth: 800, margin: "0 auto" }}>
+      <h1 className="h" style={{ fontSize: 24, marginBottom: 24 }}>Connected Repositories</h1>
+      
+      {repos.length === 0 ? (
+        <section className="panel" style={{ textAlign: "center", padding: "60px 20px" }}>
+          <svg className="ico" style={{ width: 48, height: 48, opacity: 0.2, marginBottom: 16 }} aria-hidden="true"><use href="#ic-github"/></svg>
+          <p style={{ color: "var(--muted)", marginBottom: 20 }}>You have not connected any platforms for code syncing yet.</p>
+          <Link href="/connect" className="btn brand" style={{ display: "inline-flex" }}>Connect a Platform</Link>
         </section>
+      ) : (
+        repos.map((repo) => (
+          <section className="panel" key={repo.platform} style={{ marginBottom: 24 }}>
+            <div className="repohead">
+              <div className="ghmark"><svg viewBox="0 0 24 24"><use href="#ic-github"/></svg></div>
+              <div>
+                <div className="nm">
+                  <span style={{ marginRight: 8, display: 'inline-flex', verticalAlign: 'middle' }}>
+                    <PlatformChip platformId={repo.platform} size="sm" showName={false} variant="ghost" />
+                  </span>
+                  {user.githubLogin} / <a href={`https://github.com/${user.githubLogin}/${repo.repoFullName}`} target="_blank" rel="noopener noreferrer">{repo.repoFullName}</a> 
+                  <span className="pubpill" style={{ textTransform: 'capitalize' }}>{repo.visibility}</span>
+                </div>
+                <div className="meta">
+                  <span>default branch <b>{repo.defaultBranch}</b></span>
+                  <span>folder format: <b>{repo.folderConvention}</b></span>
+                  <span>auto-sync on</span>
+                </div>
+              </div>
+              <div className="acts">
+                <a className="btn" href={`https://github.com/${user.githubLogin}/${repo.repoFullName}`} target="_blank" rel="noopener noreferrer">Open on GitHub ↗</a>
+                <Link className="btn brand" href="/sync-status">
+                  <svg className="ico sm" aria-hidden="true"><use href="#ic-sync"/></svg> Re-sync now
+                </Link>
+              </div>
+            </div>
 
-        <section className="panel">
-          <h2 className="h">Recent commits</h2>
-          <div className="commits">
-            <div className="commit"><span className="sha">a1f3c9</span><span className="msg">Add 0369 · Plus One Linked List</span><span className="when">2h</span></div>
-            <div className="commit"><span className="sha">7b2e10</span><span className="msg">Update README index (612 problems)</span><span className="when">2h</span></div>
-            <div className="commit"><span className="sha">c98da4</span><span className="msg">Add 0704 · Binary Search</span><span className="when">2d</span></div>
-            <div className="commit"><span className="sha">3de5f0</span><span className="msg">Add 1143 · Longest Common Subsequence</span><span className="when">1w</span></div>
-            <div className="commit"><span className="sha">e4419b</span><span className="msg">Add 0011 · Container With Most Water</span><span className="when">3mo</span></div>
-          </div>
-        </section>
-      </div>
-
-      <section className="panel">
-        <h2 className="h">Repository mapping <span style={{ fontWeight: 500, color: "var(--faint)", fontSize: "12px" }}>one repo per platform</span></h2>
-        <div className="map">
-          <div className="map-row">
-            <span className="badge-ic lc">LC</span> LeetCode <span className="arrow">→</span> <span className="repo">LeetCodeQuestions</span>
-            <Link className="btn" href="/settings">Configure</Link>
-          </div>
-          <div className="map-row">
-            <span className="badge-ic cf">CF</span> Codeforces <span className="arrow">→</span> <span className="repo">CodeforcesSolutions</span>
-            <Link className="btn" href="/settings">Configure</Link>
-          </div>
-          <div className="map-row">
-            <span className="badge-ic cc">CC</span> CodeChef <span className="arrow">→</span> <span className="repo">CodeChef-Solutions</span>
-            <Link className="btn" href="/settings">Configure</Link>
-          </div>
-          <div className="map-row">
-            <span className="badge-ic hr">HR</span> HackerRank <span className="arrow">→</span> <span className="repo">HackerRank</span>
-            <Link className="btn" href="/settings">Configure</Link>
-          </div>
-        </div>
-      </section>
-    </>
+            <div style={{ marginTop: 24, padding: "30px 20px", background: "var(--paper)", border: "1px dashed var(--border-2)", borderRadius: 8, textAlign: "center", color: "var(--muted)" }}>
+              <p style={{ fontSize: 14 }}>No files synced yet. CodeVault will automatically push your first accepted solution here.</p>
+            </div>
+          </section>
+        ))
+      )}
+    </div>
   );
 }

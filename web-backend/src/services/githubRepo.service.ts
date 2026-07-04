@@ -37,4 +37,16 @@ export class GithubRepoService {
       throw error;
     }
   }
+
+  static async getRepos(userId: string) {
+    try {
+      const repos = await prisma.githubRepo.findMany({
+        where: { userId }
+      });
+      return repos;
+    } catch (error: any) {
+      logger.error({ err: error.message }, 'Failed to fetch repos');
+      throw error;
+    }
+  }
 }

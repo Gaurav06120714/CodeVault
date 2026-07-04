@@ -6,7 +6,8 @@ import { useRouter } from "next/navigation";
 export default function AnalyticsPage() {
   const router = useRouter();
   const [user, setUser] = useState<{ id: string; githubLogin: string; displayName: string | null } | null>(null);
-  const [activePlatform, setActivePlatform] = useState("All");
+  const [stats, setStats] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -22,154 +23,252 @@ export default function AnalyticsPage() {
     } catch (e) {
       console.error("Failed to parse user data", e);
     }
+
+    const fetchStats = async () => {
+      try {
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
+        const res = await fetch(`${API_URL}/stats`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        
+        if (res.ok) {
+          const data = await res.json();
+          setStats(data);
+        } else if (res.status === 404) {
+          router.push("/connect");
+        }
+      } catch (err) {
+        console.error("Failed to fetch stats", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchStats();
   }, [router]);
 
-  if (!user) {
-    return <div style={{ padding: "40px", textAlign: "center" }}>Loading analytics...</div>;
+  if (isLoading || !user || !stats) {
+    return <div style={{ padding: "40px", textAlign: "center", color: "var(--faint)" }}>Loading deep analytics...</div>;
   }
+
+  // --- MERGE DEEP DATA ---
+  const mergedLanguages: Record<string, number> = {};
+  const mergedTopics: Record<string, number> = {};
+  const monthlyCounts: Record<string, number> = {};
+
+  Object.values(stats.platforms || {}).forEach((p: any) => {
+    // Merge Languages
+    if (p.languages) {
+      if (Array.isArray(p.languages)) { // LeetCode format: [{ languageName, problemsSolved }]
+        p.languages.forEach((l: any) => {
+          mergedLanguages[l.languageName] = (mergedLanguages[l.languageName] || 0) + l.problemsSolved;
+        });
+      } else { // Codeforces format: { "C++": 10 }
+        Object.entries(p.languages).forEach(([l, c]) => {
+          mergedLanguages[l] = (mergedLanguages[l] || 0) + (c as number);
+        });
+      }
+    }
+    
+    // Merge Topics
+    if (p.topics) {
+      if (p.topics.advanced) { // LeetCode format: { advanced: [{ tagName, problemsSolved }] }
+        const mergeArr = (arr: any[]) => {
+          arr.forEach(t => { mergedTopics[t.tagName] = (mergedTopics[t.tagName] || 0) + t.problemsSolved; });
+        };
+        if (p.topics.advanced) mergeArr(p.topics.advanced);
+        if (p.topics.intermediate) mergeArr(p.topics.intermediate);
+        if (p.topics.fundamental) mergeArr(p.topics.fundamental);
+      } else { // Codeforces format: { "math": 5 }
+        Object.entries(p.topics).forEach(([t, c]) => {
+          // Capitalize codeforces tags
+          const tag = t.charAt(0).toUpperCase() + t.slice(1);
+          mergedTopics[tag] = (mergedTopics[tag] || 0) + (c as number);
+        });
+      }
+    }
+    
+    // Merge Heatmap into Monthly
+    if (p.heatmap) {
+      const pHeatmap = typeof p.heatmap === 'string' ? JSON.parse(p.heatmap) : p.heatmap;
+      Object.entries(pHeatmap).forEach(([ts, count]) => {
+        const d = new Date(parseInt(ts) * 1000);
+        const monthKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+        monthlyCounts[monthKey] = (monthlyCounts[monthKey] || 0) + (count as number);
+      });
+    }
+  });
+
+  // Sort Languages
+  const sortedLanguages = Object.entries(mergedLanguages)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 6);
+  const topLangCount = sortedLanguages[0]?.[1] || 1;
+
+  // Sort Topics
+  const sortedTopics = Object.entries(mergedTopics)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 8);
+  const topTopicCount = sortedTopics[0]?.[1] || 1;
+
+  // Process Monthly Chart (last 6 months)
+  const monthBars = [];
+  const today = new Date();
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
+    const mKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    const mName = d.toLocaleString('default', { month: 'short' });
+    monthBars.push({ name: mName, count: monthlyCounts[mKey] || 0 });
+  }
+  const maxMonth = Math.max(1, ...monthBars.map(m => m.count));
+
+  // Process Codeforces Sparkline
+  let cfPeak = 0;
+  let cfPoints = "";
+  let cfLastRating = 0;
+  const cfRatingHist = stats.platforms?.codeforces?.ratingHistory || [];
+  if (cfRatingHist.length > 0) {
+    // Normalize to 320x95 box
+    const ratings = cfRatingHist.map((r: any) => r.newRating);
+    cfPeak = Math.max(...ratings);
+    const minR = Math.min(...ratings, 1000);
+    const maxR = Math.max(cfPeak, 2000);
+    const range = maxR - minR;
+    
+    // Take last 10 contests
+    const recentHist = cfRatingHist.slice(-10);
+    const step = 320 / Math.max(1, recentHist.length - 1);
+    
+    cfPoints = recentHist.map((r: any, i: number) => {
+      const x = i * step;
+      const y = 95 - ((r.newRating - minR) / range) * 80; // keep in top part
+      return `${x},${y}`;
+    }).join(" L");
+    
+    cfLastRating = recentHist[recentHist.length - 1].newRating;
+  }
+
+  const colors = ["var(--brand)", "var(--amber)", "var(--rose)", "#8a8378", "#1f8acb", "#1aa260"];
 
   return (
     <>
       <div className="filters">
-        <div className="seg" role="tablist" aria-label="Platform filter">
-          {["All", "LeetCode", "Codeforces", "CodeChef", "HackerRank"].map((plat) => (
-            <button
-              key={plat}
-              type="button"
-              className={activePlatform === plat ? "on" : ""}
-              onClick={() => setActivePlatform(plat)}
-            >
-              {plat}
-            </button>
-          ))}
+        <div className="seg" role="tablist">
+          <button type="button" className="on">All Platforms</button>
         </div>
-        <span className="spacer"></span>
-        <select aria-label="Time range">
-          <option>Last 12 months</option>
-          <option>Last 6 months</option>
-          <option>All time</option>
-        </select>
       </div>
 
       <section className="stats" aria-label="Headline analytics">
         <div className="stat">
-          <div className="l">Acceptance rate</div>
-          <div className="n">71.4%</div>
-          <div className="d">1,248 AC / 1,748 tries</div>
+          <div className="l">Total solved</div>
+          <div className="n">{stats?.totalSolved?.toLocaleString() || "0"}</div>
+          <div className="d">across all platforms</div>
         </div>
-        <div className="stat">
-          <div className="l">Avg. problems / day</div>
-          <div className="n">3.4</div>
-          <div className="d">last 90 days</div>
-        </div>
-        <div className="stat">
-          <div className="l">Active days</div>
-          <div className="n">284</div>
-          <div className="d">of last 365</div>
-        </div>
-        <div className="stat">
-          <div className="l">Best CF rating</div>
-          <div className="n">1,711</div>
-          <div className="d">current 1,623</div>
-        </div>
+        {cfRatingHist.length > 0 && (
+          <div className="stat">
+            <div className="l">CF Rating</div>
+            <div className="n">{cfLastRating.toLocaleString()}</div>
+            <div className="d pink">Peak {cfPeak.toLocaleString()}</div>
+          </div>
+        )}
       </section>
 
       <section className="panel">
-        <h2 className="h">Problems solved per month <span className="tag">2025–2026</span></h2>
+        <h2 className="h">Submissions per month <span className="tag">last 6 months</span></h2>
         <div className="mbars">
-          {[
-            { m: "Jul", v: 42, h: "30%" },
-            { m: "Aug", v: 55, h: "38%" },
-            { m: "Sep", v: 67, h: "46%" },
-            { m: "Oct", v: 58, h: "40%" },
-            { m: "Nov", v: 80, h: "55%" },
-            { m: "Dec", v: 91, h: "62%" },
-            { m: "Jan", v: 104, h: "72%" },
-            { m: "Feb", v: 96, h: "66%" },
-            { m: "Mar", v: 112, h: "78%" },
-            { m: "Apr", v: 121, h: "84%" },
-            { m: "May", v: 133, h: "92%" },
-            { m: "Jun", v: 147, h: "100%" },
-          ].map((bar) => (
-            <div key={bar.m} className="col">
-              <div className="bar" style={{ height: bar.h }}>
-                <span>{bar.v}</span>
+          {monthBars.map((bar, i) => {
+            const h = Math.max(5, (bar.count / maxMonth) * 100);
+            return (
+              <div key={i} className="col" style={{ flex: 1, minWidth: 40 }}>
+                <div className="bar" style={{ height: `${h}%` }}>
+                  <span>{bar.count}</span>
+                </div>
+                <div className="lbl">{bar.name}</div>
               </div>
-              <div className="lbl">{bar.m}</div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </section>
 
       <div className="grid g-2">
         <section className="panel">
-          <h2 className="h">Difficulty mix</h2>
-          <div className="ringwrap">
-            <div className="ring" role="img" aria-label="540 Easy, 560 Medium, 148 Hard">
-              <div className="rc"><b>1,248</b><span>solved</span></div>
+          <h2 className="h">Difficulty mix <span className="tag">LeetCode</span></h2>
+          {stats?.platforms?.leetcode ? (
+            <div className="ringwrap">
+              <div className="ring" role="img" aria-label="Difficulty breakdown">
+                <div className="rc"><b>{stats.platforms.leetcode.total?.toLocaleString() || "0"}</b><span>solved</span></div>
+              </div>
+              <div className="rleg">
+                <div className="r"><span className="sw e"></span> Easy <span className="v">{stats.platforms.leetcode.easy || 0}</span></div>
+                <div className="r"><span className="sw m"></span> Medium <span className="v">{stats.platforms.leetcode.medium || 0}</span></div>
+                <div className="r"><span className="sw h"></span> Hard <span className="v">{stats.platforms.leetcode.hard || 0}</span></div>
+              </div>
             </div>
-            <div className="rleg">
-              <div className="r"><span className="sw e"></span> Easy <span className="v">540 · 43%</span></div>
-              <div className="r"><span className="sw m"></span> Medium <span className="v">560 · 45%</span></div>
-              <div className="r"><span className="sw h"></span> Hard <span className="v">148 · 12%</span></div>
-            </div>
-          </div>
+          ) : (
+            <div style={{ padding: 40, textAlign: 'center', color: 'var(--muted)' }}>No LeetCode data.</div>
+          )}
         </section>
 
         <section className="panel">
           <h2 className="h">Languages used</h2>
-          <div className="hb">
-            <div className="hb-row">
-              <span className="lab"><span className="dot" style={{ background: "var(--brand)" }}></span>Python</span>
-              <span className="hb-bar"><i style={{ width: "100%", background: "var(--brand)" }}></i></span>
-              <span className="v">540</span>
+          {sortedLanguages.length === 0 ? (
+            <div style={{ padding: 40, textAlign: 'center', color: 'var(--muted)' }}>No language data found.</div>
+          ) : (
+            <div className="hb">
+              {sortedLanguages.map(([lang, count], i) => {
+                const color = colors[i % colors.length];
+                const width = (count / topLangCount) * 100;
+                return (
+                  <div className="hb-row" key={lang}>
+                    <span className="lab"><span className="dot" style={{ background: color }}></span>{lang}</span>
+                    <span className="hb-bar"><i style={{ width: `${width}%`, background: color }}></i></span>
+                    <span className="v">{count}</span>
+                  </div>
+                );
+              })}
             </div>
-            <div className="hb-row">
-              <span className="lab"><span className="dot" style={{ background: "var(--amber)" }}></span>C++</span>
-              <span className="hb-bar"><i style={{ width: "76%", background: "var(--amber)" }}></i></span>
-              <span className="v">410</span>
-            </div>
-            <div className="hb-row">
-              <span className="lab"><span className="dot" style={{ background: "var(--rose)" }}></span>Java</span>
-              <span className="hb-bar"><i style={{ width: "37%", background: "var(--rose)" }}></i></span>
-              <span className="v">198</span>
-            </div>
-            <div className="hb-row">
-              <span className="lab"><span className="dot" style={{ background: "#8a8378" }}></span>JavaScript</span>
-              <span className="hb-bar"><i style={{ width: "18%", background: "#8a8378" }}></i></span>
-              <span className="v">100</span>
-            </div>
-          </div>
+          )}
         </section>
       </div>
 
       <div className="grid g-2">
         <section className="panel">
           <h2 className="h">Topic distribution</h2>
-          <div className="hb">
-            <div className="hb-row"><span className="lab">Arrays</span><span className="hb-bar"><i style={{ width: "100%", background: "var(--brand)" }}></i></span><span className="v">210</span></div>
-            <div className="hb-row"><span className="lab">Dynamic Prog.</span><span className="hb-bar"><i style={{ width: "68%", background: "var(--brand)" }}></i></span><span className="v">142</span></div>
-            <div className="hb-row"><span className="lab">Graphs</span><span className="hb-bar"><i style={{ width: "56%", background: "var(--amber)" }}></i></span><span className="v">118</span></div>
-            <div className="hb-row"><span className="lab">Trees</span><span className="hb-bar"><i style={{ width: "46%", background: "var(--amber)" }}></i></span><span className="v">96</span></div>
-            <div className="hb-row"><span className="lab">Greedy</span><span className="hb-bar"><i style={{ width: "40%", background: "var(--rose)" }}></i></span><span className="v">84</span></div>
-            <div className="hb-row"><span className="lab">Binary Search</span><span className="hb-bar"><i style={{ width: "34%", background: "var(--rose)" }}></i></span><span className="v">71</span></div>
-          </div>
+          {sortedTopics.length === 0 ? (
+            <div style={{ padding: 40, textAlign: 'center', color: 'var(--muted)' }}>No topic data found.</div>
+          ) : (
+            <div className="hb">
+              {sortedTopics.map(([topic, count], i) => {
+                const color = colors[i % colors.length];
+                const width = (count / topTopicCount) * 100;
+                return (
+                  <div className="hb-row" key={topic}>
+                    <span className="lab">{topic}</span>
+                    <span className="hb-bar"><i style={{ width: `${width}%`, background: color }}></i></span>
+                    <span className="v">{count}</span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </section>
 
-        <section className="panel">
-          <h2 className="h">Codeforces rating <span className="tag">peak 1,711</span></h2>
-          <svg className="spark" viewBox="0 0 320 120" preserveAspectRatio="none" role="img" aria-label="Codeforces rating trend rising to 1623">
-            <defs>
-              <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0" stopColor="#f1543f" stopOpacity="0.25"/>
-                <stop offset="1" stopColor="#f1543f" stopOpacity="0"/>
-              </linearGradient>
-            </defs>
-            <path d="M0,95 L40,88 L80,92 L120,70 L160,74 L200,52 L240,40 L280,46 L320,28 L320,120 L0,120 Z" fill="url(#g)"/>
-            <path d="M0,95 L40,88 L80,92 L120,70 L160,74 L200,52 L240,40 L280,46 L320,28" fill="none" stroke="#f1543f" strokeWidth="2.5" strokeLinejoin="round"/>
-            <circle cx="320" cy="28" r="3.5" fill="#f1543f"/>
-          </svg>
-        </section>
+        {cfRatingHist.length > 0 && (
+          <section className="panel">
+            <h2 className="h">Codeforces rating <span className="tag">peak {cfPeak}</span></h2>
+            <svg className="spark" viewBox="0 0 320 120" preserveAspectRatio="none" role="img">
+              <defs>
+                <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stopColor="#f1543f" stopOpacity="0.25"/>
+                  <stop offset="1" stopColor="#f1543f" stopOpacity="0"/>
+                </linearGradient>
+              </defs>
+              <path d={`M0,95 L${cfPoints} L320,120 L0,120 Z`} fill="url(#g)"/>
+              <path d={`M0,95 L${cfPoints}`} fill="none" stroke="#f1543f" strokeWidth="2.5" strokeLinejoin="round"/>
+              <circle cx="320" cy={cfPoints.split(' ').pop()?.split(',')[1] || "28"} r="3.5" fill="#f1543f"/>
+            </svg>
+          </section>
+        )}
       </div>
     </>
   );
