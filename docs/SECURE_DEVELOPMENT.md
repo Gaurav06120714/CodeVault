@@ -100,3 +100,15 @@ A focused deployment checklist. For infrastructure and pipeline detail, see [INF
 ## 5. References
 - [SECURITY_PLAN.md](SECURITY_PLAN.md) · [BACKEND_SECURITY.md](BACKEND_SECURITY.md) · [AUTH_SECURITY.md](AUTH_SECURITY.md) · [API_SECURITY.md](API_SECURITY.md) · [DATABASE_SECURITY.md](DATABASE_SECURITY.md) · [SECRETS.md](SECRETS.md) · [DEVSECOPS.md](DEVSECOPS.md) · [INFRASTRUCTURE_SECURITY.md](INFRASTRUCTURE_SECURITY.md) · [CLOUD_SECURITY.md](CLOUD_SECURITY.md) · [FILE_UPLOAD_SECURITY.md](FILE_UPLOAD_SECURITY.md)
 - Service setup: [../web-frontend/README.md](../web-frontend/README.md) · [../web-backend/README.md](../web-backend/README.md) · [../git-service/README.md](../git-service/README.md)
+
+
+---
+
+## ✅ Completion checklist
+
+> Area status at a glance. Full per-feature done / partial / pending tracking lives in **[PROGRESS.md](PROGRESS.md)**.
+
+- [x] Designed & documented (this file)
+- [ ] Implemented in code — see [PROGRESS.md](PROGRESS.md) for this area's exact status
+- [ ] Tested / verified
+- [ ] Production-hardened (pre-launch items tracked in [`../CERTIFICATES_BEFORE_LAUNCH/`](../CERTIFICATES_BEFORE_LAUNCH/))
