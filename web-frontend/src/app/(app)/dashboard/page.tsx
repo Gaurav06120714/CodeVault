@@ -171,6 +171,17 @@ export default function DashboardPage() {
             <div className="d">problems solved</div>
           </div>
         )}
+        {stats?.platforms?.codechef?.rating && (
+          <div className="stat">
+            <div className="l"><PlatformChip platformId="codechef" size="sm" showName={false} variant="ghost" /> CodeChef Rating</div>
+            <div className="n">{stats.platforms.codechef.rating.toLocaleString()}</div>
+            <div className="d">
+              <span style={{ color: "#e8a200" }}>{"★".repeat(stats.platforms.codechef.stars || 0)}</span>
+              {stats.platforms.codechef.highestRating ? ` · peak ${stats.platforms.codechef.highestRating}` : ""}
+              {stats.platforms.codechef.globalRank ? ` · #${stats.platforms.codechef.globalRank.toLocaleString()} global` : ""}
+            </div>
+          </div>
+        )}
         {stats?.platforms?.hackerrank && (
           <div className="stat">
             <div className="l"><PlatformChip platformId="hackerrank" size="sm" showName={false} variant="ghost" /> HackerRank</div>
