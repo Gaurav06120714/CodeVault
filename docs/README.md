@@ -16,8 +16,11 @@
 | Doc | What it covers |
 |-----|----------------|
 | [FEATURES.md](FEATURES.md) | **Full feature catalog** — every feature, its real build status (✅/🟠/⛔), owner, and code location. |
+| [PROGRESS.md](PROGRESS.md) | **Progress checklist** — what's done / partial / pending, with % per area, verified against code. |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | System topology, layers, request/data lifecycles, the two data paths. |
 | [ROADMAP.md](ROADMAP.md) | Consolidated M0–M6 milestones. |
+| [FUTURE_IMPLEMENTATION_TASKS.md](FUTURE_IMPLEMENTATION_TASKS.md) | Forward task list (reconciled with what's already built). |
+| [PROJECT_ANALYSIS.md](PROJECT_ANALYSIS.md) | Market/strengths/risks analysis + strategic next steps. |
 | [TEAM_PLAN.md](TEAM_PLAN.md) | Ownership split (Aishwarya ↔ Gaurav) and git workflow. |
 | [TECH_STACK.md](TECH_STACK.md) | Canonical stack + versions and upgrade rationale. |
 | [FAQ.md](FAQ.md) | Common questions about the product and approach. |
