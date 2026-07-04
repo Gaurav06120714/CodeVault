@@ -291,3 +291,15 @@ Alert fires ─▶ on-call notified (PagerDuty) ─▶ acknowledge within 15 min
 - [ ] Runbooks written and linked in alert definitions
 - [ ] Uptime synthetic checks on `/health` (every 1 min from 3 regions)
 - [ ] Log retention policies set; audit logs 1-year retention
+
+
+---
+
+## ✅ Completion checklist
+
+> Area status at a glance. Full per-feature done / partial / pending tracking lives in **[PROGRESS.md](PROGRESS.md)**.
+
+- [x] Designed & documented (this file)
+- [ ] Implemented in code — see [PROGRESS.md](PROGRESS.md) for this area's exact status
+- [ ] Tested / verified
+- [ ] Production-hardened (pre-launch items tracked in [`../CERTIFICATES_BEFORE_LAUNCH/`](../CERTIFICATES_BEFORE_LAUNCH/))
