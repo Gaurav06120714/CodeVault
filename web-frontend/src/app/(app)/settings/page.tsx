@@ -11,6 +11,52 @@ export default function SettingsPage() {
   const [activeSection, setActiveSection] = useState("account");
   const [activeTheme, setActiveTheme] = useState("Light");
 
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api";
+  const PLATFORMS_LIST = [
+    { id: "leetcode", name: "LeetCode" },
+    { id: "codeforces", name: "Codeforces" },
+    { id: "codechef", name: "CodeChef" },
+    { id: "hackerrank", name: "HackerRank" },
+  ];
+  // platform -> repo full name (owner/name), loaded from and saved to /api/github-repos
+  const [repos, setRepos] = useState<Record<string, string>>({});
+  const [repoStatus, setRepoStatus] = useState<Record<string, string>>({});
+
+  // Load existing per-platform repo mappings.
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+    fetch(`${API_URL}/github-repos`, { headers: { Authorization: `Bearer ${token}` } })
+      .then((r) => (r.ok ? r.json() : []))
+      .then((rows: Array<{ platform: string; repoFullName: string }>) => {
+        const map: Record<string, string> = {};
+        (rows || []).forEach((row) => { map[row.platform] = row.repoFullName; });
+        setRepos(map);
+      })
+      .catch(() => {});
+  }, [API_URL]);
+
+  // Save (upsert) one platform's repo link.
+  const saveRepo = async (platform: string) => {
+    const token = localStorage.getItem("token");
+    const repoFullName = (repos[platform] || "").trim();
+    if (!token || !/^[\w.-]+\/[\w.-]+$/.test(repoFullName)) {
+      setRepoStatus((s) => ({ ...s, [platform]: "error" }));
+      return;
+    }
+    setRepoStatus((s) => ({ ...s, [platform]: "saving" }));
+    try {
+      const res = await fetch(`${API_URL}/github-repos`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ platform, repoFullName }),
+      });
+      setRepoStatus((s) => ({ ...s, [platform]: res.ok ? "saved" : "error" }));
+    } catch {
+      setRepoStatus((s) => ({ ...s, [platform]: "error" }));
+    }
+  };
+
   useEffect(() => {
     const token = localStorage.getItem("token");
     const storedUser = localStorage.getItem("user");
@@ -176,12 +222,38 @@ export default function SettingsPage() {
             <button className="btn danger sm right" type="button">Disconnect</button>
           </div>
           <div className="field" style={{ marginTop: "14px" }}>
-            <label className="fl" htmlFor="repo">Target repository</label>
-            <select id="repo">
-              <option>{user.githubLogin}/LeetCodeQuestions</option>
-              <option>{user.githubLogin}/CodeforcesSolutions</option>
-              <option>+ Create new repository…</option>
-            </select>
+            <label className="fl">Target repository per platform</label>
+            <p className="m" style={{ marginBottom: 12 }}>
+              Paste the GitHub repo (<code>owner/name</code>) where each platform&apos;s accepted solutions get pushed. Each platform can have its own repo.
+            </p>
+            {PLATFORMS_LIST.map((p) => (
+              <div key={p.id} style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10, flexWrap: "wrap" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 140 }}>
+                  <PlatformChip platformId={p.id} size="sm" showName={false} variant="ghost" />
+                  <span style={{ fontWeight: 600 }}>{p.name}</span>
+                </div>
+                <input
+                  className="txt"
+                  aria-label={`${p.name} repository`}
+                  placeholder={`${user.githubLogin}/${p.id}-solutions`}
+                  value={repos[p.id] || ""}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    setRepos((r) => ({ ...r, [p.id]: v }));
+                    setRepoStatus((s) => ({ ...s, [p.id]: "" }));
+                  }}
+                  style={{ flex: 1, minWidth: 200 }}
+                />
+                <button className="btn brand sm" type="button" onClick={() => saveRepo(p.id)}>
+                  {repoStatus[p.id] === "saving" ? "Saving…" : repoStatus[p.id] === "saved" ? "Saved ✓" : "Save"}
+                </button>
+                {repoStatus[p.id] === "error" && (
+                  <span style={{ color: "var(--brand-d)", fontSize: 12, fontWeight: 600, flexBasis: "100%" }}>
+                    Enter a valid <code>owner/name</code> repo.
+                  </span>
+                )}
+              </div>
+            ))}
           </div>
           <div className="two">
             <div className="field">
