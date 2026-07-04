@@ -43,3 +43,15 @@ This document addresses common questions regarding CodeVault's architecture, aut
   * **`web-backend`** handles user sessions, platform connections, and analytics stats.
   * **`git-service`** consumes those connection credentials to fetch submissions and push them to GitHub.
   * Isolation ensures that if the background sync worker experiences load or crashes, it never brings down the main user dashboard or API server.
+
+
+---
+
+## ✅ Completion checklist
+
+> Area status at a glance. Full per-feature done / partial / pending tracking lives in **[PROGRESS.md](PROGRESS.md)**.
+
+- [x] Designed & documented (this file)
+- [ ] Implemented in code — see [PROGRESS.md](PROGRESS.md) for this area's exact status
+- [ ] Tested / verified
+- [ ] Production-hardened (pre-launch items tracked in [`../CERTIFICATES_BEFORE_LAUNCH/`](../CERTIFICATES_BEFORE_LAUNCH/))
