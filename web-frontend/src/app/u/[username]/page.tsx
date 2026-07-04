@@ -1,13 +1,49 @@
 "use client";
 
-import React, { useState, use, useMemo } from "react";
+import React, { useState, use, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { PlatformChip } from "@/components/PlatformChip";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api";
+
+type PlatformStat = { total?: number; easy?: number; medium?: number; hard?: number; rating?: number };
+type PublicData = {
+  user?: { handle?: string; displayName?: string | null; avatarUrl?: string | null };
+  stats?: { totalSolved?: number; platforms?: Record<string, PlatformStat> };
+};
+
+const PLATFORM_META: { id: string; name: string; color: string }[] = [
+  { id: "leetcode", name: "LeetCode", color: "#ffa116" },
+  { id: "codeforces", name: "Codeforces", color: "#1f8acb" },
+  { id: "codechef", name: "CodeChef", color: "#7a5230" },
+  { id: "hackerrank", name: "HackerRank", color: "#1aa260" },
+];
+
+const fmt = (n: number | undefined | null) => (typeof n === "number" ? n.toLocaleString() : "—");
 
 export default function PublicProfileView({ params }: { params: Promise<{ username: string }> }) {
   const resolvedParams = use(params);
   const username = resolvedParams.username || "gaurav";
   const [copied, setCopied] = useState(false);
+  const [data, setData] = useState<PublicData | null>(null);
+
+  // Fetch the public profile (no auth) from web-backend.
+  useEffect(() => {
+    let alive = true;
+    fetch(`${API_URL}/public/${username}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => { if (alive) setData(d); })
+      .catch(() => {});
+    return () => { alive = false; };
+  }, [username]);
+
+  const platforms = data?.stats?.platforms || {};
+  const lc = platforms.leetcode;
+  const totalSolved = data?.stats?.totalSolved;
+  const platformCount = Object.keys(platforms).length;
+  const hardSolved = lc?.hard;
+  const maxTotal = Math.max(1, ...PLATFORM_META.map((p) => platforms[p.id]?.total || 0));
+  const displayName = data?.user?.displayName || username;
 
   const heatmapCells = useMemo(() => {
     // Generate heatmap cells
@@ -58,13 +94,14 @@ export default function PublicProfileView({ params }: { params: Promise<{ userna
         <section className="phead" style={{ padding: "26px", borderRadius: "18px" }}>
           <div className="pav" style={{ width: "80px", height: "80px", borderRadius: "20px", fontSize: "34px" }}>{initial}</div>
           <div className="pid">
-            <h1 style={{ fontSize: "24px" }}>{username}</h1>
+            <h1 style={{ fontSize: "24px" }}>{displayName}</h1>
             <div className="ln">codevault.dev/u/{username}</div>
             <div className="chips" style={{ marginTop: "12px" }}>
-              <span className="pchip"><PlatformChip platformId="leetcode" size="sm" showName={false} variant="ghost" /> @{username}</span>
-              <span className="pchip"><PlatformChip platformId="codeforces" size="sm" showName={false} variant="ghost" /> @{username}_t</span>
-              <span className="pchip"><PlatformChip platformId="codechef" size="sm" showName={false} variant="ghost" /> @{username}06</span>
-              <span className="pchip"><PlatformChip platformId="hackerrank" size="sm" showName={false} variant="ghost" /> @{username}g</span>
+              {PLATFORM_META.filter((p) => platforms[p.id]).map((p) => (
+                <span className="pchip" key={p.id}>
+                  <PlatformChip platformId={p.id} size="sm" showName={false} variant="ghost" /> {p.name}
+                </span>
+              ))}
             </div>
           </div>
           <div className="pa">
@@ -76,23 +113,23 @@ export default function PublicProfileView({ params }: { params: Promise<{ userna
         </section>
 
         <section className="stats">
-          <div className="stat"><div className="n">1,248</div><div className="l">Total solved</div></div>
-          <div className="stat"><div className="n">4</div><div className="l">Platforms</div></div>
-          <div className="stat"><div className="n">148</div><div className="l">Hard solved</div></div>
-          <div className="stat"><div className="n">89</div><div className="l">Best streak</div></div>
+          <div className="stat"><div className="n">{fmt(totalSolved)}</div><div className="l">Total solved</div></div>
+          <div className="stat"><div className="n">{data ? platformCount : "—"}</div><div className="l">Platforms</div></div>
+          <div className="stat"><div className="n">{fmt(hardSolved)}</div><div className="l">Hard solved (LC)</div></div>
+          <div className="stat"><div className="n">{fmt(lc?.total)}</div><div className="l">LeetCode solved</div></div>
         </section>
 
         <div className="grid g-2">
           <section className="panel">
             <h2>Difficulty</h2>
             <div className="ringwrap">
-              <div className="ring" role="img" aria-label="540 Easy, 560 Medium, 148 Hard">
-                <div className="rc"><b>1,248</b><span>solved</span></div>
+              <div className="ring" role="img" aria-label={`${lc?.easy || 0} Easy, ${lc?.medium || 0} Medium, ${lc?.hard || 0} Hard`}>
+                <div className="rc"><b>{fmt(lc?.total)}</b><span>solved</span></div>
               </div>
               <div className="rleg">
-                <div className="r"><span className="sw e"></span> Easy <span className="v">540</span></div>
-                <div className="r"><span className="sw m"></span> Medium <span className="v">560</span></div>
-                <div className="r"><span className="sw h"></span> Hard <span className="v">148</span></div>
+                <div className="r"><span className="sw e"></span> Easy <span className="v">{fmt(lc?.easy)}</span></div>
+                <div className="r"><span className="sw m"></span> Medium <span className="v">{fmt(lc?.medium)}</span></div>
+                <div className="r"><span className="sw h"></span> Hard <span className="v">{fmt(lc?.hard)}</span></div>
               </div>
             </div>
           </section>
@@ -100,26 +137,19 @@ export default function PublicProfileView({ params }: { params: Promise<{ userna
           <section className="panel">
             <h2>By platform</h2>
             <div className="pf">
-              <div className="pf-row">
-                <span className="lab"><PlatformChip platformId="leetcode" size="sm" showName={false} variant="ghost" />LeetCode</span>
-                <span className="pf-bar"><i style={{ width: "100%", background: "#ffa116" }}></i></span>
-                <span className="val">612</span>
-              </div>
-              <div className="pf-row">
-                <span className="lab"><PlatformChip platformId="codeforces" size="sm" showName={false} variant="ghost" />Codeforces</span>
-                <span className="pf-bar"><i style={{ width: "56%", background: "#1f8acb" }}></i></span>
-                <span className="val">341</span>
-              </div>
-              <div className="pf-row">
-                <span className="lab"><PlatformChip platformId="codechef" size="sm" showName={false} variant="ghost" />CodeChef</span>
-                <span className="pf-bar"><i style={{ width: "30%", background: "#7a5230" }}></i></span>
-                <span className="val">184</span>
-              </div>
-              <div className="pf-row">
-                <span className="lab"><PlatformChip platformId="hackerrank" size="sm" showName={false} variant="ghost" />HackerRank</span>
-                <span className="pf-bar"><i style={{ width: "18%", background: "#1aa260" }}></i></span>
-                <span className="val">111</span>
-              </div>
+              {PLATFORM_META.filter((p) => platforms[p.id]).map((p) => {
+                const t = platforms[p.id]?.total || 0;
+                return (
+                  <div className="pf-row" key={p.id}>
+                    <span className="lab"><PlatformChip platformId={p.id} size="sm" showName={false} variant="ghost" />{p.name}</span>
+                    <span className="pf-bar"><i style={{ width: `${Math.max(4, (t / maxTotal) * 100)}%`, background: p.color }}></i></span>
+                    <span className="val">{fmt(t)}</span>
+                  </div>
+                );
+              })}
+              {data && platformCount === 0 && (
+                <p style={{ color: "var(--muted)", fontSize: 14 }}>No platforms connected yet.</p>
+              )}
             </div>
           </section>
         </div>
