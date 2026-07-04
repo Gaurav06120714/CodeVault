@@ -123,3 +123,15 @@ Restore drill: quarterly into isolated instance + checksum + smoke test
 
 - [DATABASE_SECURITY.md](DATABASE_SECURITY.md) · [INFRASTRUCTURE_SECURITY.md](INFRASTRUCTURE_SECURITY.md) · [MONITORING.md](MONITORING.md) · [SECURITY_PLAN.md](SECURITY_PLAN.md) §20.5
 - DEVOPS_PLAN §6 (DR) · OBSERVABILITY_PLAN §6 (Incident Response)
+
+
+---
+
+## ✅ Completion checklist
+
+> Area status at a glance. Full per-feature done / partial / pending tracking lives in **[PROGRESS.md](PROGRESS.md)**.
+
+- [x] Designed & documented (this file)
+- [ ] Implemented in code — see [PROGRESS.md](PROGRESS.md) for this area's exact status
+- [ ] Tested / verified
+- [ ] Production-hardened (pre-launch items tracked in [`../CERTIFICATES_BEFORE_LAUNCH/`](../CERTIFICATES_BEFORE_LAUNCH/))
