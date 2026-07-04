@@ -169,3 +169,15 @@ Scripts: `dev`=nodemon · `build`=`prisma generate && tsc` · `start` · `typech
 
 > Local host ports: Postgres 5433, Redis 6380, web-backend 4000, git-service 5050. `JWT_SECRET` + `ENCRYPTION_KEY` **must be identical** across both services.
 - OWASP Secrets Management Cheat Sheet · 12-Factor App: Config
+
+
+---
+
+## ✅ Completion checklist
+
+> Area status at a glance. Full per-feature done / partial / pending tracking lives in **[PROGRESS.md](PROGRESS.md)**.
+
+- [x] Designed & documented (this file)
+- [ ] Implemented in code — see [PROGRESS.md](PROGRESS.md) for this area's exact status
+- [ ] Tested / verified
+- [ ] Production-hardened (pre-launch items tracked in [`../CERTIFICATES_BEFORE_LAUNCH/`](../CERTIFICATES_BEFORE_LAUNCH/))
