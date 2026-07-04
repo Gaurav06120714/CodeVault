@@ -465,3 +465,15 @@ FE marketing/UI-kit run alongside M0–M1 (no BE dep).
 ---
 
 > This contract is the interface. **Any change to an endpoint, model, or error shape must be a PR to this file + the shared DTO types**, announced at the daily sync. When you're ready, I can expand any milestone into a per-task ticket list, or generate the typed DTO reference — still no code.
+
+
+---
+
+## ✅ Completion checklist
+
+> Area status at a glance. Full per-feature done / partial / pending tracking lives in **[PROGRESS.md](PROGRESS.md)**.
+
+- [x] Designed & documented (this file)
+- [ ] Implemented in code — see [PROGRESS.md](PROGRESS.md) for this area's exact status
+- [ ] Tested / verified
+- [ ] Production-hardened (pre-launch items tracked in [`../CERTIFICATES_BEFORE_LAUNCH/`](../CERTIFICATES_BEFORE_LAUNCH/))
