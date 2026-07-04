@@ -478,3 +478,15 @@ This blueprint is the master security reference; detailed controls live in compa
 - **Optional / later:** session-device UI, SBOM+signing, WAF bot rules/CAPTCHA, cloud IDS, dark-mode-style enhancements.
 
 > Next step when you ask: I can turn the **Critical** roadmap items into a step-by-step remediation checklist, or produce a focused threat model for a single flow (OAuth, or the Path B token lifecycle) — still no code.
+
+
+---
+
+## ✅ Completion checklist
+
+> Area status at a glance. Full per-feature done / partial / pending tracking lives in **[PROGRESS.md](PROGRESS.md)**.
+
+- [x] Designed & documented (this file)
+- [ ] Implemented in code — see [PROGRESS.md](PROGRESS.md) for this area's exact status
+- [ ] Tested / verified
+- [ ] Production-hardened (pre-launch items tracked in [`../CERTIFICATES_BEFORE_LAUNCH/`](../CERTIFICATES_BEFORE_LAUNCH/))
