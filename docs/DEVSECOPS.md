@@ -127,3 +127,15 @@ uses: actions/checkout@<full-sha>
 
 - [DEVOPS_PLAN.md](DEVOPS_PLAN.md) · [SECRETS.md](SECRETS.md) · [SECURITY_TESTING.md](SECURITY_TESTING.md) · [INFRASTRUCTURE_SECURITY.md](INFRASTRUCTURE_SECURITY.md)
 - GitHub Actions hardening · SLSA framework · OWASP DevSecOps Guideline
+
+
+---
+
+## ✅ Completion checklist
+
+> Area status at a glance. Full per-feature done / partial / pending tracking lives in **[PROGRESS.md](PROGRESS.md)**.
+
+- [x] Designed & documented (this file)
+- [ ] Implemented in code — see [PROGRESS.md](PROGRESS.md) for this area's exact status
+- [ ] Tested / verified
+- [ ] Production-hardened (pre-launch items tracked in [`../CERTIFICATES_BEFORE_LAUNCH/`](../CERTIFICATES_BEFORE_LAUNCH/))
