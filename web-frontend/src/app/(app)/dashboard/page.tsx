@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { PlatformChip } from "@/components/PlatformChip";
+import { CodeVaultLoader } from "@/components/CodeVaultLoader";
 
 // Build the public problem URL from a submission's platform + titleSlug.
 function problemUrl(sub: { platform?: string; titleSlug?: string }): string | null {
@@ -138,7 +139,7 @@ export default function DashboardPage() {
   };
 
   if (isLoading || !user) {
-    return <div style={{ padding: "40px", textAlign: "center", color: "var(--faint)" }}>Loading your data...</div>;
+    return <CodeVaultLoader text="Loading your dashboard" />;
   }
 
   return (
