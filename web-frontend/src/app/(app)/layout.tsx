@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
+import { GlobalSearch } from "@/components/GlobalSearch";
+import { NotificationBell } from "@/components/NotificationBell";
 
 export default function AppLayout({
   children,
@@ -119,16 +121,11 @@ export default function AppLayout({
               return (
                 <>
                   <h1>Dashboard</h1>
-                  <div className="search">
-                    <svg className="ico sm"><use href="#ic-search"/></svg>
-                    <input type="text" placeholder="Search problems or platforms..." />
-                  </div>
-                  <button className="ic-btn" title="Sync Settings">
+                  <GlobalSearch />
+                  <button className="ic-btn" title="Refresh" onClick={() => window.location.reload()}>
                     <svg className="ico"><use href="#ic-sync"/></svg>
                   </button>
-                  <button className="ic-btn" title="Notifications">
-                    <svg className="ico"><use href="#ic-bell"/></svg>
-                  </button>
+                  <NotificationBell />
                 </>
               );
             }
@@ -144,9 +141,10 @@ export default function AppLayout({
               <>
                 <h1>{title}</h1>
                 <span className="spacer"></span>
-                <button className="ic-btn" title="Notifications">
-                  <svg className="ico"><use href="#ic-bell"/></svg>
+                <button className="ic-btn" title="Refresh" onClick={() => window.location.reload()}>
+                  <svg className="ico"><use href="#ic-sync"/></svg>
                 </button>
+                <NotificationBell />
               </>
             );
           })()}
