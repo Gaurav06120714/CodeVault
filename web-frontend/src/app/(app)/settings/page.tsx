@@ -57,6 +57,42 @@ export default function SettingsPage() {
     }
   };
 
+  // Real connected platforms + solved counts (no more hardcoded rows).
+  type Conn = { platform: string; username: string; tokenStatus?: string };
+  const [connections, setConnections] = useState<Conn[] | null>(null);
+  const [solved, setSolved] = useState<Record<string, number>>({});
+
+  const loadConnections = React.useCallback(() => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+    const headers = { Authorization: `Bearer ${token}` };
+    fetch(`${API_URL}/platforms`, { headers })
+      .then((r) => (r.ok ? r.json() : []))
+      .then((rows: Conn[]) => setConnections(Array.isArray(rows) ? rows : []))
+      .catch(() => setConnections([]));
+    fetch(`${API_URL}/stats`, { headers })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        const p = d?.platforms || {};
+        const m: Record<string, number> = {};
+        Object.keys(p).forEach((k) => { if (typeof p[k]?.total === "number") m[k] = p[k].total; });
+        setSolved(m);
+      })
+      .catch(() => {});
+  }, [API_URL]);
+
+  useEffect(() => { loadConnections(); }, [loadConnections]);
+
+  const disconnectPlatform = async (platform: string) => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+    await fetch(`${API_URL}/platforms/${platform}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` },
+    }).catch(() => {});
+    loadConnections();
+  };
+
   useEffect(() => {
     const token = localStorage.getItem("token");
     const storedUser = localStorage.getItem("user");
@@ -170,38 +206,36 @@ export default function SettingsPage() {
         <section className="panel" id="platforms">
           <h2>Connected platforms</h2>
           <p className="desc">Stats come from public profiles; code sync needs an authorized connection.</p>
-          <div className="row">
-            <PlatformChip platformId="leetcode" size="sm" showName={false} variant="ghost" />
-            <div className="rt">
-              <div className="n">LeetCode <span className="st-pill ok">Connected</span></div>
-              <div className="m">@{user.githubLogin} · 612 solved</div>
-            </div>
-            <button className="btn danger sm right" type="button">Disconnect</button>
-          </div>
-          <div className="row">
-            <PlatformChip platformId="codeforces" size="sm" showName={false} variant="ghost" />
-            <div className="rt">
-              <div className="n">Codeforces <span className="st-pill ok">Connected</span></div>
-              <div className="m">@{user.githubLogin}_t · 341 solved</div>
-            </div>
-            <button className="btn danger sm right" type="button">Disconnect</button>
-          </div>
-          <div className="row">
-            <PlatformChip platformId="codechef" size="sm" showName={false} variant="ghost" />
-            <div className="rt">
-              <div className="n">CodeChef <span className="st-pill ok">Connected</span></div>
-              <div className="m">@{user.githubLogin}06 · 184 solved</div>
-            </div>
-            <button className="btn danger sm right" type="button">Disconnect</button>
-          </div>
-          <div className="row">
-            <PlatformChip platformId="hackerrank" size="sm" showName={false} variant="ghost" />
-            <div className="rt">
-              <div className="n">HackerRank <span className="st-pill exp">Session expired</span></div>
-              <div className="m">@{user.githubLogin}g · 111 solved</div>
-            </div>
-            <Link className="btn brand sm right" href="/connect">Reconnect</Link>
-          </div>
+          {connections === null ? (
+            <p className="desc">Loading connections…</p>
+          ) : connections.length === 0 ? (
+            <p className="desc">No platforms connected yet. <Link href="/connect">Connect one</Link>.</p>
+          ) : (
+            connections.map((c) => {
+              const meta = PLATFORMS_LIST.find((p) => p.id === c.platform);
+              const expired = c.tokenStatus === "expired";
+              const count = solved[c.platform];
+              return (
+                <div className="row" key={c.platform}>
+                  <PlatformChip platformId={c.platform} size="sm" showName={false} variant="ghost" />
+                  <div className="rt">
+                    <div className="n">
+                      {meta?.name || c.platform}{" "}
+                      {expired
+                        ? <span className="st-pill exp">Session expired</span>
+                        : <span className="st-pill ok">Connected</span>}
+                    </div>
+                    <div className="m">@{c.username}{typeof count === "number" ? ` · ${count.toLocaleString()} solved` : ""}</div>
+                  </div>
+                  {expired ? (
+                    <Link className="btn brand sm right" href="/connect">Reconnect</Link>
+                  ) : (
+                    <button className="btn danger sm right" type="button" onClick={() => disconnectPlatform(c.platform)}>Disconnect</button>
+                  )}
+                </div>
+              );
+            })
+          )}
           <div className="save-bar">
             <Link className="btn" href="/connect">+ Add platform</Link>
           </div>
