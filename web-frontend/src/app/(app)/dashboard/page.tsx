@@ -5,6 +5,34 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { PlatformChip } from "@/components/PlatformChip";
 
+// Build the public problem URL from a submission's platform + titleSlug.
+function problemUrl(sub: { platform?: string; titleSlug?: string }): string | null {
+  const slug = sub.titleSlug;
+  if (!slug) return null;
+  switch (sub.platform) {
+    case "leetcode":
+      return `https://leetcode.com/problems/${slug}/`;
+    case "codeforces": {
+      // titleSlug is "<contestId>-<index>"
+      const [contestId, index] = slug.split("-");
+      return contestId && index
+        ? `https://codeforces.com/contest/${contestId}/problem/${index}`
+        : "https://codeforces.com/problemset";
+    }
+    case "codechef":
+      return `https://www.codechef.com/problems/${slug}`;
+    case "hackerrank":
+      return `https://www.hackerrank.com/challenges/${slug}/problem`;
+    default:
+      return null;
+  }
+}
+
+// dd/mm/yyyy
+function formatDate(tsSeconds: number): string {
+  return new Date(tsSeconds * 1000).toLocaleDateString("en-GB");
+}
+
 export default function DashboardPage() {
   const router = useRouter();
   const [user, setUser] = useState<{ id: string; githubLogin: string; displayName: string | null } | null>(null);
@@ -288,10 +316,20 @@ export default function DashboardPage() {
             </thead>
             <tbody>
               {recentSubs.map((sub, i) => {
-                const date = new Date(sub.timestamp * 1000);
+                const url = problemUrl(sub);
                 return (
                   <tr key={i}>
-                    <td className="prob-name">{sub.title}</td>
+                    <td className="prob-name">
+                      {url ? (
+                        <a href={url} target="_blank" rel="noopener noreferrer" style={{ color: "inherit", textDecoration: "none" }}
+                           onMouseOver={(e) => (e.currentTarget.style.textDecoration = "underline")}
+                           onMouseOut={(e) => (e.currentTarget.style.textDecoration = "none")}>
+                          {sub.title} <span aria-hidden="true" style={{ opacity: 0.5, fontSize: "0.85em" }}>↗</span>
+                        </a>
+                      ) : (
+                        sub.title
+                      )}
+                    </td>
                     <td>
                       <span className="src">
                         <PlatformChip platformId={sub.platform} size="sm" showName={false} variant="ghost" />
@@ -306,7 +344,7 @@ export default function DashboardPage() {
                       )}
                     </td>
                     <td className="verd">Accepted</td>
-                    <td className="tright">{date.toLocaleDateString()}</td>
+                    <td className="tright">{formatDate(sub.timestamp)}</td>
                   </tr>
                 );
               })}
