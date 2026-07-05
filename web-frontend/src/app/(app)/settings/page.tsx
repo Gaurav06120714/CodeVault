@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { PlatformChip } from "@/components/PlatformChip";
+import { CodeVaultLoader } from "@/components/CodeVaultLoader";
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -134,7 +135,7 @@ export default function SettingsPage() {
   }, []);
 
   if (!user) {
-    return <div style={{ padding: "40px", textAlign: "center" }}>Loading settings...</div>;
+    return <CodeVaultLoader text="Loading settings" />;
   }
 
   const initial = (user.displayName || user.githubLogin).charAt(0).toUpperCase();
