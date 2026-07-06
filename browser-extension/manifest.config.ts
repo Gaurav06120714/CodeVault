@@ -34,6 +34,8 @@ export default {
     type: 'module',
   },
   content_scripts: [
+    // MAIN-world hook: patch fetch/XHR + read full Monaco code (must run before page scripts).
+    { matches: ['https://leetcode.com/problems/*'], js: ['src/content/leetcode-inject.ts'], run_at: 'document_start', world: 'MAIN' },
     { matches: ['https://leetcode.com/problems/*'], js: ['src/content/leetcode.ts'], run_at: 'document_idle' },
     { matches: ['https://codeforces.com/*'], js: ['src/content/codeforces.ts'], run_at: 'document_idle' },
     { matches: ['https://www.codechef.com/*'], js: ['src/content/codechef.ts'], run_at: 'document_idle' },
