@@ -90,7 +90,11 @@ export default function RepositoriesPage() {
     const h = headers();
     if (!h) return;
     const isMore = !!cursor;
-    isMore ? setLoadingMore(true) : setLoadingProblems(true);
+    if (isMore) {
+      setLoadingMore(true);
+    } else {
+      setLoadingProblems(true);
+    }
     try {
       const params = new URLSearchParams({ platform, limit: "30" });
       if (cursor) params.set("cursor", cursor);

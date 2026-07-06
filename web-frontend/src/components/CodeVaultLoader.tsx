@@ -7,7 +7,6 @@ export function CodeVaultLoader({ text = "Loading" }: { text?: string }) {
     <div className="cv-loader-wrap">
       <div className="cv-loader">
         <div className="cv-ring" />
-        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/codevault-icon.png" alt="CodeVault" className="cv-mark-img" />
       </div>
       <div className="cv-loader-text">
