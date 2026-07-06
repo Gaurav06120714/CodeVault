@@ -1,5 +1,6 @@
 import axios from 'axios';
 import logger from '../../lib/logger';
+import { redis } from '../../lib/redis';
 
 // CodeChef exposes no public API, so we scrape the public profile page
 // (https://www.codechef.com/users/<username>). The page embeds:
@@ -87,10 +88,77 @@ export class CodeChefService {
           });
           // Limit to 15
           recent = recent.slice(0, 15);
+
+          // Fetch tags for each problem concurrently
+          await Promise.all(recent.map(async (sub) => {
+            const cacheKey = `tag_cache:codechef:${sub.titleSlug}`;
+            let tags: string[] | null = null;
+            
+            try {
+              const cached = await redis.get(cacheKey);
+              if (cached) {
+                tags = JSON.parse(cached);
+              }
+            } catch (redisErr) {
+              // Ignore redis error
+            }
+
+            if (!tags) {
+              try {
+                const probRes = await axios.get(`https://www.codechef.com/api/contests/PRACTICE/problems/${sub.titleSlug}`, {
+                  headers: { 'User-Agent': 'Mozilla/5.0' },
+                  timeout: 3000
+                });
+                const data = probRes.data;
+                tags = [];
+                if (data && data.status === 'success') {
+                  const author = (data.problem_author || '').toLowerCase();
+                  const contest = (data.intended_contest_code || '').toLowerCase();
+                  
+                  if (Array.isArray(data.user_tags)) {
+                    data.user_tags.forEach((t: string) => {
+                      if (!t) return;
+                      const norm = t.toLowerCase();
+                      if (norm !== author && norm !== contest) tags!.push(t);
+                    });
+                  }
+                  if (Array.isArray(data.computed_tags)) tags.push(...data.computed_tags);
+                }
+                tags = Array.from(new Set(tags.filter(t => typeof t === 'string' && t.trim() !== '')));
+                
+                try {
+                  await redis.setex(cacheKey, 86400 * 7, JSON.stringify(tags));
+                } catch (redisErr) {
+                  // Ignore redis error
+                }
+              } catch (err) {
+                tags = [];
+              }
+            }
+            
+            sub.tags = tags || [];
+          }));
         }
       } catch (e) {
         logger.warn({ username }, 'Failed to fetch CodeChef recent submissions');
       }
+
+      const topics: Record<string, number> = {};
+      const heatmap: Record<string, number> = {};
+      recent.forEach((sub) => {
+        if (Array.isArray(sub.tags)) {
+          sub.tags.forEach((tag: string) => {
+            const lowerTag = tag.toLowerCase();
+            topics[lowerTag] = (topics[lowerTag] || 0) + 1;
+          });
+        }
+        if (sub.timestamp) {
+          const d = new Date(sub.timestamp * 1000);
+          d.setUTCHours(0, 0, 0, 0);
+          const ts = Math.floor(d.getTime() / 1000).toString();
+          heatmap[ts] = (heatmap[ts] || 0) + 1;
+        }
+      });
 
       return {
         total,
@@ -99,6 +167,8 @@ export class CodeChefService {
         stars: rating ? CodeChefService.starsFromRating(rating) : null,
         globalRank,
         recent,
+        topics,
+        heatmap,
       };
     } catch (error: any) {
       if (error.response?.status === 404) {

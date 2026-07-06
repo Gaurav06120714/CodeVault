@@ -24,6 +24,7 @@ export class LeetCodeService {
             title
             titleSlug
             timestamp
+            topicTags { name slug }
           }
         }
       `;

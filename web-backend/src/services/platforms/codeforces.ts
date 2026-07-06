@@ -37,7 +37,8 @@ export class CodeforcesService {
                 title: `${sub.problem.contestId}${sub.problem.index} - ${sub.problem.name}`,
                 titleSlug: probId,
                 timestamp: sub.creationTimeSeconds,
-                rating: sub.problem.rating
+                rating: sub.problem.rating,
+                tags: sub.problem.tags || []
               });
             }
           }
