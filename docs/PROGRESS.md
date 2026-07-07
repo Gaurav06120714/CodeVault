@@ -116,6 +116,7 @@
 - [x] **Global page/settings search** in topbar — G (`b96f024`)
 - [x] **Functional refresh** button in topbar — G (`d339906`)
 - [x] **Animated branded CodeVault loader** across all pages — G (`38613cf`)
+- [x] **Platform metadata consolidated** → single `constants/platforms.ts` (name/color/order/URL/problemUrl); removed 6 inline `PLATFORM_LABELS`/`PLATFORM_META`/`platformConfig`/`PLATFORMS_LIST` duplicates. Change a platform color/name once, everywhere updates — G ✨ *new*
 
 ## 🚀 Pre-launch / compliance (`CERTIFICATES_BEFORE_LAUNCH/`)
 - [ ] **All ~61 items pending** — legal (ToS, Privacy, GDPR/CCPA), security certs (SOC2, ISO 27001, pentest), DNS/email (SPF/DKIM/DMARC), launch checklist, etc.
