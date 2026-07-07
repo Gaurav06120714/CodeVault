@@ -21,7 +21,7 @@
 | Platform connections | 4 | 0 | 0 | 100% |
 | Path A — stats & dashboard | 9 | 0 | 1 | ~92% |
 | Path B — code sync (git-service) | 7 | 0 | 1 | ~90% |
-| Browser extension | 4 | 2 | 0 | ~70% |
+| Browser extension | 7 | 1 | 0 | ~90% |
 | Public profile | 2 | 0 | 0 | ~90% |
 | Notifications | 3 | 0 | 0 | ~95% |
 | Repositories | 4 | 0 | 0 | ~95% |
@@ -30,7 +30,7 @@
 
 \* *Rough, feature-count based — not weighted by effort.*
 
-**Headline:** core product loop (login → connect → stats dashboard → public profile → GitHub sync) is **working end-to-end with real data for all 4 platforms** (LeetCode, Codeforces, CodeChef, HackerRank). All git-service routes live; **notifications, global search, per-platform analytics tabs, and a branded animated loader** now shipped. Remaining code work: real activity heatmap, refresh-token rotation, RLS, extension build-verify — then **pre-launch/compliance**.
+**Headline:** core product loop (login → connect → stats dashboard → public profile → GitHub sync) is **working end-to-end with real data for all 4 platforms** (LeetCode, Codeforces, CodeChef, HackerRank). The **browser extension is now build-verified and capturing LeetCode solutions** (full Monaco code) in a live test. All git-service routes live; notifications, repo browsing, global search, per-platform analytics tabs, and a branded loader shipped. Remaining code work: confirm extension→GitHub push end-to-end, CF/CC/HR extension selectors, real activity heatmap, refresh-token rotation, RLS — then **pre-launch/compliance**.
 
 ---
 
@@ -79,13 +79,16 @@
 - [x] **`GET /api/repos` + `GET /api/problems` built & mounted** (JWT-auth, keyset pagination) — G ✨ *new (`de8c6ed`)*
 - [ ] CF / CC / HR code sync — 🔒 by design (no authorized source API; degrade to `[]`) — G
 
-## 🧩 Browser extension (Path B v2)
-- [x] MV3 scaffold (CRXJS + Vite), manifest — G
-- [x] Content scripts: LeetCode / CF / CC / HR — G
-- [x] Background worker + JWT capture from web app + popup/options — G
+## 🧩 Browser extension (Path B v2) ✨ *build-verified + LeetCode capture working (G, `a108f37`→`612490f`)*
+- [x] MV3 scaffold (CRXJS + Vite), manifest, **16/48/128 icons** — G
+- [x] **`npm install` + `npm run build` verified** (was never run); loads unpacked — G
+- [x] Fixed `api-client` (`:5000`→`:5050`, `import.meta.env`); constants centralized — G
+- [x] Background worker + JWT capture from web app + popup — G
 - [x] Ingest to git-service (`POST /api/ingest`) — G
-- [~] Build-verify (`npm run build`) — not yet run — G
-- [~] Live selector testing on each platform — pending — G
+- [x] **LeetCode capture WORKING** — MAIN-world hook reads **full Monaco code**, DOM-verdict detection, real language; verified live (`[CodeVault] captured … 368 chars`) — G
+- [~] End-to-end GitHub push — capture confirmed; final commit-to-repo test pending — G
+- [~] CF / CC / HR content scripts — built, selectors not yet live-verified — G
+- [ ] Options page (`options/main.ts` empty), token refresh, store packaging — G
 
 ## 🌐 Public shareable profile
 - [x] Public profile API (`GET /api/public/:handle`, no auth) — A
@@ -97,14 +100,15 @@
 - [x] Notification **controller + routes**, **mounted** at `/api/notifications` — G
 - [x] Emits a real notification **on platform connect** — G
 - [x] **Bell dropdown UI** in topbar (unread badge + mark-all-read) — G
-- [ ] More emit triggers (sync complete, session expired) — G
+- [x] **Emit on sync complete / session expired** + job rate limits — G ✨ *new (`9789e63`)*
 
 ## 📁 Repositories
 - [x] Repositories page wired to `GET /api/github-repos` (web-backend) — A
 - [x] GitHub repo setup flow (`POST /api/github-repos`) — A
 - [x] **Per-platform repo-link manager** in Settings → GitHub — G (`aff4c53`)
-- [x] **Repositories page: per-connected-platform inline repo-link attach** (only shows connected platforms) — G ✨ *new (`125906d`)*
+- [x] **Repositories page: per-connected-platform inline repo-link attach** (only shows connected platforms) — G (`125906d`)
 - [x] git-service `/repos` + `/problems` endpoints **live** — G (`de8c6ed`)
+- [x] **Repository browsing UI** (Manage / Browse) wired to git-service — G ✨ *new (`9bed193`)*
 
 ## 🎨 Settings & UI/UX ✨ *new*
 - [x] Settings **Connected platforms** render real `/api/platforms` data + working Disconnect — G (`32fca74`)
