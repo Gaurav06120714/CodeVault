@@ -55,7 +55,7 @@
 | Auto-generated repo README index | ✅ | G | `git-service/services/github/readme.generator.ts` |
 | Scheduled auto-sync | ✅ | G | `git-service/jobs/scheduler.ts`, `sync.job.ts` |
 | Sync status / activity page | ✅ | G | `web-frontend/(app)/sync-status` |
-| Browser extension capture (Path B v2) | 🟠 | G | `browser-extension/` (built, not build-verified) |
+| Browser extension capture (Path B v2) | ✅ | G | build-verified; **LeetCode capture working live** (full Monaco code) (`a108f37`→`612490f`) |
 | Extension → git-service ingest | ✅ | G | `git-service/ingest.*`, `POST /api/ingest` |
 | Notifications | ✅ | G | service + controller + routes mounted `/api/notifications`; bell dropdown + emit on connect (`96f6ac2`) |
 | Global search + branded loader | ✅ | G | topbar page/settings search + animated CodeVault loader across pages |
@@ -141,12 +141,13 @@ Supported platforms: **LeetCode, Codeforces, CodeChef, HackerRank** (`PlatformTy
 
 | Feature | Status | Owner | Details |
 |---------|:------:|:-----:|---------|
-| MV3 extension scaffold (CRXJS + Vite) | ✅ | G | `vite.config.ts`, `manifest.config.ts`. |
-| Content scripts (LeetCode/CF/CC/HR) | 🟠 | G | Built; **selectors need live testing**, not build-verified. |
+| MV3 scaffold + build (CRXJS + Vite) + icons | ✅ | G | **build-verified** (`npm run build`), loads unpacked. |
+| LeetCode capture | ✅ | G | MAIN-world hook reads **full Monaco code** + DOM-verdict detection + real language; **verified live**. |
+| Content scripts (CF / CC / HR) | 🟠 | G | Built; selectors not yet live-verified. |
 | CodeVault web-app content script (JWT capture) | ✅ | G | `content/codevault.ts` reads the JWT from the signed-in web app. |
 | Background service worker | ✅ | G | `background/index.ts` owns the token, dispatches ingest. |
-| Popup + options UI | ✅ | G | `popup/`, `options/`. |
-| Ingest to git-service | ✅ | G | `POST /api/ingest` (same JWT verify + GitHub push). |
+| Ingest to git-service | ✅ | G | `POST /api/ingest` (JWT verify + GitHub push). |
+| Options page + token refresh + store packaging | 🟠 | G | `options/main.ts` empty; JWT from localStorage has no refresh yet. |
 
 > ⚠️ **Doc drift:** `browser-extension/README.md` describes a PKCE `launchWebAuthFlow` handoff, but the implementation reads the JWT via the web-app content script (`WEB_APP_URL`). Reconcile before shipping.
 
