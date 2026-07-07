@@ -1,11 +1,6 @@
 import type { CapturedSubmission, IngestResponse } from '../types';
 import { getToken } from './storage';
-
-// git-service base URL. Vite injects VITE_GIT_SERVICE_URL at build time via import.meta.env
-// (NOT process.env — that's undefined in a browser bundle). Falls back to local dev (:5050).
-const GIT_SERVICE_URL =
-  (import.meta.env?.VITE_GIT_SERVICE_URL as string | undefined) ||
-  'http://localhost:5050/api';
+import { GIT_SERVICE_URL } from '../constants';
 
 // Send captured submissions to git-service. Auth = the same user JWT (Bearer),
 // stored by the sign-in flow. Returns a normalized result.
