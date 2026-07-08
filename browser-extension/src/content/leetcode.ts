@@ -122,10 +122,36 @@ window.addEventListener('message', (ev: MessageEvent) => {
   }
 });
 
-// Watch for a verdict appearing, and check once shortly after load (covers a result
-// that is already on screen when the page opens).
+// A short burst of checks — the verdict + editor can render a moment after the DOM mutates.
+function scanBurst(): void {
+  let n = 0;
+  const iv = setInterval(() => {
+    tryCapture();
+    if (++n >= 8) clearInterval(iv);
+  }, 700);
+}
+
+// 1) Verdict appearing in the DOM (covers submit-on-this-page).
 const observer = new MutationObserver(() => tryCapture());
 observer.observe(document.documentElement, { childList: true, subtree: true });
-setTimeout(tryCapture, 1200);
 
-console.info('[CodeVault] LeetCode capture ready (DOM verdict + Monaco full-code)');
+// 2) SPA navigation: LeetCode swaps problems without a full reload, so the content script
+//    stays but never re-runs. Poll the path and re-scan when it changes — no hard refresh.
+let lastPath = location.pathname;
+setInterval(() => {
+  if (location.pathname !== lastPath) {
+    lastPath = location.pathname;
+    scanBurst();
+  }
+}, 1000);
+
+// 3) Returning to the tab (you submit, switch away, come back) — re-scan.
+window.addEventListener("focus", scanBurst);
+document.addEventListener("visibilitychange", () => {
+  if (!document.hidden) scanBurst();
+});
+
+// Initial scan (covers a result already on screen when the page/extension loads).
+scanBurst();
+
+console.info('[CodeVault] LeetCode capture ready — auto-detect (no refresh needed)');
