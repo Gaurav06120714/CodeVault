@@ -47,7 +47,12 @@
       const accepted = data?.status_msg === 'Accepted' || data?.status_code === 10;
       if (accepted) {
         window.postMessage(
-          { __cv: 'accepted', lang: String(data?.lang ?? data?.pretty_lang ?? ''), questionId: String(data?.question_id ?? '') },
+          {
+            __cv: 'accepted',
+            lang: String(data?.lang ?? data?.pretty_lang ?? ''),
+            questionId: String(data?.question_id ?? ''),
+            submissionId: String(data?.submission_id ?? ''),
+          },
           '*',
         );
       }
