@@ -55,7 +55,7 @@
 | Auto-generated repo README index | ✅ | G | `git-service/services/github/readme.generator.ts` |
 | Scheduled auto-sync | ✅ | G | `git-service/jobs/scheduler.ts`, `sync.job.ts` |
 | Sync status / activity page | ✅ | G | `web-frontend/(app)/sync-status` |
-| Browser extension capture (Path B v2) | ✅ | G | build-verified; **LeetCode capture working live** (full Monaco code) (`a108f37`→`612490f`) |
+| Browser extension capture (Path B v2) | ✅ | G | build-verified; **LeetCode capture working live** — full submitted code, **all languages** via `submissionDetails` GraphQL (`a108f37`→`fc530bd`) |
 | Extension → git-service ingest | ✅ | G | `git-service/ingest.*`, `POST /api/ingest` |
 | Notifications | ✅ | G | service + controller + routes mounted `/api/notifications`; bell dropdown + emit on connect (`96f6ac2`) |
 | Global search + branded loader | ✅ | G | topbar page/settings search + animated CodeVault loader across pages |
@@ -142,7 +142,7 @@ Supported platforms: **LeetCode, Codeforces, CodeChef, HackerRank** (`PlatformTy
 | Feature | Status | Owner | Details |
 |---------|:------:|:-----:|---------|
 | MV3 scaffold + build (CRXJS + Vite) + icons | ✅ | G | **build-verified** (`npm run build`), loads unpacked. |
-| LeetCode capture | ✅ | G | MAIN-world hook reads **full Monaco code** + DOM-verdict detection + real language; **verified live**. |
+| LeetCode capture | ✅ | G | DOM-verdict detection + **`submissionDetails` GraphQL** as primary code source → **full submitted code for every language** (Monaco read-back kept only as fallback, since it returns the starter template on submission pages). Fix `fc530bd`. **Verified live 2026-07-12** against real accepted submissions — `python3`, `python`, `mysql` all returned complete code. |
 | Content scripts (CF / CC / HR) | 🟠 | G | Built; selectors not yet live-verified. |
 | CodeVault web-app content script (JWT capture) | ✅ | G | `content/codevault.ts` reads the JWT from the signed-in web app. |
 | Background service worker | ✅ | G | `background/index.ts` owns the token, dispatches ingest. |
@@ -232,10 +232,10 @@ Full security blueprint: see the `*_SECURITY.md` docs in this folder.
 | 3 | ~~`notification` routes not mounted~~ → **FIXED**: notifications fully built + mounted (`96f6ac2`). `user`/`settings` routes still unmounted (low priority) | ✅/🟠 | G/A |
 | 4 | ~~`problem` / `repo` routes not mounted in git-service~~ → **FIXED**: built & mounted, `/api/repos` + `/api/problems` live (`de8c6ed`) | ✅ | G |
 | 5 | ~~Repositories page mock~~ → **FIXED**: per-connected-platform inline repo-attach (`125906d`); deep file/commit browse via `/problems` still to wire | 🟠 | G |
-| 6 | Extension README (PKCE) ≠ actual JWT-capture implementation; selectors untested live | 🟠 | G |
+| 6 | ~~Extension build-verify + LeetCode capture untested~~ → **FIXED**: built + LeetCode full-code capture verified live 2026-07-12 (`fc530bd`). Remaining: README (PKCE) ≠ actual JWT-capture impl; **CF/CC/HR** selectors still untested live | 🟠 | G |
 | 7 | Prisma schema **duplicated** across `web-backend/prisma` + `git-service/prisma` — hand-sync required | ⚠️ | Both |
 
-**Still open:** #5 (repositories *deep* file/commit browse), #6 (extension build-verify), #7 (schema dup), plus real activity heatmap, refresh-token rotation, RLS, and `user`/`settings` route mounting. *(Notifications #3 is now done.)*
+**Still open:** #5 (repositories *deep* file/commit browse), #6 (extension README drift + CF/CC/HR live selectors), #7 (schema dup), plus real activity heatmap, refresh-token rotation, RLS, and `user`/`settings` route mounting. *(Notifications #3 done; extension build-verify + LeetCode capture done.)*
 
 ---
 
@@ -248,7 +248,7 @@ Full security blueprint: see the `*_SECURITY.md` docs in this folder.
 | Repositories **deep** file/commit browse (wire to `/api/problems`) | G | Endpoint live; frontend pending. |
 | JWT refresh-token rotation endpoint | A | Schema ready. |
 | Enable Row-Level Security before prod | A | `database/rls.sql`. |
-| Build-verify extension + live selector test | G | `npm run build`. |
+| CF / CC / HR extension live selector test | G | LeetCode done + verified; port `submissionDetails`-style full-code capture to the other three. |
 | AI layer — explain solution, tag topic, recommend next problem | — | Uses the latest Claude models. |
 | Gamification — streaks, goals, shareable cards | — | Deferred. |
 | Pricing / plans page | — | Deferred. |
