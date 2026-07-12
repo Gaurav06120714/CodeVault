@@ -21,7 +21,7 @@
 | Platform connections | 4 | 0 | 0 | 100% |
 | Path A — stats & dashboard | 9 | 0 | 1 | ~92% |
 | Path B — code sync (git-service) | 7 | 0 | 1 | ~90% |
-| Browser extension | 7 | 1 | 0 | ~90% |
+| Browser extension | 7 | 1 | 0 | ~93% |
 | Public profile | 2 | 0 | 0 | ~90% |
 | Notifications | 3 | 0 | 0 | ~95% |
 | Repositories | 4 | 0 | 0 | ~95% |
@@ -30,7 +30,7 @@
 
 \* *Rough, feature-count based — not weighted by effort.*
 
-**Headline:** core product loop (login → connect → stats dashboard → public profile → GitHub sync) is **working end-to-end with real data for all 4 platforms** (LeetCode, Codeforces, CodeChef, HackerRank). The **browser extension is now build-verified and capturing LeetCode solutions** (full Monaco code) in a live test. All git-service routes live; notifications, repo browsing, global search, per-platform analytics tabs, and a branded loader shipped. Remaining code work: confirm extension→GitHub push end-to-end, CF/CC/HR extension selectors, real activity heatmap, refresh-token rotation, RLS — then **pre-launch/compliance**.
+**Headline:** core product loop (login → connect → stats dashboard → public profile → GitHub sync) is **working end-to-end with real data for all 4 platforms** (LeetCode, Codeforces, CodeChef, HackerRank). The **browser extension is build-verified and capturing LeetCode solutions with full submitted code for every language** — via `submissionDetails` GraphQL (`fc530bd`), verified live 2026-07-12. All git-service routes live; notifications, repo browsing, global search, per-platform analytics tabs, and a branded loader shipped. Remaining code work: CF/CC/HR extension selectors, real activity heatmap, refresh-token rotation, RLS — then **pre-launch/compliance**.
 
 ---
 
@@ -79,14 +79,14 @@
 - [x] **`GET /api/repos` + `GET /api/problems` built & mounted** (JWT-auth, keyset pagination) — G ✨ *new (`de8c6ed`)*
 - [ ] CF / CC / HR code sync — 🔒 by design (no authorized source API; degrade to `[]`) — G
 
-## 🧩 Browser extension (Path B v2) ✨ *build-verified + LeetCode capture working (G, `a108f37`→`612490f`)*
+## 🧩 Browser extension (Path B v2) ✨ *build-verified + LeetCode full-code capture verified (G, `a108f37`→`fc530bd`)*
 - [x] MV3 scaffold (CRXJS + Vite), manifest, **16/48/128 icons** — G
 - [x] **`npm install` + `npm run build` verified** (was never run); loads unpacked — G
 - [x] Fixed `api-client` (`:5000`→`:5050`, `import.meta.env`); constants centralized — G
 - [x] Background worker + JWT capture from web app + popup — G
 - [x] Ingest to git-service (`POST /api/ingest`) — G
-- [x] **LeetCode capture WORKING** — MAIN-world hook reads **full Monaco code**, DOM-verdict detection, real language; verified live (`[CodeVault] captured … 368 chars`) — G
-- [~] End-to-end GitHub push — capture confirmed; final commit-to-repo test pending — G
+- [x] **LeetCode capture WORKING — full submitted code, ALL languages** via `submissionDetails` GraphQL (`fc530bd`); DOM-verdict detection; Monaco read kept only as fallback (returned starter template on submission pages). **Verified live 2026-07-12** — replayed the extension's exact query against real accepted submissions: `python3` (0147), `python` (454), `mysql` (178) all returned complete code — G
+- [x] **End-to-end GitHub push** — SQL problems pushed live (`0177`/`0178`, `syncedToGit=true`); push path is language-agnostic (`solution.<ext>`) and full-code fetch now verified for every language. *(Belt-and-suspenders: a fresh non-SQL submit→push observation not yet re-run.)* — G
 - [~] CF / CC / HR content scripts — built, selectors not yet live-verified — G
 - [ ] Options page (`options/main.ts` empty), token refresh, store packaging — G
 
