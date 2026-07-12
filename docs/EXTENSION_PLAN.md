@@ -73,13 +73,13 @@ The extension authenticates as the **same GitHub-identity user** as the website 
 A **content script** per platform + a **background service worker**:
 
 1. Content script watches for an accepted verdict — preferably by **intercepting the platform's own network response** (e.g. LeetCode's submission-check GraphQL/REST), with DOM scraping as fallback.
-2. On `status === Accepted`, extract: problem number, slug, title, difficulty, tags, language, and the **submitted code** (Monaco editor / submission detail).
+2. On `status === Accepted`, extract: problem number, slug, title, difficulty, tags, language, and the **submitted code**. **Prefer the platform's submission-detail API over the editor DOM** — the Monaco editor shows the *starter template* on submission pages, so reading it truncates the solution. LeetCode's `submissionDetails` GraphQL returns the real submitted source for every language (shipped `fc530bd`).
 3. Post a normalized payload to the background worker.
 4. Background worker calls **git-service `POST /api/ingest`** with the JWT.
 
 | Platform | Primary capture signal | Code source |
 |----------|------------------------|-------------|
-| LeetCode | submission-check GraphQL/REST response | Monaco editor / submission detail |
+| LeetCode | submission-check GraphQL/REST response | **`submissionDetails` GraphQL** (full code, all languages); Monaco read-back only as fallback |
 | Codeforces | verdict poll → "Accepted" | user's own submission page |
 | CodeChef | submission status DOM/network | submission view |
 | HackerRank | submission result DOM/network | submission view |
@@ -151,7 +151,7 @@ Build **LeetCode end-to-end first**, then fan out.
 | Milestone | Goal |
 |-----------|------|
 | **E0 — Auth** | Scaffold extension; sign in as same user; token exchange/refresh; `GET /me` works |
-| **E1 — LeetCode E2E** | Capture → `POST /api/ingest` → GitHub push (proves the full loop) |
+| **E1 — LeetCode E2E** ✅ | Capture → `POST /api/ingest` → GitHub push (proves the full loop). **Done** — full-code capture verified live 2026-07-12 (all languages via `submissionDetails`); SQL push confirmed on GitHub. |
 | **E2 — More platforms** | Codeforces, then CodeChef + HackerRank |
 | **E3 — Cross-browser** | Firefox build, then Safari conversion |
 | **E4 — UX & control** | Popup, options, session revocation in Settings |
