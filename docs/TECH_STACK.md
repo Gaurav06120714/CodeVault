@@ -130,8 +130,8 @@ node-cron (trigger) → enqueues job → BullMQ (executes) → sync logic runs
 
 | Technology | Version | Role |
 |-----------|---------|------|
-| **Next.js** (App Router) | `15.x` | React framework — pages, routing, SSR/ISR/SSG |
-| **React** | `18.3.x` | UI component library |
+| **Next.js** (App Router) | `16.x` | React framework — pages, routing, SSR/ISR/SSG |
+| **React** | `19.x` | UI component library |
 | **Tailwind CSS** | `4.x` 🔄 | Utility CSS classes for styling |
 | **TanStack Query** | `5.x` 🆕 | Manages fetching, caching, and syncing server data in the UI |
 | **TypeScript** | `5.5.x` | Typed frontend code |
