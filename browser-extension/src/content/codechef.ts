@@ -1,5 +1,5 @@
 import type { CapturedSubmission } from '../types';
-import { once, readMonaco, sendCapture, text } from '../lib/capture';
+import { htmlToMarkdown, once, readMonaco, sendCapture, text } from '../lib/capture';
 
 // CodeChef content script (Path B v2) — mirrors the LeetCode approach:
 //   1. Detect an "Accepted" verdict in the submissions table (or status page).
@@ -54,16 +54,34 @@ function title(code: string): string {
   return text(document.querySelector('h1, .problem-title, [class*="problem-name"]')) || code;
 }
 
-function emit(problemCode: string, code: string, language: string): void {
+// Full problem statement from CodeChef's problem API (`body` holds the statement).
+async function fetchQuestionMarkdown(problemCode: string, titleText: string): Promise<string> {
+  try {
+    const res = await fetch(`https://www.codechef.com/api/contests/PRACTICE/problems/${problemCode}`, {
+      credentials: 'include',
+      headers: { accept: 'application/json' },
+    });
+    if (!res.ok) return '';
+    const data = await res.json();
+    const body = data?.body || data?.problemComponents?.statement || '';
+    if (!body) return '';
+    return `# ${problemCode}. ${titleText}\n\n${htmlToMarkdown(body)}\n\n[View on CodeChef](https://www.codechef.com/problems/${problemCode})\n`;
+  } catch {
+    return '';
+  }
+}
+
+async function emit(problemCode: string, code: string, language: string): Promise<void> {
+  const titleText = title(problemCode).slice(0, 300);
   const submission: CapturedSubmission = {
     platform: 'codechef',
     number: problemCode.slice(0, 40),
     slug: problemCode.slice(0, 200),
-    title: title(problemCode).slice(0, 300),
+    title: titleText,
     topics: [],
     language,
     code,
-    questionMarkdown: '',
+    questionMarkdown: await fetchQuestionMarkdown(problemCode, titleText),
     solvedAt: new Date().toISOString(),
     url: `https://www.codechef.com/problems/${problemCode}`,
   };
@@ -92,14 +110,14 @@ async function scanSubmissionsTable(problemCode: string): Promise<boolean> {
       console.warn(`[CodeVault] CC: accepted sol ${sid} but no source from viewplaintext.`);
       return true;
     }
-    emit(problemCode, code, cleanLang(text(langCell)));
+    await emit(problemCode, code, cleanLang(text(langCell)));
     return true;
   }
   return false;
 }
 
 // Path 2: fallback — read the editor on the problem page (may be the template).
-function scanEditor(problemCode: string): void {
+async function scanEditor(problemCode: string): Promise<void> {
   const accepted = Array.from(document.querySelectorAll('[class*="result"], span, td')).some((el) =>
     /\b(Accepted|Correct Answer|\(100\))\b/i.test(text(el)),
   );
@@ -108,7 +126,7 @@ function scanEditor(problemCode: string): void {
   const code = readMonaco();
   if (!code) return;
   console.warn('[CodeVault] CC: used editor fallback (viewplaintext unavailable).');
-  emit(problemCode, code, cleanLang(text(document.querySelector('[class*="language"]'))));
+  await emit(problemCode, code, cleanLang(text(document.querySelector('[class*="language"]'))));
 }
 
 let inFlight = false;
@@ -119,7 +137,7 @@ async function tryCapture(): Promise<void> {
   inFlight = true;
   try {
     const gotFromTable = await scanSubmissionsTable(problemCode);
-    if (!gotFromTable) scanEditor(problemCode);
+    if (!gotFromTable) await scanEditor(problemCode);
   } finally {
     inFlight = false;
   }

@@ -32,6 +32,24 @@ export function once(key: string): boolean {
   return true;
 }
 
+// Light HTML → Markdown for building question.md (GitHub also renders raw HTML, but this
+// gives cleaner diffs). Shared across platform content scripts.
+export function htmlToMarkdown(html: string): string {
+  return html
+    .replace(/<\/?(strong|b)>/gi, '**')
+    .replace(/<\/?(em|i)>/gi, '_')
+    .replace(/<pre[^>]*>/gi, '\n```\n')
+    .replace(/<\/pre>/gi, '\n```\n')
+    .replace(/<li[^>]*>/gi, '\n- ')
+    .replace(/<\/(p|div|ul|ol|h[1-6]|section)>/gi, '\n\n')
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<[^>]+>/g, '')
+    .replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'").replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
 // Read the Monaco editor's code if present (LeetCode/CodeChef use Monaco).
 export function readMonaco(): string | null {
   const w = window as unknown as { monaco?: { editor?: { getModels?: () => Array<{ getValue(): string }> } } };

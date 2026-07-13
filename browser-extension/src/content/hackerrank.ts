@@ -1,5 +1,5 @@
 import type { CapturedSubmission } from '../types';
-import { once, readMonaco, sendCapture, text } from '../lib/capture';
+import { htmlToMarkdown, once, readMonaco, sendCapture, text } from '../lib/capture';
 
 // HackerRank content script (Path B v2) — mirrors the LeetCode approach:
 //   1. Detect a solved/Accepted result in the DOM.
@@ -82,6 +82,23 @@ function cleanLang(raw?: string): string {
   return t && t.length <= 20 ? t : 'unknown';
 }
 
+// Full problem statement from the challenge REST model (`body_html`/`problem_statement`).
+async function fetchQuestionMarkdown(slug: string, title: string): Promise<string> {
+  try {
+    const res = await fetch(`${REST}/${slug}`, {
+      credentials: 'include',
+      headers: { accept: 'application/json' },
+    });
+    if (!res.ok) return '';
+    const model = (await res.json())?.model || {};
+    const html = model.body_html || model.problem_statement || '';
+    if (!html) return '';
+    return `# ${title}\n\n${htmlToMarkdown(html)}\n\n[View on HackerRank](https://www.hackerrank.com/challenges/${slug}/problem)\n`;
+  } catch {
+    return '';
+  }
+}
+
 let inFlight = false;
 async function tryCapture(): Promise<void> {
   if (inFlight) return;
@@ -112,16 +129,17 @@ async function tryCapture(): Promise<void> {
       return;
     }
 
+    const title =
+      text(document.querySelector('h1, .challenge-name, [class*="challenge-title"]')) || slug;
     const submission: CapturedSubmission = {
       platform: 'hackerrank',
       number: slug.slice(0, 40),
       slug: slug.slice(0, 200),
-      title:
-        text(document.querySelector('h1, .challenge-name, [class*="challenge-title"]')) || slug,
+      title,
       topics: [],
       language,
       code,
-      questionMarkdown: '',
+      questionMarkdown: await fetchQuestionMarkdown(slug, title),
       solvedAt: new Date().toISOString(),
       url: `https://www.hackerrank.com/challenges/${slug}/problem`,
     };
