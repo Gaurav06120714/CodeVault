@@ -41,7 +41,20 @@ chrome.runtime.onMessage.addListener(
           return false;
         }
         setToken(msg.token)
-          .then(() => sendResponse({ ok: true }))
+          .then(async () => {
+            // If this JWT arrived from the tab the popup opened for sign-in, auto-close it so
+            // the user lands back on their coding tab instead of a stray CodeVault page.
+            try {
+              const { cvLoginTabId } = await chrome.storage.local.get('cvLoginTabId');
+              if (cvLoginTabId != null && sender.tab?.id === cvLoginTabId) {
+                await chrome.storage.local.remove('cvLoginTabId');
+                await chrome.tabs.remove(cvLoginTabId);
+              }
+            } catch {
+              /* tab already closed / no tabs permission — ignore */
+            }
+            sendResponse({ ok: true });
+          })
           .catch(() => sendResponse({ ok: false, error: 'store_failed' }));
         return true;
       }
