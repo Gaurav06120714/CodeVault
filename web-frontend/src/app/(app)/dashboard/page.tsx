@@ -147,7 +147,26 @@ export default function DashboardPage() {
               allRecent = allRecent.concat(recents);
             }
           });
-          
+
+          // Manual fallback: also count problems captured by the extension (git-service),
+          // so platforms whose stats API returns no calendar still show activity on the map.
+          try {
+            const GIT_URL = process.env.NEXT_PUBLIC_GIT_SERVICE_URL || 'http://localhost:5050/api';
+            const pRes = await fetch(`${GIT_URL}/problems?limit=100`, {
+              headers: { Authorization: `Bearer ${token}` },
+            });
+            if (pRes.ok) {
+              const pData = await pRes.json();
+              (pData?.items || []).forEach((it: any) => {
+                if (!it?.solvedAt) return;
+                const dateStr = new Date(it.solvedAt).toISOString().split('T')[0];
+                mergedHeatmap[dateStr] = (mergedHeatmap[dateStr] || 0) + 1;
+              });
+            }
+          } catch {
+            /* git-service optional — heatmap still works from stats alone */
+          }
+
           // Generate 365 cells
           const cells = [];
           const today = new Date();
