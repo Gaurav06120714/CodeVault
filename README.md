@@ -124,7 +124,7 @@ CodeVault/
 | Part | Stack | What it does | Docs |
 |-----|-------|--------------|------|
 | **frontendHtml/** | static HTML · CSS · JS | Clickable prototype of every screen; the visual spec for the real UI | [frontendHtml/README.md](frontendHtml/README.md) |
-| **web-frontend/** | Next.js 15 · React 18 · Tailwind | Production website UI; connect platforms, view analysis, public profiles | [web-frontend/README.md](web-frontend/README.md) |
+| **web-frontend/** | Next.js 16 · React 19 · Tailwind | Production website UI; connect platforms, view analysis, public profiles | [web-frontend/README.md](web-frontend/README.md) |
 | **web-backend/** | Node.js · Express · Prisma | Auth, platform connections, multi‑platform stats, public profiles | [web-backend/README.md](web-backend/README.md) |
 | **git-service/** | Node.js · Express · Prisma · node‑cron | Fetches the user's code + question, pushes the per‑problem folder to GitHub, runs scheduled syncs | [git-service/README.md](git-service/README.md) |
 | **browser-extension/** | Manifest V3 · TypeScript · WebExtensions | Captures *your own* accepted solutions in-browser and feeds git-service (same CodeVault user) | [browser-extension/README.md](browser-extension/README.md) |
@@ -256,7 +256,7 @@ One-time connect ──▶ Submission Fetcher ──▶ Organizer ──▶ GitH
 
 | App | Technology | Version |
 |-----|-----------|---------|
-| web-frontend | **Next.js** (App Router) · **React** · **Tailwind CSS** · **TanStack Query** | `15.x` · `18.3.x` · `4.x` · `5.x` |
+| web-frontend | **Next.js** (App Router) · **React** · **Tailwind CSS** · **TanStack Query** | `16.x` · `19.x` · `4.x` · `5.x` |
 | web-backend | **Express** · **Prisma** · **Zod** | `5.x` · `5.18.x` · `3.x` |
 | git-service | **Express** · **Prisma** · **node-cron** · **axios** · **BullMQ** | `5.x` · `5.18.x` · `3.x` · `1.x` · `5.x` |
 | Shared | **TypeScript** · **Node.js** | `5.5.x` · `≥ 20.x LTS` |
@@ -289,13 +289,13 @@ npm run dev          # http://localhost:4000
 # 2) Git service (sync engine) — new terminal
 cd git-service
 npm install && cp .env.example .env && npx prisma db push
-npm run dev          # http://localhost:5000
+npm run dev          # http://localhost:5050
 
 # 3) Web frontend (UI) — new terminal
 cd web-frontend
 npm install
 cp .env.example .env.local   # NEXT_PUBLIC_API_URL=http://localhost:4000
-                             # NEXT_PUBLIC_GIT_SERVICE_URL=http://localhost:5000
+                             # NEXT_PUBLIC_GIT_SERVICE_URL=http://localhost:5050
 npm run dev          # http://localhost:3000
 ```
 
@@ -308,10 +308,11 @@ npm run dev          # http://localhost:3000
 - [x] web-backend: LeetCode stats (Path A)
 - [x] web-backend: Codeforces stats (official API)
 - [x] git-service: LeetCode code sync (Path B) → GitHub push + README index
-- [x] browser-extension: capture-at-source (Path B v2) → git-service ingest, same-user auth *(built; not build-verified)*
-- [x] web-frontend: build real pages from the prototype *(dashboard/analytics/repositories/sync-status wired; public profile still mock)*
-- [ ] web-backend: CodeChef + HackerRank stats (aggregate in `stats.service.ts`)
-- [ ] Unified multi‑platform dashboard *(2 of 4 platforms aggregated so far)*
+- [x] browser-extension: capture-at-source (Path B v2) → git-service ingest, same-user auth *(build-verified; LeetCode full-code capture — all languages via `submissionDetails` GraphQL — verified live 2026-07-12)*
+- [x] web-frontend: build real pages from the prototype *(dashboard/analytics/repositories/sync-status + public profile all wired to real data)*
+- [x] web-backend: CodeChef + HackerRank stats (aggregated in `stats.service.ts`)
+- [x] Unified multi‑platform dashboard *(all 4 platforms — LeetCode, Codeforces, CodeChef, HackerRank — aggregated)*
+- [ ] Extend extension full-code capture to CodeChef / HackerRank / Codeforces *(LeetCode done; next up)*
 - [ ] Pricing / plans page (deferred)
 - [ ] AI explanation & next‑problem recommendation
 - [ ] Gamification (streaks, goals, shareable cards)
