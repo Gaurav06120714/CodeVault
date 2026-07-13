@@ -3,14 +3,21 @@ import type { CapturedSubmission, CaptureMessage, IngestResponse } from '../type
 // Send a captured submission to the background worker (which posts it to /api/ingest).
 // Content scripts never hold the JWT — only the background does.
 export function sendCapture(submission: CapturedSubmission): void {
-  const msg: CaptureMessage = { type: 'capture', submission };
-  chrome.runtime
-    .sendMessage(msg)
-    .then((res: IngestResponse | undefined) => {
-      if (res?.ok) console.info('[CodeVault] synced', submission.slug, res);
-      else console.warn('[CodeVault] capture not sent:', res?.error);
-    })
-    .catch((e) => console.warn('[CodeVault] capture message failed', e));
+  // Guard against a stale content script whose extension context was invalidated by a reload
+  // (`chrome.runtime.sendMessage` then throws synchronously, not via the promise).
+  try {
+    if (!chrome.runtime?.id) return;
+    const msg: CaptureMessage = { type: 'capture', submission };
+    chrome.runtime
+      .sendMessage(msg)
+      .then((res: IngestResponse | undefined) => {
+        if (res?.ok) console.info('[CodeVault] synced', submission.slug, res);
+        else console.warn('[CodeVault] capture not sent:', res?.error);
+      })
+      .catch((e) => console.warn('[CodeVault] capture message failed', e));
+  } catch {
+    /* extension context invalidated — reload the page to re-inject a fresh script */
+  }
 }
 
 export function text(el: Element | null | undefined): string {
