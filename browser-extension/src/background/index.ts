@@ -10,7 +10,17 @@ import { clearToken, getToken, setToken } from '../lib/storage';
 // the fresh scripts inject. This removes the need to manually hard-refresh.
 chrome.runtime.onInstalled.addListener(async () => {
   try {
-    const tabs = await chrome.tabs.query({ url: 'https://leetcode.com/*' });
+    // Reload ALL platform tabs (not just LeetCode) so a stale content-script loader from a
+    // previous build — which points at a now-deleted hashed chunk (ERR_FILE_NOT_FOUND) —
+    // is replaced by the fresh script. Prevents "capture didn't fire" after every rebuild.
+    const tabs = await chrome.tabs.query({
+      url: [
+        'https://leetcode.com/*',
+        'https://codeforces.com/*',
+        'https://www.codechef.com/*',
+        'https://www.hackerrank.com/*',
+      ],
+    });
     for (const t of tabs) if (t.id) chrome.tabs.reload(t.id);
   } catch {
     /* no tabs permission for some tab / ignore */
