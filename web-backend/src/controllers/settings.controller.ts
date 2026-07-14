@@ -13,7 +13,7 @@ export class SettingsController {
       res.json(settings);
     } catch (err: any) {
       logger.error({ err }, 'Failed to get settings');
-      res.status(500).json({ error: err.message || 'Internal server error' });
+      res.status(500).json({ error: 'Failed to load settings' });
     }
   }
 
@@ -29,8 +29,12 @@ export class SettingsController {
       res.json(updatedSettings);
     } catch (err: any) {
       logger.error({ err }, 'Failed to update settings');
-      const status = err.message === 'Handle is already taken' || err.message.includes('Handle can only') ? 400 : 500;
-      res.status(status).json({ error: err.message || 'Internal server error' });
+      const knownValidation = err.message === 'Handle is already taken' || err.message?.includes('Handle can only');
+      if (knownValidation) {
+        res.status(400).json({ error: err.message });
+      } else {
+        res.status(500).json({ error: 'Failed to update settings' });
+      }
     }
   }
 }
