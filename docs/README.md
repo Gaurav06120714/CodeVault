@@ -40,28 +40,17 @@
 | [TESTING_PLAN.md](TESTING_PLAN.md) | QA strategy. |
 | [OBSERVABILITY_PLAN.md](OBSERVABILITY_PLAN.md) | Monitoring & tracing strategy. |
 
-## 🛡 Security & operations
+## 🛡 Security
+
+All security docs now live in **[`../security/`](../security/README.md)** — the 16-point
+implementation scorecard plus the detailed per-area blueprints (auth, API, database, secrets,
+extension, cloud, DevSecOps, attack prevention, testing, etc.).
+
+## ⚙️ Operations
 
 | Doc | Topic |
 |-----|-------|
-| [SECURITY_PLAN.md](SECURITY_PLAN.md) | Master security blueprint (OWASP, threat model). |
-| [AUTH_SECURITY.md](AUTH_SECURITY.md) | OAuth, JWT, refresh rotation, RBAC. |
-| [API_SECURITY.md](API_SECURITY.md) | OWASP API Top 10, idempotency, HMAC. |
-| [BACKEND_SECURITY.md](BACKEND_SECURITY.md) | Express hardening, validation, errors. |
-| [DATABASE_SECURITY.md](DATABASE_SECURITY.md) | Postgres, encryption, roles, backups. |
-| [REDIS_SECURITY.md](REDIS_SECURITY.md) | ACL, TLS, caching, locks. |
-| [QUEUE_SECURITY.md](QUEUE_SECURITY.md) | BullMQ, DLQ, backoff, locking. |
-| [GITHUB_SECURITY.md](GITHUB_SECURITY.md) | OAuth, token encryption, webhooks. |
-| [EXTENSION_SECURITY.md](EXTENSION_SECURITY.md) | Extension token scoping, least-privilege manifest, ingest validation. |
-| [FILE_UPLOAD_SECURITY.md](FILE_UPLOAD_SECURITY.md) | No-upload default + hardened blueprint. |
-| [INFRASTRUCTURE_SECURITY.md](INFRASTRUCTURE_SECURITY.md) | Docker, networking, deploys. |
-| [CLOUD_SECURITY.md](CLOUD_SECURITY.md) | Cloudflare WAF, DDoS, TLS, bots. |
-| [SECRETS.md](SECRETS.md) | Env, KMS, rotation, validation. |
 | [MONITORING.md](MONITORING.md) | Metrics, logging, security alerts. |
-| [DEVSECOPS.md](DEVSECOPS.md) | CI/CD security, scanning, supply chain. |
-| [SECURE_DEVELOPMENT.md](SECURE_DEVELOPMENT.md) | Dev & AI security practices, local setup. |
-| [SECURITY_TESTING.md](SECURITY_TESTING.md) | BOLA/CSRF/SSRF suites, DAST, pentest. |
-| [ATTACK_PREVENTION.md](ATTACK_PREVENTION.md) | 40+ attacks mapped to CodeVault. |
 | [SCALABILITY.md](SCALABILITY.md) | Stateless scaling, caching, replicas. |
 | [DISASTER_RECOVERY.md](DISASTER_RECOVERY.md) | Backups, PITR, RTO/RPO, failover. |
 | [COMPLIANCE.md](COMPLIANCE.md) | GDPR-ready, deletion, retention. |

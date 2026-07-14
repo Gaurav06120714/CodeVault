@@ -150,30 +150,18 @@ All design, planning, and security documentation lives in [`docs/`](docs/).
 | [DEVOPS_PLAN.md](docs/DEVOPS_PLAN.md) · [TESTING_PLAN.md](docs/TESTING_PLAN.md) · [OBSERVABILITY_PLAN.md](docs/OBSERVABILITY_PLAN.md) | Delivery, QA, monitoring strategy |
 | [ROADMAP.md](docs/ROADMAP.md) | Consolidated M0–M6 roadmap |
 
-**Security & operations** (enterprise-grade, CodeVault-specific)
+**Security** — all security docs live in **[`security/`](security/README.md)**: a 16-point
+implementation scorecard (mapped to the code) plus the detailed blueprints — SECURITY_PLAN,
+AUTH/API/DATABASE/BACKEND/REDIS/QUEUE/GITHUB/EXTENSION/CLOUD/INFRASTRUCTURE security, SECRETS,
+DEVSECOPS, SECURE_DEVELOPMENT, SECURITY_TESTING, ATTACK_PREVENTION, FILE_UPLOAD_SECURITY.
+
+**Operations**
 | Doc | Topic |
 |-----|-------|
-| [SECURITY_PLAN.md](docs/SECURITY_PLAN.md) | Master security blueprint (OWASP, threat model) |
-| [DATABASE_SECURITY.md](docs/DATABASE_SECURITY.md) | Postgres, encryption, roles, backups |
-| [BACKEND_SECURITY.md](docs/BACKEND_SECURITY.md) | Express hardening, validation, errors |
-| [AUTH_SECURITY.md](docs/AUTH_SECURITY.md) | OAuth, JWT, refresh rotation, RBAC |
-| [EXTENSION_SECURITY.md](docs/EXTENSION_SECURITY.md) | Extension token scoping, least-privilege manifest, ingest validation |
-| [API_SECURITY.md](docs/API_SECURITY.md) | OWASP API Top 10, idempotency, HMAC |
-| [REDIS_SECURITY.md](docs/REDIS_SECURITY.md) | ACL, TLS, caching, locks |
-| [QUEUE_SECURITY.md](docs/QUEUE_SECURITY.md) | BullMQ, DLQ, backoff, locking |
-| [GITHUB_SECURITY.md](docs/GITHUB_SECURITY.md) | OAuth, token encryption, webhooks |
-| [INFRASTRUCTURE_SECURITY.md](docs/INFRASTRUCTURE_SECURITY.md) | Docker, networking, deploys |
-| [CLOUD_SECURITY.md](docs/CLOUD_SECURITY.md) | Cloudflare WAF, DDoS, TLS, bots |
 | [MONITORING.md](docs/MONITORING.md) | Metrics, logging, security alerts |
-| [DEVSECOPS.md](docs/DEVSECOPS.md) | CI/CD security, scanning, supply chain |
-| [SECURE_DEVELOPMENT.md](docs/SECURE_DEVELOPMENT.md) | Dev & AI security practices, local setup, deployment security |
-| [FILE_UPLOAD_SECURITY.md](docs/FILE_UPLOAD_SECURITY.md) | No-upload default + hardened blueprint |
-| [SECRETS.md](docs/SECRETS.md) | Env, KMS, rotation, validation |
 | [SCALABILITY.md](docs/SCALABILITY.md) | Stateless scaling, caching, replicas |
 | [DISASTER_RECOVERY.md](docs/DISASTER_RECOVERY.md) | Backups, PITR, RTO/RPO, failover |
-| [SECURITY_TESTING.md](docs/SECURITY_TESTING.md) | BOLA/CSRF/SSRF suites, DAST, pentest |
 | [COMPLIANCE.md](docs/COMPLIANCE.md) | GDPR-ready, deletion, retention |
-| [ATTACK_PREVENTION.md](docs/ATTACK_PREVENTION.md) | 40+ attacks mapped to CodeVault |
 
 ### How they connect
 
