@@ -25,6 +25,7 @@ function EmailCallbackHandler() {
         const res = await fetch(`${API_URL}/auth/email/verify`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
+          credentials: "include",
           body: JSON.stringify({ token }),
         });
 
@@ -35,8 +36,8 @@ function EmailCallbackHandler() {
 
         const data = await res.json();
 
-        // Store the JWT token and user info
-        localStorage.setItem("token", data.token);
+        // Store the short-lived access token and user info
+        localStorage.setItem("token", data.accessToken);
         localStorage.setItem("user", JSON.stringify(data.user));
 
         // Redirect to dashboard
