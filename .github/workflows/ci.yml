@@ -45,9 +45,16 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: gitleaks/gitleaks-action@v2
-        env:
-          GITLEAKS_CONFIG: .gitleaks.toml
+      # Use the gitleaks CLI directly instead of gitleaks/gitleaks-action@v2, which now
+      # requires a paid license unless it can verify the account is an individual via the
+      # GitHub API — that verification fails on API rate limits and breaks CI. The CLI is
+      # license-free and scans the full git history the same way.
+      - name: Run gitleaks (CLI)
+        run: |
+          VERSION=8.18.4
+          curl -sSfL "https://github.com/gitleaks/gitleaks/releases/download/v${VERSION}/gitleaks_${VERSION}_linux_x64.tar.gz" \
+            | tar -xz gitleaks
+          ./gitleaks detect --source . --config .gitleaks.toml --redact --no-banner --exit-code 1
 
   codeql:
     name: SAST (CodeQL)
