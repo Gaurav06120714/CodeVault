@@ -36,6 +36,11 @@ export function once(key: string): boolean {
 // gives cleaner diffs). Shared across platform content scripts.
 export function htmlToMarkdown(html: string): string {
   return html
+    // Drop <style>/<script>/<head> blocks entirely (their inner text is CSS/JS, not content —
+    // e.g. HackerRank ships MathJax <style> that otherwise leaks into the markdown).
+    .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+    .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
+    .replace(/<head[^>]*>[\s\S]*?<\/head>/gi, '')
     .replace(/<\/?(strong|b)>/gi, '**')
     .replace(/<\/?(em|i)>/gi, '_')
     .replace(/<pre[^>]*>/gi, '\n```\n')

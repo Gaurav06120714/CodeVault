@@ -66,6 +66,8 @@ async function fetchSource(submissionId: string): Promise<string | null> {
 // LeetCode-style light HTML→Markdown so question.md is readable (GitHub also renders raw HTML).
 function htmlToMarkdown(html: string): string {
   return html
+    .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+    .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
     .replace(/<\/?(strong|b)>/gi, '**')
     .replace(/<\/?(em|i)>/gi, '_')
     .replace(/<pre[^>]*>/gi, '\n```\n')

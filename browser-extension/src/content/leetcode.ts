@@ -114,6 +114,8 @@ async function fetchQuestionMarkdown(slug: string, number: string, title: string
 // yields cleaner diffs and readable examples/constraints.
 function htmlToMarkdown(html: string): string {
   return html
+    .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+    .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
     .replace(/<\/?(strong|b)>/gi, '**')
     .replace(/<\/?(em|i)>/gi, '_')
     .replace(/<\/?code>/gi, '`')
