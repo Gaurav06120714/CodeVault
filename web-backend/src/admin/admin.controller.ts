@@ -1,14 +1,15 @@
-// HTTP handlers for /api/admin/* — see /admin/plan.md §5. Thin controllers that delegate to
-// AdminService / PaymentService / FeatureFlagService and rely on requireAdmin for access.
-//
-// TODO: implement. All mutating handlers must require a confirm token + reason and be audited.
+import type { Request, Response } from 'express';
+import { AdminService } from './admin.service';
 
+// HTTP handlers for /api/admin/* — see /admin/plan.md §5. Access is enforced by
+// requireAuth + requireAdmin on the router; these handlers just shape responses.
 export const AdminController = {
-  // overview(req, res)
-  // listUsers(req, res)          getUser(req, res)
-  // suspendUser(req, res)        revokeSessions(req, res)   deleteUser(req, res)
-  // logins(req, res)             audit(req, res)
-  // listPayments(req, res)       refund(req, res)           cancelSubscription(req, res)   compPro(req, res)
-  // flags(req, res)              setFlag(req, res)
-  // retrySync(req, res)
+  async overview(_req: Request, res: Response): Promise<void> {
+    res.json(await AdminService.overview());
+  },
+
+  async listUsers(req: Request, res: Response): Promise<void> {
+    const q = typeof req.query.query === 'string' ? req.query.query : '';
+    res.json({ items: await AdminService.listUsers(q) });
+  },
 };

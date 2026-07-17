@@ -14,6 +14,7 @@ import notificationRoutes from './routes/notification.routes';
 import settingsRoutes from './routes/settings.routes';
 import followRoutes from './routes/follow.routes';
 import messageRoutes from './routes/message.routes';
+import adminRoutes from './admin/admin.routes';
 
 export const createApp = (): Application => {
   const app = express();
@@ -47,6 +48,7 @@ export const createApp = (): Application => {
   app.use('/api/settings', settingsRoutes);
   app.use('/api/users', followRoutes);
   app.use('/api/messages', messageRoutes);
+  app.use('/api/admin', adminRoutes);
 
   // Global Error Handler — never leak internal details to the client
   app.use((err: any, req: Request, res: Response, next: NextFunction) => {
