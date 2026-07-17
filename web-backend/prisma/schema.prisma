@@ -110,6 +110,8 @@ model User {
   notifications          Notification[]
   authSessions           AuthSession[]
   auditLogs              AuditLog[]
+  payments               Payment[]
+  subscription           Subscription?
   following              Follow[]        @relation("UserFollowing")
   followers              Follow[]        @relation("UserFollowers")
   sentMessages           Message[]       @relation("SentMessages")
@@ -334,4 +336,70 @@ model Message {
   @@index([senderId, receiverId, createdAt])
   @@index([receiverId, senderId, createdAt])
   @@map("messages")
+}
+
+// ── Admin / billing (see /admin/plan.md §4 + §6) ───────────────────────────────
+// UserRole { user, admin }, AuditLog and AuditAction already exist above and cover the
+// admin role + audit trail. These add payments, subscriptions, and feature flags.
+
+enum PaymentStatus {
+  succeeded
+  partially_refunded
+  refunded
+  failed
+}
+
+enum SubscriptionStatus {
+  trialing
+  active
+  past_due
+  canceled
+}
+
+model Payment {
+  id          String        @id @default(cuid())
+  userId      String
+  provider    String        // "razorpay" | "stripe"
+  providerRef String        // provider charge / payment id
+  amount      Int           // minor units (paise / cents)
+  currency    String
+  status      PaymentStatus @default(succeeded)
+  plan        String?       // "pro_monthly" | "pro_annual" | "team_seat" ...
+  refundedAmt Int           @default(0)
+  metadata    Json          @default("{}")
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([status])
+  @@index([provider, providerRef])
+  @@map("payments")
+}
+
+model Subscription {
+  id               String             @id @default(cuid())
+  userId           String             @unique
+  provider         String
+  providerRef      String
+  plan             String
+  status           SubscriptionStatus @default(active)
+  currentPeriodEnd DateTime?
+  canceledAt       DateTime?
+  metadata         Json               @default("{}")
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  user             User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([status])
+  @@map("subscriptions")
+}
+
+model FeatureFlag {
+  key       String   @id // "sync_enabled" | "maintenance" | "ai_enabled" | per-platform toggles
+  enabled   Boolean  @default(true)
+  updatedBy String?
+  updatedAt DateTime @updatedAt
+
+  @@map("feature_flags")
 }
