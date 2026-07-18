@@ -101,23 +101,24 @@ export function Donut({
  * `counts` maps a day key (any string) → count; we lay them out in week columns.
  */
 export function Heatmap({ days }: { days: { count: number }[] }) {
-  const cell = 11;
+  const cell = 12;
   const gap = 3;
   const cols = Math.ceil(days.length / 7);
-  const max = Math.max(1, ...days.map((d) => d.count));
+  const max = Math.max(1, ...days.filter((d) => d.count > 0).map((d) => d.count));
   const shade = (n: number) => {
-    if (n <= 0) return colors.border;
+    if (n === 0) return colors.cardAlt; // no activity
     const t = Math.min(1, n / max);
-    if (t < 0.25) return '#cfead9';
-    if (t < 0.5) return '#8fd3ae';
-    if (t < 0.75) return '#4fb583';
-    return colors.green;
+    if (t < 0.25) return '#f7d7cf';
+    if (t < 0.5) return '#f0a996';
+    if (t < 0.75) return '#ea7c62';
+    return colors.brand;
   };
   const width = cols * (cell + gap);
   const height = 7 * (cell + gap);
   return (
     <Svg width={width} height={height}>
       {days.map((d, i) => {
+        if (d.count < 0) return null; // leading weekday padding
         const col = Math.floor(i / 7);
         const row = i % 7;
         return (

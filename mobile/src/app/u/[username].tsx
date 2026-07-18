@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, Image } from 'react-native';
+import { View, StyleSheet, Image, ScrollView } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { fetchPublicProfile } from '../../api/endpoints';
@@ -65,9 +65,10 @@ export default function PublicProfile() {
       {vm.heatmap.length > 0 && (
         <Card>
           <H2>Activity</H2>
-          <View style={{ marginTop: space(3), alignItems: 'center' }}>
+          <Muted>Last 12 months</Muted>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: space(3) }}>
             <Heatmap days={vm.heatmap} />
-          </View>
+          </ScrollView>
         </Card>
       )}
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { View, Text, StyleSheet, Pressable, ScrollView } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import { fetchStats } from '../../api/endpoints';
@@ -82,10 +82,14 @@ export default function Dashboard() {
           {vm.heatmap.length > 0 && (
             <Card>
               <H2>Activity</H2>
-              <Muted>Last 17 weeks</Muted>
-              <View style={{ marginTop: space(3), alignItems: 'center' }}>
+              <Muted>Last 12 months</Muted>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                style={{ marginTop: space(3) }}
+              >
                 <Heatmap days={vm.heatmap} />
-              </View>
+              </ScrollView>
             </Card>
           )}
 

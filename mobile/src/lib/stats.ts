@@ -25,15 +25,19 @@ function parseLeetHeatmap(raw: any): { count: number }[] {
   } catch {
     cal = {};
   }
-  // Build the last 119 days (17 weeks) so it fits a phone width.
-  const DAYS = 119;
+  // Full last 12 months (like the web), horizontally scrollable on phone.
+  const DAYS = 371; // 53 weeks
   const byDay = new Map<string, number>();
   for (const [ts, count] of Object.entries(cal)) {
-    const d = new Date(Number(ts) * 1000);
-    byDay.set(d.toISOString().slice(0, 10), (byDay.get(d.toISOString().slice(0, 10)) || 0) + Number(count));
+    const key = new Date(Number(ts) * 1000).toISOString().slice(0, 10);
+    byDay.set(key, (byDay.get(key) || 0) + Number(count));
   }
   const out: { count: number }[] = [];
   const today = new Date();
+  const first = new Date(today);
+  first.setDate(today.getDate() - (DAYS - 1));
+  // Pad the leading partial week so rows line up to weekday (0 = Sunday).
+  for (let p = 0; p < first.getDay(); p++) out.push({ count: -1 });
   for (let i = DAYS - 1; i >= 0; i--) {
     const d = new Date(today);
     d.setDate(today.getDate() - i);
