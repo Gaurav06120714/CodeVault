@@ -205,3 +205,21 @@ docker compose up -d
 ```
 
 This builds and runs all 4 services. Use this for production-like testing, but `npm run dev` is faster for development.
+
+---
+
+## 📱 Mobile app (Expo Go)
+
+Runs on a phone via Expo Go — not containerized. The phone can't reach the laptop's `localhost`, so
+point it at your machine's LAN IP (`ipconfig getifaddr en0` on macOS).
+
+```bash
+cd mobile
+npm install
+cp .env.example .env          # set EXPO_PUBLIC_WEB_API / EXPO_PUBLIC_GIT_API to your LAN IP
+npx expo start --lan          # scan the QR in Expo Go
+```
+
+Requires web-backend (:4000) and git-service (:5050) running and reachable on the LAN. Login is email
+magic-link (token prints to the web-backend console when SMTP is unconfigured). Full guide:
+[MOBILE_APP.md](MOBILE_APP.md).
