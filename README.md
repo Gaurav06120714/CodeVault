@@ -95,20 +95,22 @@ When you solve problems on LeetCode, Codeforces, CodeChef, or HackerRank, all th
 
 ## 🗂 Monorepo layout
 
-CodeVault is split into **three independent applications** — one UI and two separate backends:
+CodeVault is split into **independent applications** — web + mobile UIs, two backends, an admin console, and a browser extension:
 
 ```
 CodeVault/
 ├── README.md          # ← you are here (project overview)
-├── plan.md            # build spec for every file
-├── context.md         # AI handoff / full project context
+├── MEMORY.md          # working notes for AI agents (ports, conventions, team split)
 ├── .gitignore
 │
-├── docs/                # 📚 architecture, plans & security docs (see Documentation below)
+├── docs/                # 📚 architecture, plans, mobile & security docs (incl. plan.md, context.md)
 │
 ├── frontendHtml/      # 🎨 Clickable HTML/CSS/JS prototype (15 pages)  →  see frontendHtml/README.md
 │
 ├── web-frontend/      # 🖥️ Next.js website UI (production build)       →  see web-frontend/README.md
+│   └── src/ ...
+│
+├── mobile/            # 📱 Expo (React Native) app — runs in Expo Go   →  see mobile/README.md
 │   └── src/ ...
 │
 ├── web-backend/       # 🌐 website API: auth, stats, profiles  →  see web-backend/README.md
@@ -116,6 +118,9 @@ CodeVault/
 │
 ├── git-service/       # 📦 GitHub-sync backend: fetch code + push  →  see git-service/README.md
 │   └── src/ ...
+│
+├── admin/             # 🛠️ Standalone admin console (Next.js, :3100)  →  see admin/README.md
+│   └── ...
 │
 └── browser-extension/ # 🧩 Cross-browser extension: capture accepted code (Path B v2)  →  see browser-extension/README.md
     └── src/ ...
@@ -125,8 +130,10 @@ CodeVault/
 |-----|-------|--------------|------|
 | **frontendHtml/** | static HTML · CSS · JS | Clickable prototype of every screen; the visual spec for the real UI | [frontendHtml/README.md](frontendHtml/README.md) |
 | **web-frontend/** | Next.js 16 · React 19 · Tailwind | Production website UI; connect platforms, view analysis, public profiles | [web-frontend/README.md](web-frontend/README.md) |
+| **mobile/** | Expo SDK 54 · React Native · expo-router | Phone app (Expo Go) mirroring the web features against the same backends | [mobile/README.md](mobile/README.md) · [docs/MOBILE_APP.md](docs/MOBILE_APP.md) |
 | **web-backend/** | Node.js · Express · Prisma | Auth, platform connections, multi‑platform stats, public profiles | [web-backend/README.md](web-backend/README.md) |
 | **git-service/** | Node.js · Express · Prisma · node‑cron | Fetches the user's code + question, pushes the per‑problem folder to GitHub, runs scheduled syncs | [git-service/README.md](git-service/README.md) |
+| **admin/** | Next.js · Prisma | Owner-only admin console (KPIs, users, payments) on :3100 | [admin/README.md](admin/README.md) |
 | **browser-extension/** | Manifest V3 · TypeScript · WebExtensions | Captures *your own* accepted solutions in-browser and feeds git-service (same CodeVault user) | [browser-extension/README.md](browser-extension/README.md) |
 
 > 🎨 **Design language:** warm "paper" background with a **coral `#f1543f` + gold `#e8a200` + rose `#e0457b`** mix (no purple/blue/green theme). Inter + JetBrains Mono. See the live look in [frontendHtml/](frontendHtml/README.md).
