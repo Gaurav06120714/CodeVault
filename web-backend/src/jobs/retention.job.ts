@@ -15,15 +15,24 @@ import logger from '../lib/logger';
  *  5. GDPR erasure   — hard-delete User rows soft-deleted more than 30 days ago
  *                      (cascades to all child tables via Prisma schema OnDelete: Cascade)
  */
+export function getRetentionThresholds(now: number) {
+  return {
+    thirtyDaysAgo: new Date(now - 30 * 24 * 60 * 60 * 1000),
+    ninetyDaysAgo: new Date(now - 90 * 24 * 60 * 60 * 1000),
+    oneEightyDaysAgo: new Date(now - 180 * 24 * 60 * 60 * 1000),
+  };
+}
+
 export async function runRetentionJob(): Promise<void> {
   const start = Date.now();
   logger.info('[RetentionJob] Starting daily data-retention sweep');
 
+  const thresholds = getRetentionThresholds(start);
+
   // ─── 1. Notifications older than 90 days ─────────────────────────────────
-  const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000);
   try {
     const { count: notifCount } = await prisma.notification.deleteMany({
-      where: { createdAt: { lt: ninetyDaysAgo } },
+      where: { createdAt: { lt: thresholds.ninetyDaysAgo } },
     });
     logger.info(`[RetentionJob] Deleted ${notifCount} notifications older than 90 days`);
   } catch (err) {
@@ -31,15 +40,14 @@ export async function runRetentionJob(): Promise<void> {
   }
 
   // ─── 2. Expired / revoked AuthSessions older than 30 days ────────────────
-  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
   try {
     const { count: sessionCount } = await prisma.authSession.deleteMany({
       where: {
         OR: [
           // Session token has naturally expired AND was last seen > 30 days ago
-          { expiresAt: { lt: thirtyDaysAgo } },
+          { expiresAt: { lt: thresholds.thirtyDaysAgo } },
           // Session was explicitly revoked > 30 days ago
-          { revokedAt: { not: null, lt: thirtyDaysAgo } },
+          { revokedAt: { not: null, lt: thresholds.thirtyDaysAgo } },
         ],
       },
     });
@@ -49,10 +57,9 @@ export async function runRetentionJob(): Promise<void> {
   }
 
   // ─── 3. AuditLogs older than 180 days ────────────────────────────────────
-  const oneEightyDaysAgo = new Date(Date.now() - 180 * 24 * 60 * 60 * 1000);
   try {
     const { count: auditCount } = await prisma.auditLog.deleteMany({
-      where: { createdAt: { lt: oneEightyDaysAgo } },
+      where: { createdAt: { lt: thresholds.oneEightyDaysAgo } },
     });
     logger.info(`[RetentionJob] Deleted ${auditCount} audit log entries older than 180 days`);
   } catch (err) {
@@ -66,7 +73,7 @@ export async function runRetentionJob(): Promise<void> {
   try {
     // Users who have at least one session in the last 90 days = active
     const activeSessions = await prisma.authSession.findMany({
-      where: { createdAt: { gte: ninetyDaysAgo } },
+      where: { createdAt: { gte: thresholds.ninetyDaysAgo } },
       select: { userId: true },
       distinct: ['userId'],
     });
@@ -75,7 +82,7 @@ export async function runRetentionJob(): Promise<void> {
     const { count: snapCount } = await prisma.statsSnapshot.deleteMany({
       where: {
         userId: { notIn: activeUserIds.length > 0 ? activeUserIds : ['__none__'] },
-        fetchedAt: { lt: ninetyDaysAgo },
+        fetchedAt: { lt: thresholds.ninetyDaysAgo },
       },
     });
     logger.info(`[RetentionJob] Deleted ${snapCount} stale stats snapshots for inactive users`);
@@ -89,7 +96,7 @@ export async function runRetentionJob(): Promise<void> {
   try {
     const { count: userCount } = await prisma.user.deleteMany({
       where: {
-        deletedAt: { not: null, lt: thirtyDaysAgo },
+        deletedAt: { not: null, lt: thresholds.thirtyDaysAgo },
       },
     });
     logger.info(`[RetentionJob] Hard-deleted ${userCount} GDPR-erased users (soft-deleted > 30d)`);
