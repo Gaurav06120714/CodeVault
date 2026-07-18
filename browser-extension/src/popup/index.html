@@ -58,6 +58,14 @@
       .hint { font-size: 11.5px; color: var(--muted); margin: 12px 0 0; line-height: 1.45; }
       .sep { height: 1px; background: var(--line); margin: 13px 0; }
       [hidden] { display: none !important; }
+      /* Health monitor row */
+      .health-row { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: var(--r-sm); font-size: 11.5px; font-weight: 600; margin-bottom: 10px; border: 1px solid var(--line); background: var(--card); }
+      .health-row.health-ok { border-color: #bbf7d0; background: #f0fdf4; color: #15803d; }
+      .health-row.health-degraded { border-color: #fecaca; background: #fef2f2; color: #dc2626; }
+      .health-row.health-unknown { color: var(--muted); }
+      .health-dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+      .health-ok .health-dot { animation: pulse 1.8s ease-in-out infinite; }
+      .health-meta { margin-left: auto; font-size: 10px; font-weight: 400; color: inherit; opacity: .75; }
     </style>
   </head>
   <body>
@@ -83,6 +91,13 @@
       <!-- SIGNED IN -->
       <section id="signedIn" hidden>
         <p class="lead">You're all set. Solve a problem and it lands in your repo automatically.</p>
+        <!-- Capture health monitor -->
+        <div id="healthRow" class="health-row health-unknown">
+          <span class="health-dot"></span>
+          <span id="healthText">Checking capture health…</span>
+          <span id="healthMeta" class="health-meta"></span>
+        </div>
+
         <div class="plats" id="plats">
           <span class="chip" data-plat="leetcode">LeetCode</span>
           <span class="chip" data-plat="codeforces">CF</span>
