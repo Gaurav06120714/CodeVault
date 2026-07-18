@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, Pressable, ScrollView, Image } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
-import { fetchStats } from '../../api/endpoints';
+import { fetchStats, fetchProblems } from '../../api/endpoints';
 import { errMsg } from '../../api/client';
 import { normalizeStats, diffColors } from '../../lib/stats';
 import { useAuth } from '../../auth/AuthContext';
@@ -16,12 +16,33 @@ export default function Dashboard() {
   const { user } = useAuth();
   const router = useRouter();
   const q = useQuery({ queryKey: ['stats'], queryFn: fetchStats });
+  // Synced problems come from git-service; failing silently keeps the dashboard
+  // alive when git-service is down — we fall back to LeetCode recents.
+  const problemsQ = useQuery({ queryKey: ['problems'], queryFn: fetchProblems, retry: 0 });
 
   if (q.isLoading) return <Screen scroll={false}><Loading label="Fetching your analysis…" /></Screen>;
   if (q.isError)
     return <Screen scroll={false}><ErrorView message={errMsg(q.error)} onRetry={q.refetch} /></Screen>;
 
   const vm = normalizeStats(q.data);
+  const synced = (problemsQ.data?.items ?? []).map((p: any) => ({
+    title: p.title || p.slug || `#${p.number}`,
+    platform: p.platform,
+    difficulty: p.difficulty as string | undefined,
+    number: p.number as string | undefined,
+    when: p.solvedAt
+      ? new Date(p.solvedAt).toLocaleDateString()
+      : p.syncedAt
+        ? new Date(p.syncedAt).toLocaleDateString()
+        : '',
+  }));
+  const recent: {
+    title: string;
+    platform: string;
+    when: string;
+    difficulty?: string;
+    number?: string;
+  }[] = synced.length ? synced : vm.recent;
   const diff = vm.byDifficulty;
   const diffTotal = diff.easy + diff.medium + diff.hard;
 
@@ -101,19 +122,40 @@ export default function Dashboard() {
             </Card>
           )}
 
-          {vm.recent.length > 0 && (
+          {recent.length > 0 && (
             <Card>
-              <H2>Recent solves</H2>
+              <H2>Recent accepted submissions</H2>
+              <Muted>across all platforms</Muted>
               <View style={{ marginTop: space(2), gap: space(2) }}>
-                {vm.recent.slice(0, 6).map((r, i) => (
-                  <View key={i} style={s.recentRow}>
-                    <View style={{ flex: 1 }}>
-                      <Body style={{ fontWeight: '600' }}>{r.title}</Body>
-                      <Muted>{r.when}</Muted>
+                {recent.slice(0, 8).map((r, i) => {
+                  const row = (
+                    <View style={s.recentRow}>
+                      <View style={{ flex: 1 }}>
+                        <Body style={{ fontWeight: '600' }}>{r.title}</Body>
+                        <Muted>
+                          {r.when}
+                          {r.difficulty ? ` · ${r.difficulty}` : ''}
+                        </Muted>
+                      </View>
+                      <Pill text={r.platform} color={platformColor[r.platform] || colors.brand} />
                     </View>
-                    <Pill text={r.platform} color={platformColor[r.platform] || colors.brand} />
-                  </View>
-                ))}
+                  );
+                  return r.number ? (
+                    <Pressable
+                      key={i}
+                      onPress={() =>
+                        router.push({
+                          pathname: '/problem/[platform]/[number]',
+                          params: { platform: r.platform, number: String(r.number), title: r.title },
+                        })
+                      }
+                    >
+                      {row}
+                    </Pressable>
+                  ) : (
+                    <View key={i}>{row}</View>
+                  );
+                })}
               </View>
             </Card>
           )}
