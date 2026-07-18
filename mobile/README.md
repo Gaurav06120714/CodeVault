@@ -1,56 +1,49 @@
-# Welcome to your Expo app 👋
+# 📱 CodeVault Mobile
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+The CodeVault mobile app — **Expo SDK 54 + expo-router**, running on a phone via **Expo Go**. It
+mirrors the web app's features against the same backends, so the data is identical.
 
-## Get started
+Full documentation: [`../docs/MOBILE_APP.md`](../docs/MOBILE_APP.md).
 
-1. Install dependencies
+## Quick start
 
-   ```bash
-   npm install
-   ```
-
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+The phone can't reach the laptop's `localhost` — point the app at your machine's **LAN IP** (same
+Wi-Fi). Find it with `ipconfig getifaddr en0` (macOS).
 
 ```bash
-npm run reset-project
+cd mobile
+npm install
+cp .env.example .env          # set EXPO_PUBLIC_WEB_API / EXPO_PUBLIC_GIT_API to your LAN IP
+npx expo start --lan          # scan the QR with the Expo Go app
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+Requires **web-backend (:4000)** and **git-service (:5050)** running and reachable on the LAN.
+Your Expo Go app must be on **SDK 54**.
 
-### Other setup steps
+## Login
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+Email magic-link — enter the email on your account, then paste the token into the verify screen.
+Without SMTP configured, the token prints to the web-backend console, or:
 
-## Learn more
+```bash
+docker exec codevault-postgres psql -U codevault -d codevault -tAc \
+  'select token from verification_tokens order by "createdAt" desc limit 1;'
+```
 
-To learn more about developing your project with Expo, look at the following resources:
+Email login lands on the same account a GitHub login would (matched by email), so you see your real
+data.
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+## Layout
 
-## Join the community
+- `src/app` — expo-router routes (auth, tabs, chat, profile, connect, notifications).
+- `src/api` — axios clients + endpoint functions.
+- `src/auth` — auth context (login, profile hydration, persistence).
+- `src/components` — UI kit + SVG chart kit.
+- `src/lib` — config (API base URLs), theme, storage, stats normalization.
 
-Join our community of developers creating universal apps.
+## Scripts
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+- `npx expo start --lan` — dev server for Expo Go.
+- `npx expo start --lan -c` — same, clearing the Metro cache (use after dependency changes).
+- `npx tsc --noEmit` — type-check.
+- `npx expo export -p ios` — validate the production bundle compiles.
