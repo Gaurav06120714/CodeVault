@@ -349,6 +349,23 @@ npm run build
 
 > Docker stopped? **macOS:** `colima stop`. **Windows:** quit Docker Desktop. Restart with the step-0 commands.
 
+### 5. mobile → Expo Go (scan on your phone)
+
+The mobile app (`mobile/`, Expo SDK 57 + expo-router) mirrors the web app's features. It runs on your phone via **Expo Go** — nothing to containerize.
+
+> ⚠️ **The phone can't reach the laptop's `localhost`.** Point the app at your machine's **LAN IP** (same Wi-Fi). Find it with `ipconfig getifaddr en0` (macOS) / your Wi-Fi adapter IP (Windows).
+
+```bash
+cd mobile
+npm install
+cp .env.example .env          # set EXPO_PUBLIC_WEB_API / EXPO_PUBLIC_GIT_API to your LAN IP
+npx expo start --lan          # scan the QR with the Expo Go app
+```
+
+- **Auth:** email magic-link. Use the **same email** as your web (GitHub) account — it resolves to the same user, so you see your real analysis. Without SMTP configured, the magic-link token is printed to the **web-backend console**; paste it into the app's verify screen.
+- **CORS note:** native requests from the phone aren't subject to browser CORS, so no allowlist change is needed for device testing. Only `npx expo start --web` (browser preview) would require adding the LAN origin to web-backend's CORS allowlist.
+- Requires the web-backend (`:4000`) and git-service (`:5050`) to be running and reachable on the LAN.
+
 ---
 
 ## 🗺 Roadmap
