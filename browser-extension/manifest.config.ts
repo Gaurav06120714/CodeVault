@@ -6,7 +6,7 @@ export default {
   name: 'CodeVault',
   version: '0.1.0',
   description: 'Capture your accepted solutions and sync them to GitHub via CodeVault.',
-  permissions: ['storage', 'scripting', 'identity'],
+  permissions: ['storage', 'scripting', 'identity', 'alarms', 'tabs'],
   host_permissions: [
     'https://leetcode.com/*',
     'https://codeforces.com/*',
