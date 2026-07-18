@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { PlatformChip } from "../../components/PlatformChip";
+import { apiFetch } from "@/utils/api";
 
 const GITHUB_CLIENT_ID = process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID || '';
 const REDIRECT_URI = `${typeof window !== 'undefined' ? window.location.origin : ''}/login/callback`;
@@ -34,7 +35,7 @@ export default function Login() {
     setEmailError("");
 
     try {
-      const res = await fetch(`${API_URL}/auth/email`, {
+      const res = await apiFetch(`${API_URL}/auth/email`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
