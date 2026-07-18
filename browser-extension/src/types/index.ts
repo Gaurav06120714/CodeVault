@@ -39,12 +39,31 @@ export interface GetRecentMessage {
   type: 'getRecent';
 }
 
+export interface CaptureSuccessMessage {
+  type: 'captureSuccess';
+  platform: PlatformName;
+}
+
+export interface GetHealthMessage {
+  type: 'getHealth';
+}
+
+export type HealthStatus = 'ok' | 'degraded' | 'unknown';
+
+export interface HealthState {
+  status: HealthStatus;
+  lastCaptureAt?: string; // ISO timestamp of last successful capture
+  lastCheckedAt?: string; // ISO timestamp of last health alarm
+}
+
 export type ExtMessage =
   | CaptureMessage
   | SetTokenMessage
   | SignOutMessage
   | GetStatusMessage
-  | GetRecentMessage;
+  | GetRecentMessage
+  | CaptureSuccessMessage
+  | GetHealthMessage;
 
 export interface RecentItem {
   platform: PlatformName;
