@@ -6,6 +6,7 @@ import Link from "next/link";
 import { PLATFORMS } from "@/constants/platforms";
 import { PlatformChip } from "@/components/PlatformChip";
 import { CodeVaultLoader } from "@/components/CodeVaultLoader";
+import { apiFetch } from "@/utils/api";
 
 const GIT_URL = process.env.NEXT_PUBLIC_GIT_SERVICE_URL || "http://localhost:5050/api";
 
@@ -64,8 +65,8 @@ export default function SyncStatusPage() {
     try {
       setError("");
       const [sRes, aRes] = await Promise.all([
-        fetch(`${GIT_URL}/sync/status`, { credentials: 'include' }),
-        fetch(`${GIT_URL}/sync/activity?limit=20`, { credentials: 'include' }),
+        apiFetch(`${GIT_URL}/sync/status`, { credentials: 'include' }),
+        apiFetch(`${GIT_URL}/sync/activity?limit=20`, { credentials: 'include' }),
       ]);
       if (!sRes.ok) throw new Error("Failed to load sync status");
       const sData = await sRes.json();
@@ -88,7 +89,7 @@ export default function SyncStatusPage() {
     try {
       setSyncing(true);
       setError("");
-      await fetch(`${GIT_URL}/sync`, {
+      await apiFetch(`${GIT_URL}/sync`, {
         method: "POST",
         credentials: 'include',
         headers: { "Content-Type": "application/json" },
