@@ -54,8 +54,8 @@ export const unreadMessageCount = () =>
   web.get('/messages/unread-count').then((r) => r.data);
 export const getConversation = (handle: string) =>
   web.get(`/messages/${handle}`).then((r) => r.data);
-export const sendMessage = (handle: string, body: string) =>
-  web.post(`/messages/${handle}`, { body }).then((r) => r.data);
+export const sendMessage = (handle: string, content: string) =>
+  web.post(`/messages/${handle}`, { content }).then((r) => r.data);
 
 /* ---- Sync + repos + problems (git-service /api) ---- */
 export const triggerSync = (connectionId?: string) =>

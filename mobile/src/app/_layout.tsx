@@ -32,6 +32,7 @@ export default function RootLayout() {
             <Stack.Screen name="connect" options={{ title: 'Connect a platform', presentation: 'modal' }} />
             <Stack.Screen name="notifications" options={{ title: 'Notifications' }} />
             <Stack.Screen name="u/[username]" options={{ title: 'Profile' }} />
+            <Stack.Screen name="chat/[handle]" options={{ title: 'Chat' }} />
             <Stack.Screen name="problem/[platform]/[number]" options={{ title: 'Problem' }} />
           </Stack>
         </AuthProvider>

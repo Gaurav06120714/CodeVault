@@ -1,16 +1,11 @@
 import React from 'react';
-import { View, StyleSheet, Pressable, Image } from 'react-native';
+import { StyleSheet, Pressable, Image, View } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import { listConversations } from '../../api/endpoints';
 import { errMsg } from '../../api/client';
 import { Screen, Card, H1, Muted, Body, Loading, ErrorView, EmptyView } from '../../components/ui';
 import { colors, space } from '../../lib/theme';
-
-function asList(d: any): any[] {
-  if (Array.isArray(d)) return d;
-  return d?.items ?? d?.conversations ?? [];
-}
 
 export default function Messages() {
   const router = useRouter();
@@ -19,29 +14,38 @@ export default function Messages() {
   if (q.isLoading) return <Screen scroll={false}><Loading /></Screen>;
   if (q.isError) return <Screen scroll={false}><ErrorView message={errMsg(q.error)} onRetry={q.refetch} /></Screen>;
 
-  const convos = asList(q.data);
+  const convos: any[] = q.data?.conversations ?? [];
 
   return (
     <Screen refreshing={q.isRefetching} onRefresh={q.refetch}>
       <H1>Inbox</H1>
       {convos.length === 0 ? (
-        <EmptyView icon="💬" title="No conversations" hint="Follow people and start a chat from their profile." />
+        <EmptyView icon="💬" title="No conversations" hint="Open someone's profile to start a chat." />
       ) : (
-        convos.map((c: any, i: number) => {
-          const handle = c.handle || c.user?.handle || c.otherUser?.handle;
+        convos.map((c, i) => {
+          const u = c.user ?? {};
+          const preview = c.lastMessage
+            ? `${c.lastMessage.fromMe ? 'You: ' : ''}${c.lastMessage.content}`
+            : `@${u.handle}`;
           return (
-            <Pressable key={i} onPress={() => handle && router.push(`/u/${handle}`)}>
+            <Pressable key={u.id ?? i} onPress={() => u.handle && router.push(`/chat/${u.handle}`)}>
               <Card style={s.row}>
-                {c.avatarUrl || c.user?.avatarUrl ? (
-                  <Image source={{ uri: c.avatarUrl || c.user?.avatarUrl }} style={s.avatar} />
+                {u.avatarUrl ? (
+                  <Image source={{ uri: u.avatarUrl }} style={s.avatar} />
                 ) : (
                   <View style={[s.avatar, s.avatarFallback]} />
                 )}
                 <View style={{ flex: 1 }}>
-                  <Body style={{ fontWeight: '700' }}>{c.displayName || c.user?.displayName || handle}</Body>
-                  <Muted>{c.lastMessage || c.preview || `@${handle}`}</Muted>
+                  <Body style={{ fontWeight: '700' }}>{u.displayName || `@${u.handle}`}</Body>
+                  <Muted style={{ marginTop: 2 }} >
+                    {preview.length > 48 ? preview.slice(0, 48) + '…' : preview}
+                  </Muted>
                 </View>
-                {c.unread ? <View style={s.unread} /> : null}
+                {c.unread > 0 ? (
+                  <View style={s.badge}>
+                    <Body style={s.badgeText}>{c.unread}</Body>
+                  </View>
+                ) : null}
               </Card>
             </Pressable>
           );
@@ -53,7 +57,8 @@ export default function Messages() {
 
 const s = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', gap: space(3) },
-  avatar: { width: 44, height: 44, borderRadius: 22, backgroundColor: colors.cardAlt },
+  avatar: { width: 46, height: 46, borderRadius: 23, backgroundColor: colors.cardAlt },
   avatarFallback: { borderWidth: 1, borderColor: colors.border },
-  unread: { width: 10, height: 10, borderRadius: 5, backgroundColor: colors.brand },
+  badge: { minWidth: 22, height: 22, borderRadius: 11, backgroundColor: colors.brand, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 6 },
+  badgeText: { color: '#fff', fontSize: 12, fontWeight: '800' },
 });

@@ -1,16 +1,19 @@
 import React from 'react';
 import { View, StyleSheet, Image, ScrollView } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { fetchPublicProfile } from '../../api/endpoints';
 import { errMsg } from '../../api/client';
-import { Screen, Card, H1, H2, Muted, Body, StatCard, Loading, ErrorView } from '../../components/ui';
+import { Screen, Card, H1, H2, Muted, Body, StatCard, Button, Loading, ErrorView } from '../../components/ui';
+import { useAuth } from '../../auth/AuthContext';
 import { Donut, Heatmap, BarList } from '../../components/charts';
 import { normalizeStats, diffColors } from '../../lib/stats';
 import { colors, space } from '../../lib/theme';
 
 export default function PublicProfile() {
   const { username } = useLocalSearchParams<{ username: string }>();
+  const router = useRouter();
+  const { user } = useAuth();
   const q = useQuery({
     queryKey: ['public', username],
     queryFn: () => fetchPublicProfile(String(username)),
@@ -39,6 +42,10 @@ export default function PublicProfile() {
           <Muted>@{p.handle || username}</Muted>
         </View>
       </Card>
+
+      {user?.handle !== (p.handle || username) && (
+        <Button title="Message" onPress={() => router.push(`/chat/${p.handle || username}`)} />
+      )}
 
       <View style={s.row}>
         <StatCard label="Total solved" value={p.totalSolved ?? vm.totalSolved} accent={colors.brand} />
