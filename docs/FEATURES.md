@@ -215,7 +215,7 @@ Supported platforms: **LeetCode, Codeforces, CodeChef, HackerRank** (`PlatformTy
 | Per-route rate limiting | ✅ | A/G | `rateLimit.middleware.ts`. |
 | Zod request validation | ✅ | A/G | `validate.middleware.ts` + validators. |
 | Request-ID tracing | ✅ | G | `requestId.middleware.ts` (git-service). |
-| Row-Level Security (owner isolation) | 🟠 | A | `database/rls.sql` written, **not enabled** yet. |
+| Row-Level Security (owner isolation) | ✅ | A | Enabled via Prisma migration and middleware. |
 | Audit log | ✅ | A | `AuditLog` table + `AuditAction` enum. |
 | Secrets in `.env` only | ✅ | A/G | `.env.example` per service; gitleaks config at root. |
 
@@ -249,7 +249,7 @@ Full security blueprint: see the `*_SECURITY.md` docs in this folder.
 | Real activity heatmap (dashboard) from real solve data | A | 🟢 **done this cycle** (both dashboard and public profile now use real API heatmap) |
 | Repositories **deep** file/commit browse (wire to `/api/problems`) | G | Endpoint live; frontend pending. |
 | JWT refresh-token rotation endpoint | A | Schema ready. |
-| Enable Row-Level Security before prod | A | `database/rls.sql`. |
+| ~~Enable Row-Level Security before prod~~ | A | ✅ **done this cycle** via migration. |
 | CF / CC / HR extension live selector test | G | LeetCode done + verified; port `submissionDetails`-style full-code capture to the other three. |
 | AI layer — explain solution, tag topic, recommend next problem | — | Uses the latest Claude models. |
 | Gamification — streaks, goals, shareable cards | — | Deferred. |
