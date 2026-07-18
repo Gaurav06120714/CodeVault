@@ -16,6 +16,7 @@ export default function DashboardPage() {
   const router = useRouter();
   const [user, setUser] = useState<{ id: string; githubLogin: string; displayName: string | null } | null>(null);
   const [stats, setStats] = useState<any>(null);
+  const [statsError, setStatsError] = useState(false);
   const [heatmapCells, setHeatmapCells] = useState<string[]>([]);
   const [recentSubs, setRecentSubs] = useState<any[]>([]);
 
@@ -191,7 +192,8 @@ export default function DashboardPage() {
           router.push("/connect");
         }
       } catch (err) {
-        console.error("Failed to fetch stats", err);
+        setStatsError(true);
+        console.warn("Stats API unreachable — is web-backend (:4000) running?", err);
       } finally {
         setIsLoading(false);
       }
@@ -214,6 +216,11 @@ export default function DashboardPage() {
 
   return (
     <>
+      {statsError && (
+        <div role="alert" style={{ margin: "0 0 16px", padding: "10px 14px", borderRadius: 10, background: "#fef3c7", color: "#92400e", fontSize: 14, border: "1px solid #fde68a" }}>
+          ⚠️ Couldn&apos;t reach the backend — showing cached/partial data. Make sure web-backend (:4000) is running, then refresh.
+        </div>
+      )}
       {/* PROFILE HEADER */}
       <section className="phead">
         <div className="pav">{user.displayName?.charAt(0).toUpperCase() || user.githubLogin.charAt(0).toUpperCase()}</div>
