@@ -6,6 +6,12 @@
 #   docker compose up -d postgres redis
 # Bring up everything once the services have a package.json:
 #   docker compose up -d
+#
+# Mobile app (mobile/, Expo Go): NOT containerized — the Metro bundler runs on
+# the host (`cd mobile && npx expo start --lan`) and the app runs on your phone
+# via Expo Go. It reaches web-backend (:4000) and git-service (:5050) over the
+# LAN, so publish those ports (below) and set the phone's EXPO_PUBLIC_* env vars
+# to the host's LAN IP (not localhost). See README §5.
 
 services:
   postgres:
