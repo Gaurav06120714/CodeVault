@@ -449,7 +449,7 @@ FE marketing/UI-kit run alongside M0–M1 (no BE dep).
 ### 9.5 Final deployment readiness checklist
 *(Whole-product gate — includes frontend + deploy items still pending. Ticked = done.)*
 - [ ] All endpoints conform to this contract (conformance tests pass) *(endpoints built; automated conformance tests pending)*
-- [ ] AuthN/Z: JWT verified both services; ownership/BOLA; CSRF; refresh rotation *(JWT+ownership+refresh done; anti-CSRF token middleware pending)*
+- [ ] AuthN/Z: JWT verified both services; ownership/BOLA; CSRF; refresh rotation *(JWT+ownership+refresh done; anti-CSRF token middleware implemented)*
 - [x] Tokens envelope-encrypted; no secrets in logs/bundle; git-service not browser-keyed
 - [x] Rate limits + queue caps + SSRF egress allowlist
 - [ ] Every page: loading + empty + error + success verified *(frontend not built yet)*
