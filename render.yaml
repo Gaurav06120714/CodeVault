@@ -20,11 +20,8 @@ envVarGroups:
         sync: false # you set this (64 hex chars) — must be identical for both
 
 services:
-  - type: keyvalue
-    name: codevault-redis
-    plan: free
-    ipAllowList: [] # only reachable from your Render services
-
+  # Reusing your EXISTING free Redis (free tier = 1 Key Value max). Set REDIS_URL manually on
+  # codevault-backend + codevault-git (paste the Internal URL from your Redis → Connect).
   - type: web
     name: codevault-backend
     runtime: docker
@@ -36,7 +33,7 @@ services:
       - key: DATABASE_URL
         fromDatabase: { name: codevault-db, property: connectionString }
       - key: REDIS_URL
-        fromService: { type: keyvalue, name: codevault-redis, property: connectionString }
+        sync: false # paste your existing Redis's Internal connection string
       - key: NODE_ENV
         value: production
       - key: GITHUB_CLIENT_ID
@@ -59,7 +56,7 @@ services:
       - key: DATABASE_URL
         fromDatabase: { name: codevault-db, property: connectionString }
       - key: REDIS_URL
-        fromService: { type: keyvalue, name: codevault-redis, property: connectionString }
+        sync: false # paste your existing Redis's Internal connection string
       - key: NODE_ENV
         value: production
 
