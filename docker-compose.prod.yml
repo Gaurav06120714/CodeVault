@@ -1,0 +1,92 @@
+# CodeVault — full production stack for ONE VM (Oracle Cloud Always Free).
+# Everything talks over the internal docker network; only Caddy is exposed (80/443) and it
+# reverse-proxies to the frontend, which itself proxies /api + /gitapi to the backends
+# (same-origin — see web-frontend/next.config.ts). One command to run it all:
+#   docker compose -f docker-compose.prod.yml up -d --build
+# Secrets are read from a .env file next to this one (see docs/DEPLOY.md).
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: codevault
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-codevault}
+      POSTGRES_DB: codevault
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U codevault"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes: [redisdata:/data]
+
+  web-backend:
+    build: ./web-backend
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://codevault:${DB_PASSWORD:-codevault}@postgres:5432/codevault
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY}
+      GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID}
+      GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      NODE_ENV: production
+      PORT: "4000"
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_started }
+
+  git-service:
+    build: ./git-service
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://codevault:${DB_PASSWORD:-codevault}@postgres:5432/codevault
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY}
+      NODE_ENV: production
+      PORT: "5050"
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_started }
+
+  web-frontend:
+    build:
+      context: ./web-frontend
+      args:
+        NEXT_PUBLIC_API_URL: /api
+        NEXT_PUBLIC_GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID}
+        NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+    restart: unless-stopped
+    environment:
+      BACKEND_URL: http://web-backend:4000
+      GIT_URL: http://git-service:5050
+      NODE_ENV: production
+      PORT: "3000"
+    depends_on: [web-backend, git-service]
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports: ["80:80", "443:443"]
+    environment:
+      DOMAIN: ${DOMAIN}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on: [web-frontend]
+
+volumes:
+  pgdata: {}
+  redisdata: {}
+  caddy_data: {}
+  caddy_config: {}

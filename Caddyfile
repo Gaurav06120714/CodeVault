@@ -1,0 +1,5 @@
+# Caddy auto-provisions a free Let's Encrypt HTTPS cert for $DOMAIN and reverse-proxies
+# everything to the frontend (which same-origin-proxies /api + /gitapi to the backends).
+{$DOMAIN} {
+	reverse_proxy web-frontend:3000
+}
