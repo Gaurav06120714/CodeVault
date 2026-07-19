@@ -81,7 +81,12 @@ export async function apiFetch(
     }
   }
 
-  const url = path.startsWith("http") ? path : `${API_URL}${path}`;
+  // Callers pass the FULL path already including the API base (e.g. `${API_URL}/auth/github`
+  // or `${GIT_URL}/repos`), exactly like the app's plain fetch() calls. Do NOT re-prepend
+  // API_URL here — when API_URL is relative in prod (`/api`) that double-prefixes to
+  // `/api/api/...`, which isn't CSRF-exempt and 403s. (Locally it was masked because API_URL
+  // was an absolute http URL, so the old `startsWith("http")` branch skipped the prefix.)
+  const url = path;
 
   let res = await fetch(url, {
     ...options,
