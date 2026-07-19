@@ -9,20 +9,10 @@ const nextConfig: NextConfig = {
   output: "standalone",
 
   // Same-origin proxy for deployment: the browser only ever talks to this frontend's origin,
-  // so the session cookie + CSRF work with no cross-domain headaches. In production set the
-  // BACKEND_URL / GIT_URL env vars to the (private) service URLs; locally these are unset so
-  // the app calls the services directly. See docs/DEPLOY.md.
-  async rewrites() {
-    // Render passes a "host:port" (no scheme) via fromService.hostport — add http:// for
-    // internal traffic. A full URL (Oracle/other) is used as-is.
-    const withScheme = (u?: string) => (u && !/^https?:\/\//.test(u) ? `http://${u}` : u);
-    const backend = withScheme(process.env.BACKEND_URL);
-    const git = withScheme(process.env.GIT_URL);
-    const rules = [];
-    if (backend) rules.push({ source: "/api/:path*", destination: `${backend}/api/:path*` });
-    if (git) rules.push({ source: "/gitapi/:path*", destination: `${git}/api/:path*` });
-    return rules;
-  },
+  // so the session cookies + CSRF work with no cross-domain headaches. This is done with RUNTIME
+  // route handlers (src/app/api/[...path] and src/app/gitapi/[...path]) — NOT next.config
+  // rewrites, which resolve at BUILD time when BACKEND_URL/GIT_URL (fromService.hostport) don't
+  // exist yet, so the proxy silently 404'd in prod. See src/utils/proxy.ts and docs/DEPLOY.md.
 };
 
 export default nextConfig;
