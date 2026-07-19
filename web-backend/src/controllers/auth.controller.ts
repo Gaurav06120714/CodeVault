@@ -86,7 +86,11 @@ export class AuthController {
       res.json(buildAuthResponse(result));
     } catch (error: any) {
       logger.error(error, 'Auth Controller Error');
-      res.status(500).json({ error: 'Internal server error during authentication' });
+      res.status(500).json({
+        error: 'Internal server error during authentication',
+        message: error?.message,
+        detail: error?.response?.data,
+      });
     }
   }
 
@@ -105,7 +109,11 @@ export class AuthController {
       res.json(buildAuthResponse(result));
     } catch (error: any) {
       logger.error(error, 'Google Auth Controller Error');
-      res.status(500).json({ error: 'Internal server error during authentication' });
+      res.status(500).json({
+        error: 'Internal server error during authentication',
+        message: error?.message,
+        detail: error?.response?.data,
+      });
     }
   }
 
