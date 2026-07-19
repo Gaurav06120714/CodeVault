@@ -2,6 +2,9 @@
 
 FROM node:20-alpine AS builder
 WORKDIR /app
+# openssl must be present BEFORE `prisma generate` so Prisma detects openssl 3 and emits the
+# linux-musl-openssl-3.0.x engine (not the openssl-1.1 fallback that node:20-alpine can't load).
+RUN apk add --no-cache openssl
 COPY package*.json ./
 RUN npm ci
 COPY prisma ./prisma
@@ -13,6 +16,8 @@ RUN npm run build
 FROM node:20-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
+# Prisma's query engine links against libssl at runtime.
+RUN apk add --no-cache openssl
 COPY package*.json ./
 RUN npm ci --omit=dev && npm cache clean --force
 # Built output + the generated Prisma client.
