@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { AuthService, AuthResult } from '../services/auth.service';
 import { env } from '../config/env';
 import logger from '../lib/logger';
+import { signToken } from '../utils/jwt';
 
 const REFRESH_COOKIE = 'cv_refresh';
 const ACCESS_COOKIE = 'cv_access';
@@ -82,6 +83,19 @@ export class AuthController {
   static async me(req: Request, res: Response): Promise<void> {
     // req.user is guaranteed to exist because of requireAuth middleware
     res.json({ message: 'You are authenticated!', user: req.user });
+  }
+
+  /**
+   * Extension token handoff. The browser extension can't read the httpOnly
+   * session cookie, so it calls this (with the cookie, via `credentials:'include'`)
+   * to trade the signed-in session for a longer-lived JWT it stores locally and
+   * sends as `Authorization: Bearer` to git-service. This is what lets the
+   * extension keep working after a single web sign-in. GET → not CSRF-guarded.
+   */
+  static async extensionToken(req: Request, res: Response): Promise<void> {
+    const userId = req.user!.userId;
+    const token = signToken({ userId }, '30d');
+    res.json({ token });
   }
 
   static async requestEmailLogin(req: Request, res: Response): Promise<void> {
