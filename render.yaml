@@ -79,6 +79,6 @@ services:
       - key: NEXT_PUBLIC_GOOGLE_CLIENT_ID
         value: 625546308328-sg2o3jje5as70u21f4hg72gplqv7bai5.apps.googleusercontent.com
       - key: BACKEND_URL
-        fromService: { type: web, name: codevault-backend, property: url }
+        fromService: { type: web, name: codevault-backend, property: hostport }
       - key: GIT_URL
-        fromService: { type: web, name: codevault-git, property: url }
+        fromService: { type: web, name: codevault-git, property: hostport }

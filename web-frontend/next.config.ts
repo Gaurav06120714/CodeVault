@@ -13,8 +13,11 @@ const nextConfig: NextConfig = {
   // BACKEND_URL / GIT_URL env vars to the (private) service URLs; locally these are unset so
   // the app calls the services directly. See docs/DEPLOY.md.
   async rewrites() {
-    const backend = process.env.BACKEND_URL;
-    const git = process.env.GIT_URL;
+    // Render passes a "host:port" (no scheme) via fromService.hostport — add http:// for
+    // internal traffic. A full URL (Oracle/other) is used as-is.
+    const withScheme = (u?: string) => (u && !/^https?:\/\//.test(u) ? `http://${u}` : u);
+    const backend = withScheme(process.env.BACKEND_URL);
+    const git = withScheme(process.env.GIT_URL);
     const rules = [];
     if (backend) rules.push({ source: "/api/:path*", destination: `${backend}/api/:path*` });
     if (git) rules.push({ source: "/gitapi/:path*", destination: `${git}/api/:path*` });
