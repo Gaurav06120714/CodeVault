@@ -13,6 +13,7 @@ export default {
     'https://www.codechef.com/*',
     'https://www.hackerrank.com/*',
     'http://localhost:3000/*',
+    'http://localhost:4000/*',
     'http://localhost:5050/*',
   ],
   icons: {
