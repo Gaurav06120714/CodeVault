@@ -6,7 +6,15 @@ import { apiFetch } from "@/utils/api";
 
 const GITHUB_CLIENT_ID = process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID || '';
 const REDIRECT_URI = `${typeof window !== 'undefined' ? window.location.origin : ''}/login/callback`;
+const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '';
+const GOOGLE_REDIRECT_URI = `${typeof window !== 'undefined' ? window.location.origin : ''}/login/callback/google`;
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api";
+
+function randomState() {
+  return typeof crypto !== "undefined" && crypto.randomUUID
+    ? crypto.randomUUID()
+    : Math.random().toString(36).slice(2) + Date.now().toString(36);
+}
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -24,6 +32,13 @@ export default function Login() {
     sessionStorage.setItem("gh_oauth_state", state);
     const githubAuthUrl = `https://github.com/login/oauth/authorize?client_id=${GITHUB_CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&scope=repo,read:user,user:email&state=${encodeURIComponent(state)}&prompt=select_account`;
     window.location.href = githubAuthUrl;
+  };
+
+  const handleGoogleLogin = () => {
+    const state = randomState();
+    sessionStorage.setItem("google_oauth_state", state);
+    const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${encodeURIComponent(GOOGLE_REDIRECT_URI)}&response_type=code&scope=${encodeURIComponent("openid email profile")}&state=${encodeURIComponent(state)}&prompt=select_account`;
+    window.location.href = googleAuthUrl;
   };
 
   const handleEmailLogin = async (e: React.FormEvent) => {
@@ -87,6 +102,16 @@ export default function Login() {
             Continue with GitHub
           </button>
           <p className="why">GitHub is required to create and update your synced repository.</p>
+
+          <button className="gh" type="button" onClick={handleGoogleLogin} style={{ marginTop: 8, background: "#fff", color: "#1f2937", border: "1px solid #e5e7eb" }}>
+            <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.27-4.74 3.27-8.1z"/>
+              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84A11 11 0 0 0 12 23z"/>
+              <path fill="#FBBC05" d="M5.84 14.1a6.6 6.6 0 0 1 0-4.2V7.06H2.18a11 11 0 0 0 0 9.88l3.66-2.84z"/>
+              <path fill="#EA4335" d="M12 4.75c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 1.46 14.97.5 12 .5A11 11 0 0 0 2.18 7.06l3.66 2.84C6.71 6.68 9.14 4.75 12 4.75z"/>
+            </svg>
+            Continue with Google
+          </button>
 
           <div className="divider">or use a sign-in link</div>
 
