@@ -1,85 +1,63 @@
 <div align="center">
 
-# 🚀 CodeVault — Deploy free & always-on (Oracle Cloud "Always Free")
+# 🚀 CodeVault — Deploy free on Render (Mac off, no card)
 
 </div>
 
-> $0 forever, runs with your Mac off, real HTTPS link to share. Oracle asks for a card to
-> **verify** your identity but does **not** charge for Always-Free resources. You run the whole
-> stack (frontend + 2 backends + Postgres + Redis + Caddy for HTTPS) on one small VM with a single
-> `docker compose` command.
+> Free, works with your Mac off, sign in with GitHub (no card). Uses the `render.yaml` Blueprint
+> in this repo — Render provisions Postgres + Redis + all 3 services in a few clicks.
+>
+> **One caveat:** free services **sleep after ~15 min idle** and take ~50s to wake on the next
+> visit. Fine for a friend opening the link to review; the extension may miss a capture while the
+> backend is asleep.
 
 ## The shape
 ```
-your-name.duckdns.org ─▶ Caddy (HTTPS) ─▶ web-frontend ──/api──▶ web-backend
-   (free subdomain)                                      └/gitapi─▶ git-service
-                                                          + postgres + redis (internal)
+https://codevault.onrender.com ─▶ web-frontend ──/api──▶ codevault-backend
+   (the one public URL)                          └/gitapi─▶ codevault-git
+                                                  + Postgres + Redis
 ```
-Everything is same-origin behind Caddy, so cookies + CSRF just work.
+Same-origin behind the frontend, so login cookies + CSRF just work.
 
 ---
 
-## 1. Oracle Cloud account + a free VM
-1. Sign up at **cloud.oracle.com** (choose your home region, e.g. Mumbai). Add a card to verify — Always-Free stays $0.
-2. Console → **Compute → Instances → Create instance**:
-   - Image: **Ubuntu 22.04**.
-   - Shape: **Ampere (Arm) VM.Standard.A1.Flex** — set 1–2 OCPU / 6–12 GB (all Always-Free). If Arm is out of capacity, use **VM.Standard.E2.1.Micro** (AMD, also free).
-   - Add your SSH key (or let it generate one — download it).
-   - Create. Note the **public IP**.
-3. Open the web ports: Instance → its **subnet → Security List → Add Ingress Rules**: source `0.0.0.0/0`, TCP ports **80** and **443**. (Also do `sudo iptables` open or `netfilter-persistent` if Ubuntu blocks them — see step 3.)
+## Step 1 — Sign up
+Go to **render.com** → **Sign up with GitHub** (no card). Authorize Render to read your repo.
 
-## 2. Free domain (needed for HTTPS)
-1. Go to **duckdns.org**, sign in, create a subdomain e.g. **`codevault`** → `codevault.duckdns.org`.
-2. Set its IP to your VM's public IP.
+## Step 2 — Create the Blueprint
+Dashboard → **New +** → **Blueprint** → pick the **CodeVault** repo → Render reads `render.yaml`
+and shows the services (backend, git, frontend, Postgres, Redis).
 
-## 3. SSH in + install Docker
-```bash
-ssh ubuntu@<VM_PUBLIC_IP>
-sudo apt update && sudo apt install -y docker.io docker-compose-plugin git
-sudo usermod -aG docker $USER && newgrp docker
-# open the firewall on the VM itself (Oracle Ubuntu images block 80/443 by default):
-sudo iptables -I INPUT 6 -m state --state NEW -p tcp --dport 80 -j ACCEPT
-sudo iptables -I INPUT 6 -m state --state NEW -p tcp --dport 443 -j ACCEPT
-sudo netfilter-persistent save
+## Step 3 — Fill the secrets it asks for
+Render will prompt for the `sync: false` values. Set:
+| Key | Value |
+|---|---|
+| `ENCRYPTION_KEY` (in the **codevault-secrets** group) | a 64-hex string — run `openssl rand -hex 32` |
+| `GITHUB_CLIENT_SECRET` (backend) | your GitHub OAuth secret |
+| `GOOGLE_CLIENT_SECRET` (backend) | your Google OAuth secret |
+
+(`JWT_SECRET` auto-generates and is shared; `ENCRYPTION_KEY` must be the **same** for backend + git — the group handles that.)
+
+Click **Apply** → Render builds and deploys everything (first build ~5–10 min).
+
+## Step 4 — Create the DB schema (once)
+Open **codevault-backend → Shell** (in the Render dashboard) and run:
+```
+npx prisma db push
 ```
 
-## 4. Get the code + secrets
-```bash
-git clone https://github.com/Gaurav06120714/CodeVault.git && cd CodeVault
-nano .env      # create it with the values below
-```
-`.env` (next to `docker-compose.prod.yml`):
-```
-DOMAIN=codevault.duckdns.org
-DB_PASSWORD=<pick any strong password>
-JWT_SECRET=<openssl rand -hex 32>
-ENCRYPTION_KEY=<openssl rand -hex 32>
-GITHUB_CLIENT_ID=Ov23liaSjAYFgsFp9WzL
-GITHUB_CLIENT_SECRET=<your github secret>
-GOOGLE_CLIENT_ID=625546308328-....apps.googleusercontent.com
-GOOGLE_CLIENT_SECRET=<your google secret>
-```
+## Step 5 — Point OAuth at the live URL
+Your app is at **`https://codevault.onrender.com`** (name may differ if taken).
+- **GitHub** OAuth App → callback URL: `https://codevault.onrender.com/login/callback`
+- **Google** OAuth client → redirect URI: `https://codevault.onrender.com/login/callback/google` + JS origin `https://codevault.onrender.com`
 
-## 5. Launch everything
-```bash
-docker compose -f docker-compose.prod.yml up -d --build
-# first time: create the DB schema
-docker compose -f docker-compose.prod.yml exec web-backend npx prisma db push
-```
-Caddy gets the HTTPS cert automatically (give it ~30s). Your link:
-**`https://codevault.duckdns.org`** 🎉
-
-## 6. Point OAuth at the live URL
-- **GitHub** OAuth App → callback URL: `https://codevault.duckdns.org/login/callback`
-- **Google** OAuth client → authorized redirect URI: `https://codevault.duckdns.org/login/callback/google` (and set the JS origin to `https://codevault.duckdns.org`).
-
-## 7. Extension for the live backend
-On your Mac, rebuild it pointed at the deployed URL, then load `dist/` unpacked:
+## Step 6 — Extension for the live backend
+On your Mac, rebuild the extension pointed at the deployed URL, then load `dist/` unpacked:
 ```bash
 cd browser-extension
-VITE_API_URL="https://codevault.duckdns.org/api" \
-VITE_GIT_SERVICE_URL="https://codevault.duckdns.org/gitapi" \
-VITE_WEB_APP_URL="https://codevault.duckdns.org" \
+VITE_API_URL="https://codevault.onrender.com/api" \
+VITE_GIT_SERVICE_URL="https://codevault.onrender.com/gitapi" \
+VITE_WEB_APP_URL="https://codevault.onrender.com" \
 npm run build
 ```
 (Also update the background worker's hardcoded `http://localhost:3000` origin check to the live URL.)
@@ -87,7 +65,13 @@ npm run build
 ---
 
 ## Updating later
-SSH in → `cd CodeVault && git pull && docker compose -f docker-compose.prod.yml up -d --build`.
+Push to `main` → Render **auto-deploys** the changed services (Blueprints have auto-deploy on).
 
-## Cost
-Always-Free VM + your own Postgres/Redis in containers = **$0/month**, always-on. No sleeping.
+## Notes
+- Free Postgres is deleted after ~30 days of the free plan — fine for a review, upgrade later if you keep it.
+- If a service shows a build error, open its **Logs** in Render and paste it to me — I'll fix it.
+
+---
+
+> Prefer a truly-always-on (no sleep) free host later? The repo also ships `docker-compose.prod.yml`
+> + `Caddyfile` for an Oracle Cloud "Always Free" VM — see the git history of this file.

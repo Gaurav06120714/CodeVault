@@ -1,0 +1,84 @@
+# CodeVault — Render Blueprint. In Render: New → Blueprint → connect this repo → Apply.
+# It provisions: Postgres + Redis (Key Value) + 3 web services. Public client IDs are baked in
+# (they're not secret). Real secrets are `sync: false` — you set them once in the dashboard.
+#
+# Same-origin proxy: only `codevault` (the frontend) is public; it proxies /api → backend and
+# /gitapi → git-service, so cookies + CSRF work with no cross-domain issues.
+
+databases:
+  - name: codevault-db
+    plan: free
+    databaseName: codevault
+    user: codevault
+
+envVarGroups:
+  - name: codevault-secrets
+    envVars:
+      - key: JWT_SECRET
+        generateValue: true # generated once, shared by backend + git-service
+      - key: ENCRYPTION_KEY
+        sync: false # you set this (64 hex chars) — must be identical for both
+
+services:
+  - type: keyvalue
+    name: codevault-redis
+    plan: free
+    ipAllowList: [] # only reachable from your Render services
+
+  - type: web
+    name: codevault-backend
+    runtime: docker
+    plan: free
+    dockerfilePath: ./web-backend/Dockerfile
+    dockerContext: ./web-backend
+    envVars:
+      - fromGroup: codevault-secrets
+      - key: DATABASE_URL
+        fromDatabase: { name: codevault-db, property: connectionString }
+      - key: REDIS_URL
+        fromService: { type: keyvalue, name: codevault-redis, property: connectionString }
+      - key: NODE_ENV
+        value: production
+      - key: GITHUB_CLIENT_ID
+        value: Ov23liaSjAYFgsFp9WzL
+      - key: GOOGLE_CLIENT_ID
+        value: 625546308328-sg2o3jje5as70u21f4hg72gplqv7bai5.apps.googleusercontent.com
+      - key: GITHUB_CLIENT_SECRET
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+
+  - type: web
+    name: codevault-git
+    runtime: docker
+    plan: free
+    dockerfilePath: ./git-service/Dockerfile
+    dockerContext: ./git-service
+    envVars:
+      - fromGroup: codevault-secrets
+      - key: DATABASE_URL
+        fromDatabase: { name: codevault-db, property: connectionString }
+      - key: REDIS_URL
+        fromService: { type: keyvalue, name: codevault-redis, property: connectionString }
+      - key: NODE_ENV
+        value: production
+
+  - type: web
+    name: codevault # the public app → https://codevault.onrender.com
+    runtime: docker
+    plan: free
+    dockerfilePath: ./web-frontend/Dockerfile
+    dockerContext: ./web-frontend
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NEXT_PUBLIC_API_URL
+        value: /api
+      - key: NEXT_PUBLIC_GITHUB_CLIENT_ID
+        value: Ov23liaSjAYFgsFp9WzL
+      - key: NEXT_PUBLIC_GOOGLE_CLIENT_ID
+        value: 625546308328-sg2o3jje5as70u21f4hg72gplqv7bai5.apps.googleusercontent.com
+      - key: BACKEND_URL
+        fromService: { type: web, name: codevault-backend, property: url }
+      - key: GIT_URL
+        fromService: { type: web, name: codevault-git, property: url }
