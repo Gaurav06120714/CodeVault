@@ -17,7 +17,12 @@ const envSchema = z.object({
   SMTP_PASS: z.string().optional(),
   SMTP_FROM: z.string().optional(),
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
-  LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace']).default('info')
+  LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace']).default('info'),
+  // Allowed browser origin(s) for CORS, comma-separated (deployed frontend/admin URLs).
+  CORS_ORIGIN: z.string().optional(),
+  // When true, session cookies use SameSite=None (needed when frontend + backend are on
+  // different sites, e.g. app.fly.dev vs api.fly.dev). Requires HTTPS (Secure).
+  CROSS_SITE_COOKIES: z.enum(['true', 'false']).optional(),
 });
 
 const _env = envSchema.safeParse(process.env);

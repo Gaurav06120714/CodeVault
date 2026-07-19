@@ -22,7 +22,11 @@ export const createApp = (): Application => {
   // Security Middlewares
   app.use(helmet());
   app.use(cors({
-    origin: env.NODE_ENV === 'production' ? 'https://codevault.io' : 'http://localhost:3000',
+    // Deployed frontend origin comes from CORS_ORIGIN (comma-separated allowed for
+    // multiple, e.g. the frontend + admin). Falls back to the local dev origin.
+    origin: env.CORS_ORIGIN
+      ? env.CORS_ORIGIN.split(',').map((o) => o.trim())
+      : (env.NODE_ENV === 'production' ? 'https://codevault.io' : 'http://localhost:3000'),
     credentials: true,
   }));
 
