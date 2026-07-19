@@ -75,7 +75,11 @@ services:
         value: Ov23liaSjAYFgsFp9WzL
       - key: NEXT_PUBLIC_GOOGLE_CLIENT_ID
         value: 625546308328-sg2o3jje5as70u21f4hg72gplqv7bai5.apps.googleusercontent.com
+      # Render's FREE tier has NO private networking, so fromService.hostport (internal
+      # address) is unreachable — the runtime proxy's server-side fetch must use the PUBLIC
+      # URLs. Cookies stay same-origin: the browser only ever talks to this frontend; the
+      # frontend server forwards to these over public HTTPS and relays Set-Cookie.
       - key: BACKEND_URL
-        fromService: { type: web, name: codevault-backend, property: hostport }
+        value: https://codevault-backend-ig6c.onrender.com
       - key: GIT_URL
-        fromService: { type: web, name: codevault-git, property: hostport }
+        value: https://codevault-git-ig6c.onrender.com
