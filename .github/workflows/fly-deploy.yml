@@ -1,0 +1,42 @@
+# Auto-deploy to Fly.io on push to main.
+#
+# PREREQUISITES (one-time, done by you — see docs/DEPLOY.md):
+#   1. `fly launch` each of the 4 apps once (creates them + their fly.toml is already in the repo).
+#   2. Provision Postgres + Redis and set each app's secrets (JWT_SECRET, ENCRYPTION_KEY, etc.).
+#   3. Create a deploy token:  `fly tokens create deploy`
+#   4. Add it to this repo:  Settings → Secrets and variables → Actions → new secret
+#      named  FLY_API_TOKEN.
+#
+# After that, every push to main (that touches code, not just docs) redeploys all 4 services.
+name: Deploy to Fly.io
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - '**/*.md'
+      - 'docs/**'
+      - '**/__tests__/**'
+      - '**/tests/**'
+  workflow_dispatch: {} # allow manual runs from the Actions tab
+
+jobs:
+  deploy:
+    name: deploy ${{ matrix.service }}
+    runs-on: ubuntu-latest
+    # Never run two deploys of the same service at once.
+    concurrency:
+      group: fly-deploy-${{ matrix.service }}
+      cancel-in-progress: true
+    strategy:
+      fail-fast: false
+      matrix:
+        service: [web-backend, git-service, web-frontend, admin]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+      - name: Deploy ${{ matrix.service }}
+        working-directory: ${{ matrix.service }}
+        run: flyctl deploy --remote-only
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
