@@ -171,7 +171,7 @@ export class AuthService {
       };
     } catch (error: any) {
       logger.error({ err: error.message }, 'GitHub authentication failed');
-      throw error; // TEMP debug: preserve original error (axios response data) for prod diagnosis
+      throw new Error('Authentication failed');
     }
   }
 
@@ -264,7 +264,7 @@ export class AuthService {
       };
     } catch (error: any) {
       logger.error({ err: error.message }, 'Google authentication failed');
-      throw error; // TEMP debug: preserve original error (axios response data) for prod diagnosis
+      throw new Error('Authentication failed');
     }
   }
 
