@@ -71,6 +71,8 @@ services:
         value: production
       - key: NEXT_PUBLIC_API_URL
         value: /api
+      - key: NEXT_PUBLIC_GIT_SERVICE_URL
+        value: /gitapi
       - key: NEXT_PUBLIC_GITHUB_CLIENT_ID
         value: Ov23liaSjAYFgsFp9WzL
       - key: NEXT_PUBLIC_GOOGLE_CLIENT_ID
