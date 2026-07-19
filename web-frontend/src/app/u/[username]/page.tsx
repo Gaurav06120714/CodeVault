@@ -64,7 +64,7 @@ export default function PublicProfileView({ params }: { params: Promise<{ userna
     setFollowerCount((c) => c + (wasFollowing ? -1 : 1));
 
     try {
-      const res = await apiFetch(`/users/${username}/follow`, {
+      const res = await apiFetch(`${API_URL}/users/${username}/follow`, {
         method: wasFollowing ? "DELETE" : "POST",
         credentials: "include",
       });
