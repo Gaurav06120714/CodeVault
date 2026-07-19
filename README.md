@@ -6,6 +6,10 @@
 
 CodeVault brings every competitive‑programming platform you use into **one dashboard**, and automatically publishes your accepted solutions to a **clean, searchable GitHub repository** — no browser extension, no copy‑pasting code for every problem.
 
+### 🌐 Live demo: **[codevault-ig6c.onrender.com](https://codevault-ig6c.onrender.com)**
+
+> Sign in with **GitHub** to try it. _(Hosted on Render's free tier — the first load after ~15 min of inactivity can take up to a minute while the services wake up.)_
+
 </div>
 
 ---
