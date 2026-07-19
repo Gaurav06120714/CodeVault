@@ -50,8 +50,16 @@ export async function proxy(
   const resHeaders = new Headers();
   upstream.headers.forEach((value, key) => {
     const k = key.toLowerCase();
-    // set-cookie handled separately; drop hop-by-hop / already-decoded headers.
-    if (k === "set-cookie" || k === "content-encoding" || k === "transfer-encoding") return;
+    // set-cookie handled separately. Drop content-encoding/content-length/transfer-encoding:
+    // fetch() already decoded the (gzip) body, so the upstream length no longer matches — keeping
+    // it truncates the body and yields "Unterminated string in JSON". Let the runtime recompute.
+    if (
+      k === "set-cookie" ||
+      k === "content-encoding" ||
+      k === "content-length" ||
+      k === "transfer-encoding"
+    )
+      return;
     resHeaders.set(key, value);
   });
   for (const cookie of upstream.headers.getSetCookie?.() ?? []) {
