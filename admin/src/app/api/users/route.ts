@@ -2,12 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { getAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
-// GET /api/users?query= — owner-only user list/search. Fails closed (404). See /admin/plan.md §3.1.
 export async function GET(req: NextRequest) {
   const admin = await getAdmin();
   if (!admin) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   const query = req.nextUrl.searchParams.get("query") ?? "";
+  const skip = parseInt(req.nextUrl.searchParams.get("skip") ?? "0", 10) || 0;
+  const take = 25;
+
   const where = query
     ? {
         OR: [
@@ -19,21 +21,27 @@ export async function GET(req: NextRequest) {
       }
     : {};
 
-  const items = await prisma.user.findMany({
-    where,
-    take: 25,
-    orderBy: { createdAt: "desc" },
-    select: {
-      id: true,
-      githubLogin: true,
-      handle: true,
-      displayName: true,
-      email: true,
-      role: true,
-      plan: true,
-      createdAt: true,
-    },
-  });
+  const [items, total] = await Promise.all([
+    prisma.user.findMany({
+      where,
+      take,
+      skip,
+      orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        githubLogin: true,
+        handle: true,
+        displayName: true,
+        email: true,
+        avatarUrl: true,
+        role: true,
+        plan: true,
+        createdAt: true,
+        deletedAt: true,
+      },
+    }),
+    prisma.user.count({ where }),
+  ]);
 
-  return NextResponse.json({ items });
+  return NextResponse.json({ items, total, skip, take });
 }

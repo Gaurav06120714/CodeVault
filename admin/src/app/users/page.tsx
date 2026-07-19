@@ -9,75 +9,135 @@ type AdminUser = {
   handle: string;
   displayName: string | null;
   email: string | null;
+  avatarUrl: string | null;
   role: string;
   plan: string;
   createdAt: string;
+  deletedAt: string | null;
 };
 
 export default function UsersPage() {
   const [items, setItems] = useState<AdminUser[]>([]);
   const [q, setQ] = useState("");
   const [state, setState] = useState<"loading" | "ok" | "denied">("loading");
+  const [total, setTotal] = useState(0);
+  const [skip, setSkip] = useState(0);
+  const take = 25;
 
-  const load = (query: string) => {
-    fetch(`/api/users?query=${encodeURIComponent(query)}`)
+  const load = (query: string, offset: number) => {
+    fetch(`/api/users?query=${encodeURIComponent(query)}&skip=${offset}`)
       .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
-      .then((d: { items: AdminUser[] }) => { setItems(d.items); setState("ok"); })
+      .then((d: { items: AdminUser[]; total: number }) => {
+        setItems(d.items);
+        setTotal(d.total);
+        setState("ok");
+      })
       .catch(() => setState("denied"));
   };
 
-  useEffect(() => load(""), []);
+  useEffect(() => load("", 0), []);
 
   if (state === "denied") return <AccessDenied />;
 
   return (
     <section>
-      <h1 style={{ margin: "0 0 4px" }}>Users</h1>
-      <p style={{ color: "#6b7280", marginTop: 0 }}>All users — search by login, handle, email, or name.</p>
-      <form onSubmit={(e) => { e.preventDefault(); load(q); }} style={{ display: "flex", gap: 8, margin: "14px 0" }}>
+      <h1 className="admin-page-title">Users</h1>
+      <p className="admin-page-subtitle">All users — search by login, handle, email, or name.</p>
+
+      <form
+        onSubmit={(e) => { e.preventDefault(); setSkip(0); load(q, 0); }}
+        style={{ display: "flex", gap: 8, marginBottom: 18 }}
+      >
         <input
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder="Search users…"
-          style={{ flex: 1, padding: "9px 12px", borderRadius: 10, border: "1px solid #ecece4", fontSize: 13 }}
+          className="admin-input"
+          style={{ flex: 1 }}
         />
-        <button type="submit" style={{ padding: "9px 16px", borderRadius: 10, border: "none", background: "#f1543f", color: "#fff", fontWeight: 600, fontSize: 13, cursor: "pointer" }}>
-          Search
-        </button>
+        <button type="submit" className="admin-btn admin-btn-primary">Search</button>
       </form>
-      <div style={{ background: "#fff", border: "1px solid #ecece4", borderRadius: 14, overflow: "hidden" }}>
-        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+
+      <div className="admin-card" style={{ padding: 0, overflow: "hidden" }}>
+        <table className="admin-table">
           <thead>
-            <tr style={{ textAlign: "left", color: "#6b7280", background: "#faf7f2" }}>
-              <th style={{ padding: "10px 14px" }}>User</th>
-              <th style={{ padding: "10px 14px" }}>Email</th>
-              <th style={{ padding: "10px 14px" }}>Role</th>
-              <th style={{ padding: "10px 14px" }}>Plan</th>
-              <th style={{ padding: "10px 14px" }}>Joined</th>
+            <tr>
+              <th>User</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Plan</th>
+              <th>Status</th>
+              <th>Joined</th>
             </tr>
           </thead>
           <tbody>
             {state === "loading" ? (
-              <tr><td colSpan={5} style={{ padding: 18, color: "#6b7280" }}>Loading…</td></tr>
+              <tr><td colSpan={6} className="loading">Loading…</td></tr>
             ) : items.length === 0 ? (
-              <tr><td colSpan={5} style={{ padding: 18, color: "#6b7280" }}>No users found.</td></tr>
+              <tr><td colSpan={6} className="loading">No users found.</td></tr>
             ) : (
               items.map((u) => (
-                <tr key={u.id} style={{ borderTop: "1px solid #f0eee8" }}>
-                  <td style={{ padding: "10px 14px" }}>
-                    <span style={{ fontWeight: 600 }}>{u.displayName || u.githubLogin || u.handle}</span>
-                    <div style={{ color: "#9c9a8e", fontSize: 11 }}>@{u.githubLogin || u.handle}</div>
+                <tr
+                  key={u.id}
+                  style={{ cursor: "pointer" }}
+                  onClick={() => window.location.href = `/users/${u.id}`}
+                >
+                  <td>
+                    <div className="user-cell">
+                      {u.avatarUrl ? (
+                        <img src={u.avatarUrl} alt="" className="avatar" />
+                      ) : (
+                        <div className="avatar" style={{ display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, color: "var(--text2)" }}>
+                          {(u.displayName || u.handle || "?")[0].toUpperCase()}
+                        </div>
+                      )}
+                      <div>
+                        <div className="user-cell-name">{u.displayName || u.githubLogin || u.handle}</div>
+                        <div className="user-cell-handle">@{u.githubLogin || u.handle}</div>
+                      </div>
+                    </div>
                   </td>
-                  <td style={{ padding: "10px 14px", color: "#6b7280" }}>{u.email || "—"}</td>
-                  <td style={{ padding: "10px 14px" }}>{u.role}</td>
-                  <td style={{ padding: "10px 14px" }}>{u.plan}</td>
-                  <td style={{ padding: "10px 14px", color: "#6b7280" }}>{new Date(u.createdAt).toLocaleDateString("en-GB")}</td>
+                  <td style={{ color: u.email ? "var(--text)" : "var(--text2)" }}>{u.email || "—"}</td>
+                  <td>
+                    <span className={`badge ${u.role === "admin" ? "badge-purple" : "badge-gray"}`}>{u.role}</span>
+                  </td>
+                  <td>
+                    <span className={`badge ${u.plan === "pro" ? "badge-amber" : "badge-gray"}`}>{u.plan}</span>
+                  </td>
+                  <td>
+                    <span className={`badge ${u.deletedAt ? "badge-red" : "badge-green"}`}>
+                      {u.deletedAt ? "Banned" : "Active"}
+                    </span>
+                  </td>
+                  <td style={{ color: "var(--text2)" }}>{new Date(u.createdAt).toLocaleDateString("en-GB")}</td>
                 </tr>
               ))
             )}
           </tbody>
         </table>
       </div>
+
+      {total > take && (
+        <div className="pagination">
+          <span>Showing {skip + 1}–{Math.min(skip + take, total)} of {total}</span>
+          <div style={{ display: "flex", gap: 6 }}>
+            <button
+              className="admin-btn"
+              disabled={skip === 0}
+              onClick={() => { const s = Math.max(0, skip - take); setSkip(s); load(q, s); }}
+            >
+              ← Prev
+            </button>
+            <button
+              className="admin-btn"
+              disabled={skip + take >= total}
+              onClick={() => { const s = skip + take; setSkip(s); load(q, s); }}
+            >
+              Next →
+            </button>
+          </div>
+        </div>
+      )}
     </section>
   );
 }
