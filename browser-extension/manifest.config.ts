@@ -12,6 +12,9 @@ export default {
     'https://codeforces.com/*',
     'https://www.codechef.com/*',
     'https://www.hackerrank.com/*',
+    // Production: token handoff (/api) + ingest (/gitapi) both route through the frontend proxy origin.
+    'https://codevault-ig6c.onrender.com/*',
+    // Local dev.
     'http://localhost:3000/*',
     'http://localhost:4000/*',
     'http://localhost:5050/*',
@@ -41,7 +44,7 @@ export default {
     { matches: ['https://codeforces.com/*'], js: ['src/content/codeforces.ts'], run_at: 'document_idle' },
     { matches: ['https://www.codechef.com/*'], js: ['src/content/codechef.ts'], run_at: 'document_idle' },
     { matches: ['https://www.hackerrank.com/challenges/*'], js: ['src/content/hackerrank.ts'], run_at: 'document_idle' },
-    { matches: ['http://localhost:3000/*'], js: ['src/content/codevault.ts'], run_at: 'document_idle' },
+    { matches: ['https://codevault-ig6c.onrender.com/*', 'http://localhost:3000/*'], js: ['src/content/codevault.ts'], run_at: 'document_idle' },
   ],
   content_security_policy: {
     extension_pages: "script-src 'self'; object-src 'self'",
