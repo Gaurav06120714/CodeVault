@@ -40,12 +40,29 @@ export async function proxy(
   const hasBody = req.method !== "GET" && req.method !== "HEAD";
   const body = hasBody ? await req.arrayBuffer() : undefined;
 
-  const upstream = await fetch(url, {
-    method: req.method,
-    headers,
-    body,
-    redirect: "manual",
-  });
+  // Free-tier services sleep after ~15 min; the first request while the upstream cold-boots can
+  // get a 502/503/504 from Render's gateway (or a connection error). Retry a few times with backoff
+  // so login/API calls ride out the wake-up instead of failing. Safe here: a gateway error means the
+  // upstream app never processed the request, so there's nothing to double-submit.
+  const GATEWAY_ERRORS = new Set([502, 503, 504]);
+  let upstream: Response | undefined;
+  let lastErr: unknown;
+  for (let attempt = 0; attempt < 4; attempt++) {
+    if (attempt > 0) await new Promise((r) => setTimeout(r, attempt * 2000)); // 0, 2s, 4s, 6s
+    try {
+      upstream = await fetch(url, { method: req.method, headers, body, redirect: "manual" });
+      if (!GATEWAY_ERRORS.has(upstream.status)) break; // got a real response
+    } catch (err) {
+      lastErr = err; // connection refused / reset while the upstream is booting — retry
+    }
+  }
+  if (!upstream) {
+    return new Response(
+      JSON.stringify({ message: "Upstream unavailable (service may be waking up — try again)" }),
+      { status: 503, headers: { "content-type": "application/json" } }
+    );
+  }
+  void lastErr;
 
   const resHeaders = new Headers();
   upstream.headers.forEach((value, key) => {
