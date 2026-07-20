@@ -417,6 +417,6 @@ Built by two developers working in parallel:
 
 <div align="center">
 
-⭐ If you find CodeVault useful, consider starring the repo!
+⭐ If you find CodeVault useful, consider starring the repo...!
 
 </div>
