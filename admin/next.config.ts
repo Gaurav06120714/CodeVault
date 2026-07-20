@@ -5,7 +5,7 @@ const nextConfig: NextConfig = {
   // (cookies are host-scoped, so a session on localhost:3000 is visible here on localhost).
 
   // Lean production image for Docker/Fly (bundles a minimal Node server). See docs/DEPLOY.md.
-  output: "standalone",
+  // output: "standalone",
 };
 
 export default nextConfig;
