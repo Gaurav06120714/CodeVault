@@ -247,12 +247,12 @@ M3 (analytics + public profile + settings) ─ parallel with M4 after M2
 - [ ] Platform + GitHub tokens envelope-encrypted (KMS); `key_version` in place
 - [ ] git-service NOT accessible with static browser key (user-JWT auth verified)
 - [ ] GitHub scope minimized (per-repo, not all-repos)
-- [ ] BOLA ownership checks verified on every endpoint (dedicated security test suite passes)
+- [x] BOLA ownership checks verified on every endpoint (dedicated security test suite passes)
 - [ ] CSRF protection + OAuth PKCE/state/redirect allowlist verified
-- [ ] No secrets in logs/bundle/repo (secret scan clean)
+- [x] No secrets in logs/bundle/repo (secret scan clean)
 - [ ] SSRF egress allowlist enforced
 - [ ] OWASP ZAP DAST clean at Critical/High; pentest sign-off
-- [ ] Cookies httpOnly + Secure + SameSite; security headers deployed
+- [x] Cookies httpOnly + Secure + SameSite; security headers deployed
 
 ### Performance & Quality (TESTING_PLAN §8)
 - [ ] All CI quality gates green (lint, typecheck, tests, coverage, SCA, secret scan, a11y, bundle)

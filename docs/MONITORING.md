@@ -112,7 +112,7 @@ SENTRY_DSN=...        # staging/prod
 
 ## 12. Checklist
 
-- [ ] Structured JSON logs + redaction on both services
+- [x] Structured JSON logs + redaction on both services *(structured + redaction done; shipping to sink pending)*
 - [ ] requestId/jobId correlation end-to-end
 - [ ] `/metrics` exposed (internal); RED + USE dashboards
 - [ ] Sentry wired (FE + BE)

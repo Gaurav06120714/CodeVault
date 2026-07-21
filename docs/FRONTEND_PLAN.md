@@ -586,12 +586,12 @@ tokens+tooling ─▶ UI kit ─▶ layouts/routing ─┬─▶ marketing (no A
 - [ ] UI kit complete + Storybook before features
 - [ ] 3 layouts + route groups + middleware guard
 - [ ] Every data page has loading + empty + error + success states
-- [ ] Toasts + ConfirmDialog replace all `alert()`/silent actions
+- [x] Toasts + ConfirmDialog replace all `alert()`/silent actions
 - [ ] React Query for all server data; RHF+Zod for all forms
 - [ ] Responsive matrix verified (mobile→ultra-wide); drawer/table/sub-nav transitions
 - [ ] A11y: keyboard, focus traps, aria-live, aria-current, contrast AA
-- [ ] Reduced-motion honored
-- [ ] Public profile SSR/ISR + OG/metadata
+- [x] Reduced-motion honored
+- [x] Public profile SSR/ISR + OG/metadata
 - [ ] Code-split heavy islands; fonts via next/font; images via next/image
 - [ ] Contract-first DTOs + MSW mocks for parallel dev
 - [ ] Conventional commits, `fe-*` scope, no co-author, small PRs

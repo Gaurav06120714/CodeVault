@@ -279,7 +279,7 @@ Alert fires ─▶ on-call notified (PagerDuty) ─▶ acknowledge within 15 min
 ## 7. Observability Readiness Checklist
 
 - [ ] Structured logging (JSON) shipping to sink on all 3 services
-- [ ] Redaction middleware active — no tokens/PII in logs
+- [x] Redaction middleware active — no tokens/PII in logs
 - [ ] `requestId` and `jobId` in every log line; correlated in errors
 - [ ] Sentry wired for FE + BE unhandled exceptions
 - [ ] Prometheus metrics endpoint exposed (internal only) on BE services
