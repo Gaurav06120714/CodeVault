@@ -46,6 +46,27 @@ Redis + no backups** make it a demo, not production.
 - ✅ **Scraper timeouts** — added an 8 s timeout to the LeetCode and Codeforces stats fetches so a
   slow platform can't hang the whole dashboard. (commit `a0bfc2e`)
 
+### Phase 1–6 hardening (delivered)
+
+| Phase | Delivered in code / CI / config |
+|-------|---------------------------------|
+| **1 CI** | Frontend CI job; coverage (v8) + artifacts; SCA/secret-scan/SAST green |
+| **2 Tests** | Scraper + stats unit tests; auth/**BOLA** gate; CSRF + contract HTTP tests (web-backend 12→52, git-service 90→93) |
+| **3 Security** | **Log redaction** (both services); Helmet/CSRF/cookie verification; **OWASP ZAP DAST** workflow (`security-dast.yml`) |
+| **4 Frontend a11y** | Accessible `ConfirmDialog` + `Toast` (removed native `alert`/`confirm`); global reduced-motion; OpenGraph; **axe + Lighthouse** CI (`a11y-perf.yml`) |
+| **5 Observability** | Prometheus `/metrics` (both services); `X-Request-Id` correlation; env-gated **Sentry** (BE); `observability/` (scrape config, alert rules, Grafana RED dashboard) |
+| **6 Scalability** | **Snapshot fallback** for stats on upstream failure; sync concurrency + cooldown + kill-switch (existing); **k6** load test with SLO thresholds (`load-tests/`) |
+
+### Still requires accounts / infra (cannot be completed in code)
+
+- **KMS envelope encryption + `key_version`** — changing the on-disk crypto format risks making
+  every stored token undecryptable; needs a planned, backward-compatible migration + a KMS.
+- **Per-repo GitHub scope** — currently uses the `repo` scope; true per-repo access means migrating
+  to a **GitHub App** (fine-grained), a product decision (would affect private-repo sync).
+- **Pentest sign-off**, **Sentry DSN**, **Grafana/Prometheus hosting**, **Alertmanager → PagerDuty**,
+  **status page**, **synthetic uptime checks**, **Lighthouse/axe budgets passing**, **load-test execution
+  on a non-sleeping tier** — all need external services or a running environment.
+
 ---
 
 ## 4. Two production paths
