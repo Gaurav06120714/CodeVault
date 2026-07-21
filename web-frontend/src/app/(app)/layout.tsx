@@ -8,6 +8,7 @@ import { NetworkMonitor } from "@/components/NetworkMonitor";
 import { NotificationBell } from "@/components/NotificationBell";
 import { MessagesBadge } from "@/components/MessagesBadge";
 import { CodeVaultLoader } from "@/components/CodeVaultLoader";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { apiFetch } from "@/utils/api";
 
 export default function AppLayout({
@@ -109,6 +110,7 @@ export default function AppLayout({
             Settings
           </Link>
         </div>
+        <ThemeToggle />
         <div className="side-foot">
           {user.avatarUrl ? (
             <img src={user.avatarUrl} alt={user.githubLogin} className="av" style={{ border: "none" }} />
