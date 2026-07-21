@@ -6,7 +6,9 @@ const nextConfig: NextConfig = {
   devIndicators: false,
 
   // Lean production image for Docker/Fly (bundles a minimal Node server).
-  // output: "standalone",
+  // Required: the Dockerfile copies `.next/standalone` — without this, `next build`
+  // never produces that folder and the Docker COPY fails ("Exited with status 1").
+  output: "standalone",
 
   // Same-origin proxy for deployment: the browser only ever talks to this frontend's origin,
   // so the session cookies + CSRF work with no cross-domain headaches. This is done with RUNTIME
