@@ -114,8 +114,8 @@ SENTRY_DSN=...        # staging/prod
 
 - [x] Structured JSON logs + redaction on both services *(structured + redaction done; shipping to sink pending)*
 - [ ] requestId/jobId correlation end-to-end
-- [ ] `/metrics` exposed (internal); RED + USE dashboards
-- [ ] Sentry wired (FE + BE)
+- [x] `/metrics` exposed (internal); RED + USE dashboards *(metrics + RED dashboard shipped in /observability; run collectors to go live)*
+- [ ] Sentry wired (FE + BE) *(BE env-gated wiring done; FE pending)*
 - [ ] Security alerts: 5xx, auth-fail, decrypt-fail, 403 scan, queue stall
 - [ ] Audit log append-only, 1-year retention
 - [ ] SLO burn-rate alerts; status page live

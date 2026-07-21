@@ -115,10 +115,10 @@ git-service-workers: target queue_depth < 50
 
 - [ ] All services stateless; horizontal scaling verified
 - [ ] `/stats` + `/public` cached + replica-served
-- [ ] Sync queued; concurrency + per-user cooldown caps
+- [x] Sync queued; concurrency + per-user cooldown caps *(BullMQ + SYNC_CONCURRENCY / rate-limit / SYNC_ENABLED kill-switch)*
 - [ ] Cursor pagination + `take` caps everywhere
 - [ ] Pooling (PgBouncer/Accelerate); replicas for reads
-- [ ] Circuit breakers + retry/jitter on upstreams; snapshot fallback
+- [ ] Circuit breakers + retry/jitter on upstreams; snapshot fallback *(snapshot fallback done; circuit breaker pending)*
 - [ ] Partition/shard plan threshold-armed
 - [ ] Load tests meet SLO targets
 

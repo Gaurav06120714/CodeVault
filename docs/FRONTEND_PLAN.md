@@ -595,7 +595,7 @@ tokens+tooling ─▶ UI kit ─▶ layouts/routing ─┬─▶ marketing (no A
 - [ ] Code-split heavy islands; fonts via next/font; images via next/image
 - [ ] Contract-first DTOs + MSW mocks for parallel dev
 - [ ] Conventional commits, `fe-*` scope, no co-author, small PRs
-- [ ] Lighthouse perf + a11y budgets pass in CI
+- [ ] Lighthouse perf + a11y budgets pass in CI *(automated in .github/workflows/a11y-perf.yml; must hit budgets)*
 - [ ] Every page matches the approved `frontendHtml/` prototype (UAT sign-off)
 
 > Next step when ready: I can expand any milestone into a component-by-component task checklist, or draft the **API contract / typed DTOs** doc that FE and BE build against — still no code.

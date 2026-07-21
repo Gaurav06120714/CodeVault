@@ -251,7 +251,7 @@ M3 (analytics + public profile + settings) ─ parallel with M4 after M2
 - [ ] CSRF protection + OAuth PKCE/state/redirect allowlist verified
 - [x] No secrets in logs/bundle/repo (secret scan clean)
 - [ ] SSRF egress allowlist enforced
-- [ ] OWASP ZAP DAST clean at Critical/High; pentest sign-off
+- [ ] OWASP ZAP DAST clean at Critical/High; pentest sign-off *(DAST automated in .github/workflows/security-dast.yml; pentest pending)*
 - [x] Cookies httpOnly + Secure + SameSite; security headers deployed
 
 ### Performance & Quality (TESTING_PLAN §8)
