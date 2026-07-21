@@ -1,0 +1,33 @@
+name: DAST (OWASP ZAP)
+
+# Dynamic Application Security Testing — runs a ZAP baseline scan against the
+# live app. Scheduled weekly + on demand. Report-only (does not block merges);
+# review findings in the uploaded artifact / workflow summary.
+on:
+  schedule:
+    - cron: "0 3 * * 1" # Mondays 03:00 UTC
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "Target URL to scan"
+        required: false
+        default: "https://codevault-ig6c.onrender.com"
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  zap-baseline:
+    name: ZAP baseline scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: ZAP Baseline Scan
+        uses: zaproxy/action-baseline@v0.14.0
+        with:
+          target: ${{ github.event.inputs.target || 'https://codevault-ig6c.onrender.com' }}
+          # -a: include the alpha passive scan rules. Report-only.
+          cmd_options: "-a"
+          allow_issue_writing: false
+          fail_action: false
