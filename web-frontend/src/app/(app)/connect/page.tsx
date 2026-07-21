@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { PlatformChip } from '@/components/PlatformChip';
+import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { apiFetch } from "@/utils/api";
 
 interface ExistingConnection {
@@ -29,6 +30,7 @@ export default function ConnectPage() {
   const [success, setSuccess] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [disconnecting, setDisconnecting] = useState<string | null>(null);
+  const [pendingDisconnect, setPendingDisconnect] = useState<string | null>(null);
 
   const platforms = [
     { id: 'leetcode', name: 'LeetCode', url: 'leetcode.com/u/…' },
@@ -133,8 +135,8 @@ export default function ConnectPage() {
   };
 
   const handleDisconnect = async (platform: string) => {
-    if (!confirm(`Disconnect ${platforms.find(p => p.id === platform)?.name}? You can always reconnect later.`)) return;
-    
+    setPendingDisconnect(null);
+
     try {
       setDisconnecting(platform);
 
@@ -212,7 +214,7 @@ export default function ConnectPage() {
                   </span>
                   <button
                     type="button"
-                    onClick={() => handleDisconnect(conn.platform)}
+                    onClick={() => setPendingDisconnect(conn.platform)}
                     disabled={disconnecting === conn.platform}
                     style={{
                       fontSize: 12,
@@ -353,6 +355,18 @@ export default function ConnectPage() {
       {/* Messages shown outside panels */}
       {error && unconnectedPlatforms.length === 0 && <p style={{ color: 'var(--brand-d)', fontSize: 13, marginTop: 16, fontWeight: 600, textAlign: 'center' }}>{error}</p>}
       {success && unconnectedPlatforms.length === 0 && <p style={{ color: '#1aa260', fontSize: 13, marginTop: 16, fontWeight: 600, textAlign: 'center' }}>{success}</p>}
+
+      <ConfirmDialog
+        open={!!pendingDisconnect}
+        title="Disconnect platform"
+        message={`Disconnect ${platforms.find(p => p.id === pendingDisconnect)?.name ?? 'this platform'}? You can always reconnect later.`}
+        confirmLabel="Disconnect"
+        cancelLabel="Keep connected"
+        danger
+        busy={disconnecting === pendingDisconnect}
+        onConfirm={() => pendingDisconnect && handleDisconnect(pendingDisconnect)}
+        onCancel={() => setPendingDisconnect(null)}
+      />
     </div>
   );
 }

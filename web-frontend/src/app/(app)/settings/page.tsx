@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { PlatformChip } from "@/components/PlatformChip";
 import { CodeVaultLoader } from "@/components/CodeVaultLoader";
+import { Toast } from "@/components/Toast";
 import { PLATFORMS, PLATFORM_ORDER } from "@/constants/platforms";
 import { apiFetch } from "@/utils/api";
 
@@ -13,6 +14,7 @@ export default function SettingsPage() {
   const [user, setUser] = useState<{ id: string; githubLogin: string; handle?: string; displayName: string | null; email?: string } | null>(null);
   const [activeSection, setActiveSection] = useState("account");
   const [activeTheme, setActiveTheme] = useState("Light");
+  const [toast, setToast] = useState<string | null>(null);
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api";
   const PLATFORMS_LIST = PLATFORM_ORDER.map((id) => PLATFORMS[id]);
@@ -333,7 +335,7 @@ export default function SettingsPage() {
               <div className="n">Plan</div>
               <div className="m">Free — up to 4 connected platforms</div>
             </div>
-            <button className="btn brand right" type="button" onClick={() => alert("Plans are coming soon.")}>Upgrade</button>
+            <button className="btn brand right" type="button" onClick={() => setToast("Plans are coming soon.")}>Upgrade</button>
           </div>
           <div className="save-bar">
             <button className="btn brand" type="button" onClick={saveAccountDetails} disabled={savingAccount}>
@@ -641,6 +643,7 @@ export default function SettingsPage() {
           </div>
         </section>
       </div>
+      <Toast message={toast} onDismiss={() => setToast(null)} />
     </>
   );
 }
