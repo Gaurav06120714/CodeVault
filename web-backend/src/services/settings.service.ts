@@ -1,5 +1,9 @@
+import axios from 'axios';
+import { OAuthProvider } from '@prisma/client';
 import prisma from '../lib/prisma';
 import logger from '../lib/logger';
+import { env } from '../config/env';
+import { decryptToken } from '../lib/crypto';
 
 export interface UserSettingsPayload {
   displayName?: string;
@@ -121,7 +125,35 @@ export class SettingsService {
    * notifications, follows, messages, sync runs, etc.
    */
   static async deleteAccount(userId: string) {
+    await this.revokeGithubGrant(userId); // best-effort; must not block deletion
     await prisma.user.delete({ where: { id: userId } });
     logger.warn({ userId }, 'Account deleted — all user data and tokens purged');
+  }
+
+  /**
+   * Ask GitHub to revoke our OAuth grant so the (soon-deleted) user's token can
+   * no longer be used. Best-effort: any failure is logged and swallowed so the
+   * DB deletion (which itself purges the encrypted token) always proceeds.
+   */
+  private static async revokeGithubGrant(userId: string) {
+    if (!env.GITHUB_CLIENT_ID || !env.GITHUB_CLIENT_SECRET) return;
+    try {
+      const identity = await prisma.oAuthIdentity.findFirst({
+        where: { userId, provider: OAuthProvider.github },
+        select: { accessTokenCipher: true, tokenIv: true },
+      });
+      if (!identity) return;
+
+      const token = decryptToken(Buffer.from(identity.accessTokenCipher), Buffer.from(identity.tokenIv));
+      await axios.delete(`https://api.github.com/applications/${env.GITHUB_CLIENT_ID}/grant`, {
+        auth: { username: env.GITHUB_CLIENT_ID, password: env.GITHUB_CLIENT_SECRET },
+        data: { access_token: token },
+        headers: { Accept: 'application/vnd.github+json' },
+        timeout: 8000,
+      });
+      logger.info({ userId }, 'Revoked GitHub OAuth grant on account deletion');
+    } catch (err: any) {
+      logger.warn({ userId, err: err?.message }, 'GitHub token revoke failed (continuing with deletion)');
+    }
   }
 }
