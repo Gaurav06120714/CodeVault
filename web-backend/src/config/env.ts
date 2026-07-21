@@ -25,6 +25,8 @@ const envSchema = z.object({
   // When true, session cookies use SameSite=None (needed when frontend + backend are on
   // different sites, e.g. app.fly.dev vs api.fly.dev). Requires HTTPS (Secure).
   CROSS_SITE_COOKIES: z.enum(['true', 'false']).optional(),
+  // Optional error-reporting DSN. When unset, Sentry stays a no-op.
+  SENTRY_DSN: z.string().optional(),
 });
 
 const _env = envSchema.safeParse(process.env);

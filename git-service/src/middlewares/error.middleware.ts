@@ -1,6 +1,7 @@
 import type { Request, Response, NextFunction } from 'express';
 import logger from '../lib/logger';
 import { AppError } from '../utils/errors';
+import { captureException } from '../lib/sentry';
 import type { ApiErrorBody } from '../types';
 
 export function notFoundHandler(req: Request, res: Response): void {
@@ -23,6 +24,7 @@ export function errorHandler(
     return;
   }
 
+  captureException(err); // reported to Sentry when SENTRY_DSN is configured
   logger.error({ err, reqId: req.id }, 'Unhandled error');
   const body: ApiErrorBody = { error: { code: 'INTERNAL', message: 'Internal server error' } };
   res.status(500).json(body);

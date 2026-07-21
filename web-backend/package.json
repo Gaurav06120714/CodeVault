@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",
+    "@sentry/node": "^8.55.2",
     "axios": "^1.18.1",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",

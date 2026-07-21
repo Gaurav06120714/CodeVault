@@ -28,6 +28,9 @@ const envSchema = z.object({
     .transform((v) => v === 'true'),
 
   CORS_ORIGIN: z.string().default('http://localhost:3000'),
+
+  // Optional error-reporting DSN. When unset, Sentry stays a no-op.
+  SENTRY_DSN: z.string().optional(),
 });
 
 const _env = envSchema.safeParse(process.env);

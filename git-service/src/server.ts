@@ -4,8 +4,10 @@ import { env } from './config/env';
 import logger from './lib/logger';
 import prisma from './lib/prisma';
 import { redis } from './lib/redis';
+import { initSentry } from './lib/sentry';
 
 export function startServer(): Server {
+  initSentry();
   const app = createApp();
   const port = Number(env.PORT);
 

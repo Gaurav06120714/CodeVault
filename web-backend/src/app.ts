@@ -16,6 +16,7 @@ import followRoutes from './routes/follow.routes';
 import messageRoutes from './routes/message.routes';
 import { csrfMiddleware } from './middlewares/csrf.middleware';
 import { metricsMiddleware, metricsHandler } from './lib/metrics';
+import { captureException } from './lib/sentry';
 import { randomUUID } from 'crypto';
 // Admin is a standalone app (see /admin/) running on its own port — no longer mounted here.
 
@@ -82,6 +83,7 @@ export const createApp = (): Application => {
 
   // Global Error Handler — never leak internal details to the client
   app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+    captureException(err); // reported to Sentry when SENTRY_DSN is configured
     logger.error(err);
     res.status(err.status || 500).json({
       error: {
