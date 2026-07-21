@@ -1,0 +1,54 @@
+name: A11y + Perf
+
+# Automates the manual Phase-4 gates: accessibility (axe) + performance/a11y
+# budgets (Lighthouse) against the live app. Report-only by default; tighten the
+# thresholds once the app consistently passes.
+on:
+  schedule:
+    - cron: "0 4 * * 1" # Mondays 04:00 UTC
+  workflow_dispatch:
+    inputs:
+      url:
+        description: "URL to audit"
+        required: false
+        default: "https://codevault-ig6c.onrender.com"
+
+permissions:
+  contents: read
+
+env:
+  TARGET_URL: ${{ github.event.inputs.url || 'https://codevault-ig6c.onrender.com' }}
+
+jobs:
+  axe:
+    name: axe accessibility scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 20
+      - name: Run axe against key pages
+        run: |
+          npm i -g @axe-core/cli
+          # Report-only: never fail the job, just surface violations in the log.
+          axe "$TARGET_URL" --exit || true
+          axe "$TARGET_URL/login" --exit || true
+
+  lighthouse:
+    name: Lighthouse budgets
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 20
+      - name: Run Lighthouse (perf + a11y)
+        run: |
+          npm i -g @lhci/cli
+          lhci autorun \
+            --collect.url="$TARGET_URL" \
+            --collect.numberOfRuns=1 \
+            --upload.target=temporary-public-storage \
+            --assert.preset=lighthouse:no-pwa \
+            --assert.assertions.categories:performance="warn,minScore=0.9" \
+            --assert.assertions.categories:accessibility="warn,minScore=0.9" \
+            || true
