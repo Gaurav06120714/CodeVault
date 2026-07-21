@@ -14,6 +14,10 @@ import logger from '../lib/logger';
 // recommended 15–30 min window while still feeling reasonably fresh.
 const STATS_TTL_MS  = 1200_000; // 20 min (in-memory)
 const STATS_TTL_SEC = 1200;     // 20 min (Redis)
+// Snapshot fallback: last-known-good per-platform stats kept far longer than the
+// fresh cache. If a live upstream fetch fails (platform down / rate-limited), we
+// serve this stale snapshot instead of showing the user empty stats.
+const SNAPSHOT_TTL_SEC = 604800; // 7 days
 
 // In-memory L1 cache — survives within a single process restart cycle only.
 // Avoids a Redis round-trip for the most common "same user, same minute" case.
@@ -26,6 +30,7 @@ async function fetchPlatformStats(
   userId: string,
 ): Promise<any> {
   const platformKey = `stats:platform:${userId}:${platform}`;
+  const snapshotKey = `stats:snapshot:${userId}:${platform}`;
 
   // L2 — individual platform Redis cache
   try {
@@ -50,16 +55,30 @@ async function fetchPlatformStats(
   }
 
   if (stats) {
-    // Write per-platform result to Redis; a single failed platform won't bust
-    // the entire aggregate cache on the next request.
+    // Write per-platform result to both the fresh cache and the long-lived
+    // snapshot; a single failed platform won't bust the whole aggregate cache.
     try {
       await redis.setex(platformKey, STATS_TTL_SEC, JSON.stringify(stats));
+      await redis.setex(snapshotKey, SNAPSHOT_TTL_SEC, JSON.stringify(stats));
     } catch {
       // Redis write failure is non-fatal
     }
+    return stats;
   }
 
-  return stats;
+  // Live fetch failed — degrade gracefully to the last-known-good snapshot
+  // rather than surfacing empty stats to the user.
+  try {
+    const snapshot = await redis.get(snapshotKey);
+    if (snapshot) {
+      logger.warn(`[StatsService] Live fetch failed; serving snapshot for ${platform}:${username}`);
+      return JSON.parse(snapshot);
+    }
+  } catch {
+    // Redis unavailable — nothing more we can do
+  }
+
+  return null;
 }
 
 export class StatsService {

@@ -52,6 +52,24 @@ describe('StatsService.getAggregatedStats', () => {
     expect(redis.setex).toHaveBeenCalled();
   });
 
+  it('falls back to the last-known-good snapshot when a live fetch fails', async () => {
+    const userId = nextUser();
+    // aggregate + fresh per-platform caches are cold; only the snapshot exists.
+    vi.mocked(redis.get).mockImplementation((async (key: any) => {
+      if (String(key).startsWith('stats:snapshot:')) return JSON.stringify({ total: 500 });
+      return null;
+    }) as any);
+    vi.mocked(ConnectionService.listConnections).mockResolvedValueOnce([
+      { platform: 'leetcode', username: 'alice' },
+    ] as any);
+    vi.mocked(LeetCodeService.getStats).mockResolvedValueOnce(null); // upstream down
+
+    const result = await StatsService.getAggregatedStats(userId);
+
+    expect(result.totalSolved).toBe(500); // served from snapshot, not empty
+    expect(result.platforms.leetcode).toEqual({ total: 500 });
+  });
+
   it('serves the in-memory L1 cache on an immediate second call (no second live fetch)', async () => {
     const userId = nextUser();
     vi.mocked(redis.get).mockResolvedValue(null);
