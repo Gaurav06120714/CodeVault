@@ -10,9 +10,13 @@ export class CodeforcesService {
     try {
       // Run both requests concurrently — rating history is non-critical
       const [statusRes, ratingRes] = await Promise.all([
-        axios.get(`https://codeforces.com/api/user.status?handle=${username}`),
+        axios.get(`https://codeforces.com/api/user.status?handle=${username}`, {
+          timeout: 8000,
+        }),
         axios
-          .get(`https://codeforces.com/api/user.rating?handle=${username}`)
+          .get(`https://codeforces.com/api/user.rating?handle=${username}`, {
+            timeout: 8000,
+          })
           .catch(() => null),
       ]);
 

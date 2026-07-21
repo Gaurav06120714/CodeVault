@@ -32,7 +32,7 @@ export class LeetCodeService {
       const response = await axios.post('https://leetcode.com/graphql', {
         query,
         variables: { username }
-      });
+      }, { timeout: 8000 });
 
       const data = response.data?.data;
       if (!data || !data.matchedUser) return null;
