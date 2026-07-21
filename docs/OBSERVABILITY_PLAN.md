@@ -280,9 +280,9 @@ Alert fires ─▶ on-call notified (PagerDuty) ─▶ acknowledge within 15 min
 
 - [ ] Structured logging (JSON) shipping to sink on all 3 services
 - [x] Redaction middleware active — no tokens/PII in logs
-- [ ] `requestId` and `jobId` in every log line; correlated in errors
+- [x] `requestId` and `jobId` in every log line; correlated in errors *(requestId + X-Request-Id propagation done; BullMQ jobId correlation pending)*
 - [ ] Sentry wired for FE + BE unhandled exceptions
-- [ ] Prometheus metrics endpoint exposed (internal only) on BE services
+- [x] Prometheus metrics endpoint exposed (internal only) on BE services
 - [ ] Engineering + Security dashboards live in Grafana/Datadog
 - [ ] All alerts in §4.2 created and tested (fire + resolve)
 - [ ] PagerDuty escalation policy configured; on-call roster defined
