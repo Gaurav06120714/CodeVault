@@ -41,14 +41,17 @@ export async function proxy(
   const body = hasBody ? await req.arrayBuffer() : undefined;
 
   // Free-tier services sleep after ~15 min; the first request while the upstream cold-boots can
-  // get a 502/503/504 from Render's gateway (or a connection error). Retry a few times with backoff
-  // so login/API calls ride out the wake-up instead of failing. Safe here: a gateway error means the
-  // upstream app never processed the request, so there's nothing to double-submit.
+  // get a 502/503/504 from Render's gateway (or a connection error). Render cold boots take
+  // 30–60s on free tier, so we retry for up to ~65s (8 attempts × ~5s apart + fetch time)
+  // to ride out the wake-up. Safe: a gateway error means the upstream app never processed
+  // the request, so there's nothing to double-submit.
   const GATEWAY_ERRORS = new Set([502, 503, 504]);
+  const MAX_RETRIES = 8;
+  const RETRY_INTERVAL_MS = 5000; // 5s between retries → ~65s total window (covers 30-60s cold boot)
   let upstream: Response | undefined;
   let lastErr: unknown;
-  for (let attempt = 0; attempt < 4; attempt++) {
-    if (attempt > 0) await new Promise((r) => setTimeout(r, attempt * 2000)); // 0, 2s, 4s, 6s
+  for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+    if (attempt > 0) await new Promise((r) => setTimeout(r, RETRY_INTERVAL_MS));
     try {
       upstream = await fetch(url, { method: req.method, headers, body, redirect: "manual" });
       if (!GATEWAY_ERRORS.has(upstream.status)) break; // got a real response
@@ -58,7 +61,7 @@ export async function proxy(
   }
   if (!upstream) {
     return new Response(
-      JSON.stringify({ message: "Upstream unavailable (service may be waking up — try again)" }),
+      JSON.stringify({ message: "Upstream unavailable (service may be waking up — try again in a minute)" }),
       { status: 503, headers: { "content-type": "application/json" } }
     );
   }
