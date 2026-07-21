@@ -13,6 +13,7 @@
   --brand-d: #d8431f;
   --brand-soft: #fdeae4;
   --amber: #e8a200;
+  --green: #00b8a3;
   --amber-d: #b07c00;
   --amber-soft: #fbeec8;
   --rose: #e0457b;
@@ -177,7 +178,7 @@ svg.ico.sm{width:14px;height:14px}
 
 /* Difficulty Ring */
 .ringwrap{display:flex;align-items:center;gap:18px}
-.ring{width:118px;height:118px;border-radius:50%;flex:none;background:conic-gradient(var(--amber) 0 43.3%, var(--brand) 43.3% 88.2%, var(--rose) 88.2% 100%);display:grid;place-items:center;position:relative}
+.ring{width:118px;height:118px;border-radius:50%;flex:none;background:conic-gradient(var(--green) 0 43.3%, var(--amber) 43.3% 88.2%, var(--brand) 88.2% 100%);display:grid;place-items:center;position:relative}
 .ring::before{content:"";position:absolute;width:84px;height:84px;border-radius:50%;background:#fff}
 .ring .rc{position:relative;text-align:center}
 .ring .rc b{font-size:22px;font-weight:800;display:block;letter-spacing:-.02em}
@@ -187,7 +188,7 @@ svg.ico.sm{width:14px;height:14px}
 .rleg .r .sw{width:10px;height:10px;border-radius:3px}
 .rleg .r .v{margin-left:auto;font-family:var(--mono);font-size:12px;color:var(--muted)}
 .sw{width:10px;height:10px;border-radius:3px}
-.sw.e{background:var(--amber)}.sw.m{background:var(--brand)}.sw.h{background:var(--rose)}
+.sw.e{background:var(--green)}.sw.m{background:var(--amber)}.sw.h{background:var(--brand)}
 
 /* Heatmap */
 .heat{display:grid;grid-auto-flow:column;grid-template-rows:repeat(7,1fr);gap:3px}
