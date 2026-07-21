@@ -1,6 +1,7 @@
 
   :root{
     --bg:#ffffff;
+    --card:#ffffff;
     --subtle:#f7f6f1;
     --subtle-2:#efece3;
     --ink:#16160f;
@@ -279,3 +280,55 @@
     :global(section){padding:72px 0}
     .final{padding:40px 24px}
   }
+
+  /* ── Dark theme for the marketing landing page ──────────────────────────────
+     The module defines its own :root palette (all light), so global dark mode
+     doesn't reach it. This scoped block flips the palette + the surfaces that
+     hardcode light colors when <html data-theme="dark">. */
+  :global(html[data-theme="dark"]) {
+    --bg:#14120e;
+    --card:#1c1a15;
+    --subtle:#1c1a15;
+    --subtle-2:#26221b;
+    --ink:#f3efe6;
+    --ink-2:#d8d2c5;
+    --muted:#a49e90;
+    --faint:#8f897c;
+    --border:#2c281f;
+    --border-2:#38332a;
+    --accent-soft:#3a1f18;
+    --orange-soft:#33280f;
+    --green-soft:#33280f;
+    --amber-soft:#3a1f18;
+    --red-soft:#331825;
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 24px -12px rgba(0,0,0,.6);
+    --shadow-lg:0 2px 4px rgba(0,0,0,.4), 0 24px 60px -24px rgba(0,0,0,.7);
+  }
+  :global(html[data-theme="dark"]) :global(header).nav{background:rgba(20,18,14,.8)}
+  :global(html[data-theme="dark"]) .menu-btn,
+  :global(html[data-theme="dark"]) .hp,
+  :global(html[data-theme="dark"]) .window,
+  :global(html[data-theme="dark"]) .win-url,
+  :global(html[data-theme="dark"]) .card,
+  :global(html[data-theme="dark"]) .prob,
+  :global(html[data-theme="dark"]) .sol,
+  :global(html[data-theme="dark"]) .nav-links,
+  :global(html[data-theme="dark"]) .qa button,
+  :global(html[data-theme="dark"]) .btn-secondary{background:var(--card)}
+  :global(html[data-theme="dark"]) .win-body{background:linear-gradient(180deg,#1c1a15,#201d17)}
+  :global(html[data-theme="dark"]) .flow .step .arrow{background:var(--card)}
+  :global(html[data-theme="dark"]) .win-dots i{background:#38332a}
+  :global(html[data-theme="dark"]) .heat i{background:#2a2620}
+  /* Keep platform logo tiles light so the colored SVG logos stay legible */
+  :global(html[data-theme="dark"]) .lc,
+  :global(html[data-theme="dark"]) .cf,
+  :global(html[data-theme="dark"]) .cc,
+  :global(html[data-theme="dark"]) .hr,
+  :global(html[data-theme="dark"]) .hp .hpb.lc,
+  :global(html[data-theme="dark"]) .hp .hpb.cf,
+  :global(html[data-theme="dark"]) .hp .hpb.cc,
+  :global(html[data-theme="dark"]) .hp .hpb.hr{background-color:#f3efe6}
+  /* The dark CTA banner uses var(--ink) as its background; pin it so it stays
+     dark (var(--ink) flips to light in dark mode) and keep its button readable. */
+  :global(html[data-theme="dark"]) .final{background:#0c0d12}
+  :global(html[data-theme="dark"]) .final .btn-primary{background:#f3efe6;color:#14120e;border-color:#f3efe6}

@@ -289,6 +289,19 @@ export default function SettingsPage() {
       .filter((el): el is HTMLElement => el !== null);
     if (els.length === 0) return;
 
+    // Find the nearest scrollable ancestor so the observer + bottom check use the
+    // real scroll container (falls back to the viewport/window).
+    const getScrollParent = (node: HTMLElement): HTMLElement | null => {
+      let el = node.parentElement;
+      while (el) {
+        const oy = getComputedStyle(el).overflowY;
+        if ((oy === "auto" || oy === "scroll") && el.scrollHeight > el.clientHeight) return el;
+        el = el.parentElement;
+      }
+      return null;
+    };
+    const scrollParent = getScrollParent(els[0]);
+
     const observer = new IntersectionObserver(
       (entries) => {
         const visible = entries
@@ -296,11 +309,27 @@ export default function SettingsPage() {
           .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
         if (visible[0]) setActiveSection(visible[0].target.id);
       },
-      // Bias toward the section nearest the top of the viewport.
-      { rootMargin: "-96px 0px -55% 0px", threshold: [0, 0.25, 0.5, 1] },
+      { root: scrollParent, rootMargin: "-88px 0px -60% 0px", threshold: [0, 0.2, 0.5, 1] },
     );
     els.forEach((el) => observer.observe(el));
-    return () => observer.disconnect();
+
+    // Bottom fallback: the last section (Danger zone) is short and sits at the
+    // very bottom, so it can never reach the top band — force it active once the
+    // container is scrolled to the end.
+    const scrollTarget: HTMLElement | Window = scrollParent ?? window;
+    const onScroll = () => {
+      const st = scrollParent ? scrollParent.scrollTop : window.scrollY;
+      const ch = scrollParent ? scrollParent.clientHeight : window.innerHeight;
+      const sh = scrollParent ? scrollParent.scrollHeight : document.documentElement.scrollHeight;
+      if (st + ch >= sh - 4) setActiveSection(ids[ids.length - 1]);
+    };
+    scrollTarget.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+
+    return () => {
+      observer.disconnect();
+      scrollTarget.removeEventListener("scroll", onScroll);
+    };
   }, [user]);
 
   if (!user) {
