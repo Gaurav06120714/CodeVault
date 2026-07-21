@@ -108,7 +108,7 @@ Restore drill: quarterly into isolated instance + checksum + smoke test
 
 ## 12. Checklist
 
-- [ ] Automated encrypted backups + PITR
+- [ ] Automated encrypted backups + PITR *(scripts/backup.sh encrypts + prunes; schedule via cron; PITR = managed DB)*
 - [ ] Cross-region backup copies
 - [ ] Backups = ciphertext only; keys separate in KMS
 - [ ] Quarterly restore drills + checksum verification

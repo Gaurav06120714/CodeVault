@@ -268,7 +268,7 @@ M3 (analytics + public profile + settings) ─ parallel with M4 after M2
 - [ ] Prod Postgres HA + PITR + encrypted daily backup + restore drill done
 - [ ] Redis HA; no data loss on restart acceptable (cache/queue)
 - [ ] CDN + WAF + DNSSEC + HSTS live; TLS auto-renew working
-- [ ] Blue-green / rolling deploy with health gate; rollback tested
+- [ ] Blue-green / rolling deploy with health gate; rollback tested *(health gate via render.yaml healthCheckPath; blue-green pending)*
 - [ ] Sync kill-switch (`SYNC_ENABLED=false`) tested
 - [ ] DR runbook written; RPO/RTO targets documented
 

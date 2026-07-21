@@ -160,9 +160,9 @@ terraform fmt/validate → plan (comment on PR) → security scan (tfsec) → ap
 - [ ] CI green on all 3 services + DB + IaC; contract conformance passing
 - [ ] Secrets in manager; crypto keys in KMS; no secrets in repo/CI logs
 - [ ] Migrations expand→contract; pre-migration backup; rollback tested
-- [ ] Health/readiness probes wired; blue-green/rolling with health gates
-- [ ] Backups + PITR + **restore drill** done; DR RPO/RTO documented
-- [ ] Sync kill-switch + worker concurrency caps configured
+- [ ] Health/readiness probes wired; blue-green/rolling with health gates *(healthCheckPath wired in render.yaml; blue-green pending)*
+- [ ] Backups + PITR + **restore drill** done; DR RPO/RTO documented *(encrypted backup/restore scripts in scripts/; PITR + drill = ops)*
+- [x] Sync kill-switch + worker concurrency caps configured *(SYNC_ENABLED + SYNC_CONCURRENCY / SYNC_PLATFORM_CONCURRENCY)*
 - [ ] CDN/WAF/DNSSEC/HSTS live; TLS auto-renew verified
 ```
 ```
