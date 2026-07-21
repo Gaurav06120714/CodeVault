@@ -15,6 +15,8 @@ import settingsRoutes from './routes/settings.routes';
 import followRoutes from './routes/follow.routes';
 import messageRoutes from './routes/message.routes';
 import { csrfMiddleware } from './middlewares/csrf.middleware';
+import { metricsMiddleware, metricsHandler } from './lib/metrics';
+import { randomUUID } from 'crypto';
 // Admin is a standalone app (see /admin/) running on its own port — no longer mounted here.
 
 export const createApp = (): Application => {
@@ -43,8 +45,24 @@ export const createApp = (): Application => {
     res.json({ status: 'ok', csrfToken: req.cookies['csrf-token'] });
   });
 
-  // Logging
-  app.use(pinoHttp({ logger }));
+  // Logging — correlate every log line with a request id. Reuse an inbound
+  // X-Request-Id (e.g. from the frontend proxy) or mint a UUID, and echo it back
+  // on the response so a request can be traced across services.
+  app.use(
+    pinoHttp({
+      logger,
+      genReqId: (req, res) => {
+        const inbound = req.headers['x-request-id'];
+        const id = (Array.isArray(inbound) ? inbound[0] : inbound) || randomUUID();
+        res.setHeader('x-request-id', id);
+        return id;
+      },
+    }),
+  );
+
+  // Metrics — record request duration/status, expose Prometheus scrape endpoint.
+  app.use(metricsMiddleware);
+  app.get('/api/metrics', metricsHandler);
 
   // Health check
   app.get('/api/health', (req: Request, res: Response) => {

@@ -7,6 +7,7 @@ import logger from './lib/logger';
 import { env } from './config/env';
 import { requestId } from './middlewares/requestId.middleware';
 import { errorHandler, notFoundHandler } from './middlewares/error.middleware';
+import { metricsMiddleware, metricsHandler } from './lib/metrics';
 import apiRoutes, { healthRoutes } from './routes';
 
 export function createApp(): Application {
@@ -24,6 +25,10 @@ export function createApp(): Application {
   app.use(cookieParser());
   app.use(requestId);
   app.use(pinoHttp({ logger, genReqId: (req) => (req as any).id }));
+
+  // Metrics — record request duration/status, expose Prometheus scrape endpoint.
+  app.use(metricsMiddleware);
+  app.get('/metrics', metricsHandler);
 
   // Health (unauthenticated, unprefixed).
   app.use('/', healthRoutes);
