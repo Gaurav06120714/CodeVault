@@ -6,6 +6,7 @@ import Link from "next/link";
 import { PlatformChip } from "@/components/PlatformChip";
 import { CodeVaultLoader } from "@/components/CodeVaultLoader";
 import { Toast } from "@/components/Toast";
+import { getStoredTheme, setTheme, watchSystemTheme, type Theme } from "@/utils/theme";
 import { PLATFORMS, PLATFORM_ORDER } from "@/constants/platforms";
 import { apiFetch } from "@/utils/api";
 
@@ -13,7 +14,7 @@ export default function SettingsPage() {
   const router = useRouter();
   const [user, setUser] = useState<{ id: string; githubLogin: string; handle?: string; displayName: string | null; email?: string } | null>(null);
   const [activeSection, setActiveSection] = useState("account");
-  const [activeTheme, setActiveTheme] = useState("Light");
+  const [activeTheme, setActiveTheme] = useState<Theme>("System");
   const [toast, setToast] = useState<string | null>(null);
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api";
@@ -233,29 +234,38 @@ export default function SettingsPage() {
     }
   }, [router]);
 
-  // Simple scroll listener to highlight active subnav section (matching prototype script)
+  // Initialize the theme from the stored preference and keep it in sync with the
+  // OS setting while "System" is selected.
   useEffect(() => {
-    const handleScroll = () => {
-      const sections = ["account", "platforms", "github", "sync", "profile", "notif", "appearance", "danger"];
-      let currentSection = "account";
-
-      for (const section of sections) {
-        const el = document.getElementById(section);
-        if (el) {
-          const rect = el.getBoundingClientRect();
-          // If the element is near the middle of the viewport
-          if (rect.top <= 180 && rect.bottom >= 180) {
-            currentSection = section;
-            break;
-          }
-        }
-      }
-      setActiveSection(currentSection);
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    const stored = getStoredTheme();
+    setActiveTheme(stored);
+    setTheme(stored);
+    return watchSystemTheme(() => getStoredTheme());
   }, []);
+
+  // Scroll-spy: highlight the active subnav item as its section scrolls into view.
+  // Uses IntersectionObserver so it works regardless of which element scrolls
+  // (the previous window-scroll listener never fired inside the app's scroll area).
+  useEffect(() => {
+    const ids = ["account", "platforms", "github", "sync", "profile", "notif", "appearance", "danger"];
+    const els = ids
+      .map((id) => document.getElementById(id))
+      .filter((el): el is HTMLElement => el !== null);
+    if (els.length === 0) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
+        if (visible[0]) setActiveSection(visible[0].target.id);
+      },
+      // Bias toward the section nearest the top of the viewport.
+      { rootMargin: "-96px 0px -55% 0px", threshold: [0, 0.25, 0.5, 1] },
+    );
+    els.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, [user]);
 
   if (!user) {
     return <CodeVaultLoader text="Loading settings" />;
@@ -280,7 +290,11 @@ export default function SettingsPage() {
             key={sec.id}
             href={`#${sec.id}`}
             className={activeSection === sec.id ? "on" : ""}
-            onClick={() => setActiveSection(sec.id)}
+            onClick={(e) => {
+              e.preventDefault();
+              document.getElementById(sec.id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+              setActiveSection(sec.id);
+            }}
           >
             {sec.label}
           </a>
@@ -615,7 +629,12 @@ export default function SettingsPage() {
                 key={t}
                 type="button"
                 className={activeTheme === t ? "on" : ""}
-                onClick={() => updateSetting("appearance", "theme", t)}
+                onClick={() => {
+                  const theme = t as Theme;
+                  setActiveTheme(theme);
+                  setTheme(theme); // apply + persist to localStorage immediately
+                  updateSetting("appearance", "theme", t); // persist to backend
+                }}
               >
                 {t}
               </button>

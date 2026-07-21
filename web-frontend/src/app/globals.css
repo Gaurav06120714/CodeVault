@@ -519,3 +519,29 @@ input.txt:read-only{background:var(--paper);color:var(--muted)}
     scroll-behavior: auto !important;
   }
 }
+
+/* ── Dark theme ─────────────────────────────────────────────────────────────
+   Applied when <html data-theme="dark"> (set by src/utils/theme.ts). Brand hues
+   are kept; surfaces, text and soft backgrounds are inverted for AA contrast. */
+html[data-theme="dark"] {
+  --paper: #14120e;
+  --card: #1c1a15;
+  --ink: #f3efe6;
+  --ink-2: #d8d2c5;
+  --muted: #a49e90;
+  --faint: #8f897c;
+  --border: #2c281f;
+  --border-2: #38332a;
+  --brand-soft: #3a1f18;
+  --amber-soft: #33280f;
+  --rose-soft: #331825;
+
+  --bg: #1c1a15;
+  --subtle: #201d17;
+  --subtle-2: #26221b;
+  --green-soft: #123024;
+  --red-soft: #331825;
+}
+html[data-theme="dark"] .btn-secondary { background: var(--card); }
+html[data-theme="dark"] .txt,
+html[data-theme="dark"] .field input { background: var(--card); }
