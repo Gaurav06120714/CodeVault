@@ -1,5 +1,6 @@
 import styles from "./page.module.css";
 import { PlatformChip } from "../components/PlatformChip";
+import { MobileNavScript } from "../components/MobileNavScript";
 
 export default function Home() {
   return (
@@ -374,8 +375,7 @@ export default function Home() {
   </div>
 </footer>
 
-
-
+      <MobileNavScript />
     </>
   );
 }

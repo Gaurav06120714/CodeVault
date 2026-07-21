@@ -18,6 +18,18 @@ export default function AppLayout({
   const router = useRouter();
   const pathname = usePathname();
   const [user, setUser] = useState<{ id: string; githubLogin: string; displayName: string | null; avatarUrl?: string } | null>(null);
+  const [navOpen, setNavOpen] = useState(false);
+
+  // Close the mobile drawer on navigation.
+  useEffect(() => {
+    setNavOpen(false);
+  }, [pathname]);
+
+  // Reflect drawer state on <body> so the CSS drawer + scrim show/hide.
+  useEffect(() => {
+    document.body.classList.toggle("nav-open", navOpen);
+    return () => document.body.classList.remove("nav-open");
+  }, [navOpen]);
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -129,9 +141,15 @@ export default function AppLayout({
       <div className="main">
         {/* TOPBAR */}
         <div className="topbar">
-          <div className="menu-btn">
+          <button
+            type="button"
+            className="menu-btn"
+            aria-label={navOpen ? "Close menu" : "Open menu"}
+            aria-expanded={navOpen}
+            onClick={() => setNavOpen((o) => !o)}
+          >
             <svg className="ico" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-          </div>
+          </button>
           
           {(() => {
             let title = "Dashboard";
@@ -164,7 +182,7 @@ export default function AppLayout({
           {children}
         </div>
       </div>
-      <div className="scrim"></div>
+      {navOpen && <div className="scrim" onClick={() => setNavOpen(false)} aria-hidden="true"></div>}
     </div>
     </>
   );

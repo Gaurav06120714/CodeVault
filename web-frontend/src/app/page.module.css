@@ -262,7 +262,7 @@
     .nav-in{position:relative}
     .menu-btn{display:flex}
     .nav-links{position:absolute;top:58px;right:0;left:0;flex-direction:column;gap:0;background:#fff;border:1px solid var(--border);border-radius:12px;padding:8px;box-shadow:var(--shadow-lg);display:none;z-index:60}
-    body.nav-open .nav-links{display:flex}
+    body:global(.nav-open) .nav-links{display:flex}
     .nav-links a{padding:11px 12px;border-radius:8px}
     .nav-links a:hover{background:var(--subtle)}
     .nav-right .btn-ghost{display:none}
@@ -332,3 +332,11 @@
      dark (var(--ink) flips to light in dark mode) and keep its button readable. */
   :global(html[data-theme="dark"]) .final{background:#0c0d12}
   :global(html[data-theme="dark"]) .final .btn-primary{background:#f3efe6;color:#14120e;border-color:#f3efe6}
+
+  /* Narrow phones: the header CTA overflows next to the hamburger — hide it
+     (the hero CTA + the menu already provide the action). */
+  @media (max-width:600px){
+    .nav-right .btn{display:none}
+    .nav-in{height:58px}
+    .hero{padding:56px 0 44px}
+  }

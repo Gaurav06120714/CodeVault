@@ -587,3 +587,87 @@ html[data-theme="dark"] .hr { background-color: #f3efe6; }
 .theme-toggle{display:flex;align-items:center;gap:9px;width:100%;margin-top:8px;padding:9px 11px;border-radius:9px;border:1px solid var(--border);background:var(--card);color:var(--muted);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:background-color .14s,color .14s,border-color .14s}
 .theme-toggle:hover{color:var(--ink);border-color:var(--border-2);background:var(--subtle)}
 .theme-toggle svg{flex:none}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   MOBILE RESPONSIVENESS
+   Follows the existing drawer pattern (body.nav-open .side) and design tokens.
+   Goal: no sideways PAGE scroll; wide tables/heatmaps scroll inside their card.
+   ════════════════════════════════════════════════════════════════════════════ */
+
+/* Kill accidental horizontal page scroll on every route. */
+html, body { max-width: 100%; overflow-x: hidden; }
+
+@media (max-width: 900px) {
+  /* Topbar: keep actions on one row without overlap; title truncates. */
+  .topbar { gap: 8px; padding: 12px 16px; }
+  .topbar h1 { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .search-trigger, .search { width: auto; flex: 1 1 90px; min-width: 0; }
+}
+
+@media (max-width: 640px) {
+  /* Compact spacing */
+  .content { padding: 16px 14px 48px; gap: 14px; }
+  .panel { padding: 16px; }
+
+  /* Stat cards: 2-up on phones (still readable) */
+  .stats { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .stat { padding: 13px; }
+  .stat .n { font-size: 22px; }
+  .pc-stats { grid-template-columns: repeat(2, 1fr); }
+
+  /* Wide tables scroll INSIDE their card, not the page */
+  .panel { overflow-x: auto; }
+  table { min-width: 520px; }
+
+  /* Heatmap scrolls horizontally within its card */
+  .heat { overflow-x: auto; padding-bottom: 6px; }
+
+  /* Segmented controls / filters never overflow the viewport */
+  .filters { gap: 8px; }
+  .seg { max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+  /* Profile header shrinks and wraps */
+  .phead { padding: 22px 18px 18px; }
+  .phead-top { flex-wrap: wrap; gap: 14px; }
+  .phead .pav { width: 72px; height: 72px; font-size: 28px; }
+  .phead-actions { width: 100%; }
+
+  /* Repo browser / bar rows stay contained */
+  .repohead { gap: 12px; }
+  .repohead .acts { margin-left: 0; width: 100%; }
+
+  /* Stack all two-column form/grid layouts */
+  .two, .radios, .plats, .modes, .g-2, .g-3 { grid-template-columns: 1fr; }
+  .urlrow { flex-direction: column; align-items: stretch; }
+  .url { min-width: 0; }
+
+  /* Charts shrink */
+  .ring { width: 100px; height: 100px; }
+  .ring::before { width: 70px; height: 70px; }
+  .mbars { height: 150px; }
+
+  /* Tap targets ≥ 44px (touch) */
+  .btn { min-height: 44px; }
+  .btn.sm { min-height: 38px; }
+  .ic-btn, .menu-btn { width: 42px; height: 42px; }
+  .side .nav a { padding: 12px 11px; }
+  .subnav a { padding: 11px 12px; }
+  .switch { width: 46px; height: 26px; }
+
+  /* Messages: single-pane on phones (overrides the inline 320px 1fr grid) */
+  .msg-shell { grid-template-columns: 1fr !important; height: auto !important; }
+  .msg-list { max-height: 40vh; }
+}
+
+@media (max-width: 380px) {
+  /* Very narrow phones: single-column stats so big numbers never clip */
+  .stats { grid-template-columns: 1fr; }
+}
+
+/* Login page: collapse the two-column layout on phones/tablets. */
+@media (max-width: 820px) {
+  .auth { grid-template-columns: 1fr; }
+  .auth-panel { display: none; }
+  .m-brand { display: flex; }
+  .form-side { padding: 28px 20px; }
+}

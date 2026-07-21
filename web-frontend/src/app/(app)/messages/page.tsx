@@ -155,9 +155,9 @@ function MessagesInner() {
     : conversations;
 
   return (
-    <div style={{ background: "#fff", border: "1px solid var(--border)", borderRadius: "var(--r)", display: "grid", gridTemplateColumns: "320px 1fr", overflow: "hidden", height: "calc(100vh - 150px)", minHeight: 420 }}>
+    <div className="msg-shell" style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: "var(--r)", display: "grid", gridTemplateColumns: "320px 1fr", overflow: "hidden", height: "calc(100vh - 150px)", minHeight: 420 }}>
       {/* ——— Left pane: conversations ——— */}
-      <div style={{ borderRight: "1px solid var(--border)", display: "flex", flexDirection: "column", minWidth: 0 }}>
+      <div className="msg-list" style={{ borderRight: "1px solid var(--border)", display: "flex", flexDirection: "column", minWidth: 0 }}>
         <div style={{ padding: "14px 14px 10px" }}>
           <div className="search" style={{ width: "100%", marginLeft: 0 }}>
             <svg className="ico sm" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.7" y2="16.7"/></svg>
