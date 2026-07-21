@@ -85,4 +85,43 @@ export class SettingsService {
 
     return updatedUser;
   }
+
+  /**
+   * GDPR data portability — return everything we hold about the user as JSON.
+   * Deliberately excludes secrets: connection session tokens (encrypted) and any
+   * OAuth token ciphertext are never included in an export.
+   */
+  static async exportUserData(userId: string) {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        handle: true,
+        displayName: true,
+        email: true,
+        githubLogin: true,
+        avatarUrl: true,
+        plan: true,
+        publicProfileEnabled: true,
+        settings: true,
+        createdAt: true,
+        connections: {
+          select: { platform: true, username: true, syncEnabled: true, tokenStatus: true, createdAt: true },
+        },
+      },
+    });
+    if (!user) throw new Error('User not found');
+    return { exportedAt: new Date().toISOString(), user };
+  }
+
+  /**
+   * Right-to-erasure — permanently delete the account. The schema declares
+   * onDelete: Cascade on every user relation, so this purges connections AND
+   * their ConnectionSecret rows (the encrypted platform/GitHub tokens), plus
+   * notifications, follows, messages, sync runs, etc.
+   */
+  static async deleteAccount(userId: string) {
+    await prisma.user.delete({ where: { id: userId } });
+    logger.warn({ userId }, 'Account deleted — all user data and tokens purged');
+  }
 }

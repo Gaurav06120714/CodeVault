@@ -17,6 +17,38 @@ export class SettingsController {
     }
   }
 
+  static async exportData(req: Request, res: Response): Promise<void> {
+    try {
+      if (!req.user?.userId) {
+        res.status(401).json({ error: 'Unauthorized' });
+        return;
+      }
+      const data = await SettingsService.exportUserData(req.user.userId);
+      res.setHeader('Content-Disposition', 'attachment; filename="codevault-export.json"');
+      res.json(data);
+    } catch (err: any) {
+      logger.error({ err }, 'Failed to export user data');
+      res.status(500).json({ error: 'Failed to export data' });
+    }
+  }
+
+  static async deleteAccount(req: Request, res: Response): Promise<void> {
+    try {
+      if (!req.user?.userId) {
+        res.status(401).json({ error: 'Unauthorized' });
+        return;
+      }
+      await SettingsService.deleteAccount(req.user.userId);
+      // Sign the (now non-existent) user out.
+      res.clearCookie('cv_access', { path: '/' });
+      res.clearCookie('cv_refresh', { path: '/' });
+      res.json({ ok: true });
+    } catch (err: any) {
+      logger.error({ err }, 'Failed to delete account');
+      res.status(500).json({ error: 'Failed to delete account' });
+    }
+  }
+
   static async updateSettings(req: Request, res: Response): Promise<void> {
     try {
       if (!req.user?.userId) {

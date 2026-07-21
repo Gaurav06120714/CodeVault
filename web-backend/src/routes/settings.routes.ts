@@ -8,5 +8,7 @@ router.use(requireAuth);
 
 router.get('/', SettingsController.getSettings);
 router.patch('/', SettingsController.updateSettings);
+router.get('/export', SettingsController.exportData);
+router.delete('/account', SettingsController.deleteAccount);
 
 export default router;

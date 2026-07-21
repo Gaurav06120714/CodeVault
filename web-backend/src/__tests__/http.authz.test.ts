@@ -14,6 +14,7 @@ const PROTECTED_GET = [
   '/api/notifications',
   '/api/messages',
   '/api/github-repos',
+  '/api/settings/export', // GDPR data export must never be anonymous
 ];
 
 describe('authorization gate (BOLA prevention)', () => {
