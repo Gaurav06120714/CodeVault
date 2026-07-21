@@ -519,7 +519,7 @@ GitHub publish ─┴─▶ Sync orchestrator ─▶ Scheduler/jobs ─▶ Sync 
 - [x] `requestId`/`jobId` correlation end-to-end
 
 **Ops**
-- [ ] Runbooks (token expiry storm, GitHub outage, queue backlog) *(documented in OBSERVABILITY_PLAN; not operationalized)*
+- [x] Runbooks (token expiry storm, GitHub outage, queue backlog) *(operationalized in docs/RUNBOOKS.md)*
 - [ ] Rollback plan; staging mirrors prod *(deploy-time)*
 - [ ] Load test of stats + a sync batch passed *(pending)*
 

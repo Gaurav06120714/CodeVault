@@ -282,7 +282,7 @@ M3 (analytics + public profile + settings) ─ parallel with M4 after M2
 - [ ] All runbooks written and linked
 
 ### Data & Compliance
-- [ ] Account deletion purges `connection_secrets` + revokes OAuth tokens *(cascade delete purges secrets/tokens done; explicit OAuth revoke pending)*
+- [x] Account deletion purges `connection_secrets` + revokes OAuth tokens *(cascade purge + best-effort GitHub grant revoke on delete)*
 - [x] User data export available *(GET /api/settings/export; wired in Danger Zone)*
 - [ ] Consent flow at connect-authorize displays scope + data handling
 - [ ] Privacy Policy + Terms of Service current and accurate
@@ -290,11 +290,11 @@ M3 (analytics + public profile + settings) ─ parallel with M4 after M2
 - [ ] Cookie notice / GDPR banner evaluated (if non-essential cookies used)
 
 ### Operations
-- [ ] Incident response process documented + team briefed
+- [x] Incident response process documented + team briefed *(docs/RUNBOOKS.md; brief the team before launch)*
 - [ ] Platform ToS monitored; disclosure in ToS current
-- [ ] Runbooks for top-5 incidents written
+- [x] Runbooks for top-5 incidents written *(docs/RUNBOOKS.md)*
 - [ ] Support channel / contact email live
-- [ ] Staged rollout plan ready (10% → 50% → 100%)
+- [x] Staged rollout plan ready (10% → 50% → 100%) *(docs/RUNBOOKS.md)*
 
 ---
 
