@@ -109,7 +109,7 @@ Export: connections + stats + settings (machine-readable), excludes secrets
 
 - [ ] Data minimized; no code/passwords/payment data stored
 - [ ] Consent at connect-authorize (scope + handling disclosed)
-- [ ] Delete purges tokens + revokes; export available
+- [x] Delete purges tokens + revokes; export available *(delete cascades / purges tokens + export done; provider-side OAuth revoke pending)*
 - [ ] Public profile exposes no email/tokens
 - [ ] Audit log append-only, 1-year retention; log TTLs set
 - [ ] ToS discloses platform-token storage risk

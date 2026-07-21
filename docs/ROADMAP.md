@@ -282,8 +282,8 @@ M3 (analytics + public profile + settings) ─ parallel with M4 after M2
 - [ ] All runbooks written and linked
 
 ### Data & Compliance
-- [ ] Account deletion purges `connection_secrets` + revokes OAuth tokens
-- [ ] User data export available
+- [ ] Account deletion purges `connection_secrets` + revokes OAuth tokens *(cascade delete purges secrets/tokens done; explicit OAuth revoke pending)*
+- [x] User data export available *(GET /api/settings/export; wired in Danger Zone)*
 - [ ] Consent flow at connect-authorize displays scope + data handling
 - [ ] Privacy Policy + Terms of Service current and accurate
 - [ ] `audit_logs` 1-year retention confirmed
