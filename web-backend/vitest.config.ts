@@ -8,6 +8,8 @@ export default defineConfig({
     env: {
       DATABASE_URL: 'postgresql://dummy:5432/dummy',
       JWT_SECRET: 'dummy_secret_for_testing_purposes_123456789',
+      NODE_ENV: 'test',
+      LOG_LEVEL: 'fatal',
     },
     coverage: {
       provider: 'v8',

@@ -14,6 +14,7 @@ import notificationRoutes from './routes/notification.routes';
 import settingsRoutes from './routes/settings.routes';
 import followRoutes from './routes/follow.routes';
 import messageRoutes from './routes/message.routes';
+import { csrfMiddleware } from './middlewares/csrf.middleware';
 // Admin is a standalone app (see /admin/) running on its own port — no longer mounted here.
 
 export const createApp = (): Application => {
@@ -35,7 +36,6 @@ export const createApp = (): Application => {
   app.use(cookieParser());
 
   // Anti-CSRF Token Middleware (Double Submit Cookie)
-  const { csrfMiddleware } = require('./middlewares/csrf.middleware');
   app.use(csrfMiddleware);
 
   // Expose endpoint for frontend to explicitly fetch/initialize the CSRF token if needed
