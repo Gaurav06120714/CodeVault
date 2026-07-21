@@ -6,6 +6,7 @@ import Link from "next/link";
 import { PlatformChip } from "@/components/PlatformChip";
 import { CodeVaultLoader } from "@/components/CodeVaultLoader";
 import { Toast } from "@/components/Toast";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { getStoredTheme, setTheme, watchSystemTheme, type Theme } from "@/utils/theme";
 import { PLATFORMS, PLATFORM_ORDER } from "@/constants/platforms";
 import { apiFetch } from "@/utils/api";
@@ -16,6 +17,41 @@ export default function SettingsPage() {
   const [activeSection, setActiveSection] = useState("account");
   const [activeTheme, setActiveTheme] = useState<Theme>("System");
   const [toast, setToast] = useState<string | null>(null);
+  const [pendingDelete, setPendingDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  const handleExport = async () => {
+    try {
+      const res = await apiFetch(`${API_URL}/settings/export`, { credentials: "include" });
+      if (!res.ok) throw new Error("Export failed");
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "codevault-export.json";
+      a.click();
+      URL.revokeObjectURL(url);
+      setToast("Your data export has downloaded.");
+    } catch {
+      setToast("Could not export data. Please try again.");
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    setDeleting(true);
+    try {
+      const res = await apiFetch(`${API_URL}/settings/account`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      if (!res.ok) throw new Error("Delete failed");
+      router.replace("/login");
+    } catch {
+      setDeleting(false);
+      setPendingDelete(false);
+      setToast("Could not delete account. Please try again.");
+    }
+  };
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api";
   const PLATFORMS_LIST = PLATFORM_ORDER.map((id) => PLATFORMS[id]);
@@ -655,14 +691,32 @@ export default function SettingsPage() {
           </div>
           <div className="row">
             <div className="rt">
+              <div className="n">Export my data</div>
+              <div className="m">Download everything we store about you as JSON (GDPR).</div>
+            </div>
+            <button className="btn right" type="button" onClick={handleExport}>Export data</button>
+          </div>
+          <div className="row">
+            <div className="rt">
               <div className="n">Delete account</div>
               <div className="m">Permanently remove your CodeVault account and data.</div>
             </div>
-            <button className="btn dangerfill right" type="button">Delete account</button>
+            <button className="btn dangerfill right" type="button" onClick={() => setPendingDelete(true)}>Delete account</button>
           </div>
         </section>
       </div>
       <Toast message={toast} onDismiss={() => setToast(null)} />
+      <ConfirmDialog
+        open={pendingDelete}
+        title="Delete your account?"
+        message="This permanently removes your CodeVault account, connections and stored tokens. Your GitHub repos are kept. This cannot be undone."
+        confirmLabel="Delete account"
+        cancelLabel="Keep account"
+        danger
+        busy={deleting}
+        onConfirm={handleDeleteAccount}
+        onCancel={() => setPendingDelete(false)}
+      />
     </>
   );
 }
