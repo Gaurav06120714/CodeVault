@@ -12,5 +12,9 @@ export default defineConfig({
       ENCRYPTION_KEY: 'a'.repeat(64), // 64 hex chars = 32 bytes
       REDIS_URL: 'redis://localhost:6380',
     },
+    coverage: {
+      provider: 'v8',
+      reporter: ['text-summary', 'json', 'html'],
+    },
   },
 });

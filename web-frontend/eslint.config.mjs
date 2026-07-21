@@ -27,6 +27,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // One-off dev codemod (CommonJS), not part of the app source.
+    "update_mutations.js",
   ]),
 ]);
 
