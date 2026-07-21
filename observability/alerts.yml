@@ -1,0 +1,51 @@
+# CodeVault Prometheus alerting rules.
+# Covers the OBSERVABILITY_PLAN §4.2 alert set: availability, error rate,
+# latency SLO burn, and saturation. Wire the Alertmanager receiver (PagerDuty,
+# Slack, email) separately in alertmanager.yml.
+groups:
+  - name: codevault-availability
+    rules:
+      - alert: ServiceDown
+        expr: up == 0
+        for: 2m
+        labels: { severity: critical }
+        annotations:
+          summary: "{{ $labels.job }} is down"
+          description: "{{ $labels.job }} has been unreachable for 2 minutes."
+
+  - name: codevault-errors
+    rules:
+      - alert: HighServerErrorRate
+        expr: |
+          sum(rate(http_request_duration_seconds_count{status=~"5.."}[5m])) by (service)
+            / sum(rate(http_request_duration_seconds_count[5m])) by (service) > 0.05
+        for: 5m
+        labels: { severity: critical }
+        annotations:
+          summary: "High 5xx rate on {{ $labels.service }}"
+          description: "5xx error ratio > 5% for 5 minutes on {{ $labels.service }}."
+
+  - name: codevault-latency-slo
+    rules:
+      # SLO: p95 of /stats <= 1.5s. Burn alert when p95 latency exceeds target.
+      - alert: StatsLatencySLOBurn
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum(rate(http_request_duration_seconds_bucket{service="web-backend"}[5m])) by (le)
+          ) > 1.5
+        for: 10m
+        labels: { severity: warning }
+        annotations:
+          summary: "web-backend p95 latency above SLO (1.5s)"
+          description: "p95 request latency has exceeded the 1.5s SLO for 10 minutes."
+
+  - name: codevault-saturation
+    rules:
+      - alert: EventLoopLagHigh
+        expr: nodejs_eventloop_lag_seconds > 0.2
+        for: 5m
+        labels: { severity: warning }
+        annotations:
+          summary: "High event-loop lag on {{ $labels.job }}"
+          description: "Node.js event-loop lag > 200ms for 5 minutes on {{ $labels.job }}."
