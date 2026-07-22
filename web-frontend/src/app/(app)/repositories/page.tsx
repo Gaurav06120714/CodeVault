@@ -14,7 +14,7 @@ import { platformName } from "@/constants/platforms";
 import { apiFetch } from "@/utils/api";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api";
-const GIT_URL = process.env.NEXT_PUBLIC_GIT_SERVICE_URL || "http://localhost:5050/api";
+const GIT_URL = process.env.NEXT_PUBLIC_GIT_SERVICE_URL || (process.env.NODE_ENV === 'production' ? '/gitapi' : 'http://localhost:5050/api');
 
 type Conn = { platform: string; username: string };
 

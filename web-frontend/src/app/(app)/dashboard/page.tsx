@@ -152,7 +152,7 @@ export default function DashboardPage() {
           // Manual fallback: also count problems captured by the extension (git-service),
           // so platforms whose stats API returns no calendar still show activity on the map.
           try {
-            const GIT_URL = process.env.NEXT_PUBLIC_GIT_SERVICE_URL || 'http://localhost:5050/api';
+            const GIT_URL = process.env.NEXT_PUBLIC_GIT_SERVICE_URL || (process.env.NODE_ENV === 'production' ? '/gitapi' : 'http://localhost:5050/api');
             const pRes = await fetch(`${GIT_URL}/problems?limit=100`, {
               credentials: 'include',
             });

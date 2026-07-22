@@ -8,7 +8,7 @@ import { PlatformChip } from "@/components/PlatformChip";
 import { CodeVaultLoader } from "@/components/CodeVaultLoader";
 import { apiFetch } from "@/utils/api";
 
-const GIT_URL = process.env.NEXT_PUBLIC_GIT_SERVICE_URL || "http://localhost:5050/api";
+const GIT_URL = process.env.NEXT_PUBLIC_GIT_SERVICE_URL || (process.env.NODE_ENV === 'production' ? '/gitapi' : 'http://localhost:5050/api');
 
 type ConnStatus = {
   connectionId: string;
