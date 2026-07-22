@@ -12,6 +12,7 @@ function CallbackHandler() {
   const router = useRouter();
   const [status, setStatus] = useState<"loading" | "error">("loading");
   const [errorMsg, setErrorMsg] = useState("");
+  const [waking, setWaking] = useState(false);
 
   useEffect(() => {
     const code = searchParams.get("code");
@@ -32,7 +33,8 @@ function CallbackHandler() {
       return;
     }
 
-    const exchangeCode = async () => {
+    const exchangeCode = async (attempt = 0) => {
+      const MAX_ATTEMPTS = 6;
       try {
         const res = await apiFetch(`${API_URL}/auth/github`, {
           method: "POST",
@@ -40,6 +42,15 @@ function CallbackHandler() {
           credentials: "include",
           body: JSON.stringify({ code }),
         });
+
+        // 503 = the frontend proxy couldn't reach the backend (still cold-booting).
+        // The upstream never processed the request, so the single-use code is NOT
+        // consumed — safe to wait and retry until the backend wakes up.
+        if (res.status === 503 && attempt < MAX_ATTEMPTS) {
+          setWaking(true);
+          await new Promise((r) => setTimeout(r, 3000));
+          return exchangeCode(attempt + 1);
+        }
 
         if (!res.ok) {
           const data = await res.json().catch(() => ({}));
@@ -55,6 +66,13 @@ function CallbackHandler() {
         // Redirect to dashboard (or home for now)
         router.push("/dashboard");
       } catch (err: any) {
+        // Network error (also typically a cold-boot / dropped connection) — the
+        // request didn't complete, so the code is still valid; retry a few times.
+        if (attempt < MAX_ATTEMPTS) {
+          setWaking(true);
+          await new Promise((r) => setTimeout(r, 3000));
+          return exchangeCode(attempt + 1);
+        }
         setStatus("error");
         setErrorMsg(err.message || "Something went wrong during authentication.");
       }
@@ -83,7 +101,9 @@ function CallbackHandler() {
         borderTopColor: "var(--brand, #f1543f)", borderRadius: "50%",
         animation: "spin 0.8s linear infinite"
       }} />
-      <p style={{ color: "var(--muted, #6f6d61)" }}>Signing you in...</p>
+      <p style={{ color: "var(--muted, #6f6d61)", textAlign: "center", maxWidth: 320 }}>
+        {waking ? "Waking up the server — this can take up to a minute on the first sign-in…" : "Signing you in..."}
+      </p>
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );

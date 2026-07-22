@@ -104,7 +104,7 @@ svg.ico.sm{width:14px;height:14px}
 /* Only the main content scrolls; min-height:0 lets a grid item shrink so its
    overflow scrolls instead of stretching the shell. The sticky topbar sticks
    within this scroll container. */
-.main{display:flex;flex-direction:column;min-width:0;height:100%;min-height:0;overflow-y:auto}
+.main{display:flex;flex-direction:column;min-width:0;height:100%;min-height:0;overflow-y:auto;overscroll-behavior:contain}
 .topbar{display:flex;align-items:center;gap:14px;padding:14px 28px;border-bottom:1px solid var(--border);background:rgba(248,246,241,.85);backdrop-filter:blur(8px);position:sticky;top:0;z-index:10}
 .topbar h1{font-size:18px;letter-spacing:-.01em}
 .search{margin-left:auto;display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--border-2);border-radius:9px;padding:8px 12px;color:var(--faint);font-size:13px;width:230px}

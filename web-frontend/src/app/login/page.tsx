@@ -22,6 +22,18 @@ export default function Login() {
   const [emailSuccess, setEmailSuccess] = useState(false);
   const [emailError, setEmailError] = useState("");
 
+  // Wake the (possibly asleep on Render free tier) backend BEFORE redirecting to the
+  // provider. The OAuth round-trip takes several seconds, during which the backend
+  // cold-boots — so it's ready by the time the callback exchanges the code.
+  // keepalive lets the request outlive this page's navigation.
+  const prewarmBackend = () => {
+    try {
+      fetch(`${API_URL}/health`, { keepalive: true, cache: "no-store" }).catch(() => {});
+    } catch {
+      // ignore — this is best-effort warming
+    }
+  };
+
   const handleGitHubLogin = () => {
     // CSRF protection: generate a random state, stash it same-tab, and require the callback to
     // echo it back before exchanging the code.
@@ -30,6 +42,7 @@ export default function Login() {
         ? crypto.randomUUID()
         : Math.random().toString(36).slice(2) + Date.now().toString(36);
     sessionStorage.setItem("gh_oauth_state", state);
+    prewarmBackend();
     const githubAuthUrl = `https://github.com/login/oauth/authorize?client_id=${GITHUB_CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&scope=repo,read:user,user:email&state=${encodeURIComponent(state)}&prompt=select_account`;
     window.location.href = githubAuthUrl;
   };
@@ -37,6 +50,7 @@ export default function Login() {
   const handleGoogleLogin = () => {
     const state = randomState();
     sessionStorage.setItem("google_oauth_state", state);
+    prewarmBackend();
     const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${encodeURIComponent(GOOGLE_REDIRECT_URI)}&response_type=code&scope=${encodeURIComponent("openid email profile")}&state=${encodeURIComponent(state)}&prompt=select_account`;
     window.location.href = googleAuthUrl;
   };
