@@ -30,7 +30,12 @@ export interface AuthResult {
   user: UserPayload;
 }
 
-const REFRESH_TOKEN_EXPIRY_DAYS = 7;
+const REFRESH_TOKEN_EXPIRY_DAYS = 30;
+// Grace window: a refresh token that was rotated within this many ms is treated as a
+// benign concurrent-refresh race (multiple tabs / parallel requests on reopen) rather
+// than a stolen-token replay — so we DON'T nuke the whole session family and log the
+// user out. Real replay attacks reuse tokens long after rotation, outside this window.
+const REFRESH_REUSE_GRACE_MS = 60_000; // 60s
 
 export class AuthService {
   /**
@@ -386,8 +391,20 @@ export class AuthService {
       throw new Error('Invalid refresh token');
     }
 
-    // Reuse detection: token was already revoked → compromise detected
+    // Reuse detection: token was already revoked.
     if (session.revokedAt) {
+      const sinceRevokedMs = Date.now() - session.revokedAt.getTime();
+
+      // Within the grace window this is almost certainly a concurrent-refresh race
+      // (two tabs / parallel requests fired before the rotated cookie propagated).
+      // Reject just this request but LEAVE the family intact so the still-valid
+      // rotated session keeps the user signed in — no more spurious logouts.
+      if (sinceRevokedMs < REFRESH_REUSE_GRACE_MS) {
+        logger.debug({ familyId: session.familyId, userId: session.userId }, 'Concurrent refresh race — not revoking family');
+        throw new Error('Refresh token already rotated (concurrent)');
+      }
+
+      // Reuse well after rotation → treat as a stolen-token replay: revoke the family.
       logger.warn({ familyId: session.familyId, userId: session.userId }, 'Refresh-token reuse detected — revoking family');
       await adminPrisma.authSession.updateMany({
         where: { familyId: session.familyId },
