@@ -163,11 +163,6 @@ export default function DashboardPage() {
         // Generate 365 cells
         const cells = [];
         const today = new Date();
-        let renderedColored = 0;
-        
-        // Expose debug info
-        let debugStr = `Total entries: ${Object.keys(mergedHeatmap).length}`;
-        debugStr += ` | First 3 entries: ${Object.entries(mergedHeatmap).slice(0, 3).map(([k,v])=>k+':'+v).join(', ')}`;
         
         for (let i = 364; i >= 0; i--) {
           const d = new Date(today);
@@ -188,14 +183,8 @@ export default function DashboardPage() {
           else if (count >= 2) cells.push("l2");
           else if (count >= 1) cells.push("l1");
           else cells.push("");
-          
-          if (count > 0) renderedColored++;
         }
         
-        debugStr += ` | Colored generated: ${renderedColored}`;
-        (window as any).__HEATMAP_DEBUG = debugStr;
-        
-        console.log(`[Heatmap Debug] Generated ${cells.length} cells, ${renderedColored} are colored`);
         setHeatmapCells(cells);
         
         // Sort recent
@@ -392,11 +381,6 @@ export default function DashboardPage() {
             <i style={{ background: "#f0764f" }}></i>
             <i style={{ background: "#d8431f" }}></i> More
           </div>
-          {typeof window !== 'undefined' && (window as any).__HEATMAP_DEBUG && (
-            <div style={{ marginTop: '10px', fontSize: '10px', color: 'red', fontFamily: 'monospace' }}>
-              {(window as any).__HEATMAP_DEBUG}
-            </div>
-          )}
         </section>
 
         {/* platform breakdown */}
