@@ -21,6 +21,14 @@ const COOKIE_SAMESITE: 'strict' | 'lax' | 'none' = CROSS_SITE
 
 /** Set the refresh-token HttpOnly cookie on the response. */
 function setRefreshCookie(res: Response, refreshToken: string): void {
+  // Clear any stuck legacy cookies
+  res.clearCookie(REFRESH_COOKIE, {
+    httpOnly: true,
+    secure: COOKIE_SECURE,
+    sameSite: COOKIE_SAMESITE,
+    path: '/api/auth',
+  });
+  
   res.cookie(REFRESH_COOKIE, refreshToken, {
     httpOnly: true,
     secure: COOKIE_SECURE,
@@ -38,10 +46,24 @@ function clearRefreshCookie(res: Response): void {
     sameSite: COOKIE_SAMESITE,
     path: '/',
   });
+  res.clearCookie(REFRESH_COOKIE, {
+    httpOnly: true,
+    secure: COOKIE_SECURE,
+    sameSite: COOKIE_SAMESITE,
+    path: '/api/auth',
+  });
 }
 
 /** Set the access-token HttpOnly cookie on the response. */
 function setAccessCookie(res: Response, accessToken: string): void {
+  // Clear any stuck legacy cookies
+  res.clearCookie(ACCESS_COOKIE, {
+    httpOnly: true,
+    secure: COOKIE_SECURE,
+    sameSite: COOKIE_SAMESITE,
+    path: '/api',
+  });
+
   res.cookie(ACCESS_COOKIE, accessToken, {
     httpOnly: true,
     secure: COOKIE_SECURE,
@@ -58,6 +80,12 @@ function clearAccessCookie(res: Response): void {
     secure: COOKIE_SECURE,
     sameSite: COOKIE_SAMESITE,
     path: '/',
+  });
+  res.clearCookie(ACCESS_COOKIE, {
+    httpOnly: true,
+    secure: COOKIE_SECURE,
+    sameSite: COOKIE_SAMESITE,
+    path: '/api',
   });
 }
 
