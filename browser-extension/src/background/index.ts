@@ -1,6 +1,7 @@
 import type { AuthStatus, ExtMessage, HealthState, IngestResponse, RecentResponse } from '../types';
 import { getRecentProblems, postIngest } from '../lib/api-client';
 import { clearToken, getToken, setToken } from '../lib/storage';
+import { WEB_APP_URL } from '../constants';
 
 // MV3 service worker. The sole holder of the JWT — content scripts/popup message here,
 // and only this worker talks to git-service /api/ingest.
@@ -140,7 +141,7 @@ chrome.runtime.onMessage.addListener(
 
       case 'setToken': {
         // Only accept the token from the CodeVault web app origin.
-        const fromApp = sender.url?.startsWith('http://localhost:3000') ?? false;
+        const fromApp = sender.url?.startsWith(WEB_APP_URL) ?? false;
         if (!fromApp) {
           sendResponse({ ok: false, error: 'untrusted_origin' });
           return false;
