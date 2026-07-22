@@ -8,13 +8,17 @@ import { proxyTo } from "@/utils/proxy";
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
+// The admin service URL is public and fixed (not a secret), so we default to it
+// when ADMIN_URL isn't set — the /admin proxy then works without extra env config.
+const ADMIN_URL = process.env.ADMIN_URL || "https://codevault-admin-ig6c.onrender.com";
+
 async function handler(
   req: NextRequest,
   ctx: { params: Promise<{ path?: string[] }> }
 ) {
   const { path } = await ctx.params;
   const sub = path && path.length ? `admin/${path.join("/")}` : "admin";
-  return proxyTo(req, process.env.ADMIN_URL, sub);
+  return proxyTo(req, ADMIN_URL, sub);
 }
 
 export const GET = handler;
