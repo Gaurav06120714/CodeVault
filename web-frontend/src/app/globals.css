@@ -671,3 +671,10 @@ html, body { max-width: 100%; overflow-x: hidden; }
   .m-brand { display: flex; }
   .form-side { padding: 28px 20px; }
 }
+
+/* GitHub sign-in button: base uses var(--ink) (dark surface in light mode). In dark
+   mode --ink flips to light, washing the button out — pin it to a branded dark with
+   a subtle border so it stays a clear, readable CTA against the dark page. */
+html[data-theme="dark"] .gh { background: #26221b; color: #fff; border: 1px solid var(--border-2); }
+html[data-theme="dark"] .gh:hover { background: #312c23; }
+html[data-theme="dark"] .gh svg { fill: #fff; }
