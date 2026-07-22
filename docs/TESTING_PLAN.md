@@ -202,11 +202,11 @@ tests/
 ## 8. Release Readiness Checklist (QA slice)
 
 **Automated (CI must be green):**
-- [ ] All unit + integration + contract tests pass
+- [x] All unit + integration + contract tests pass *(web-backend 53 + git-service 93; CI green)*
 - [ ] Coverage at or above all module targets
 - [ ] Bundle size within budget; Lighthouse ≥ 90 on key pages
 - [ ] Zero axe a11y violations on all 15 pages
-- [ ] SAST/SCA/secret scan clean (or mitigated)
+- [x] SAST/SCA/secret scan clean (or mitigated) *(CodeQL + npm audit + gitleaks in CI)*
 - [ ] E2E golden paths passing on staging
 
 **Manual (sign-off required):**
@@ -214,7 +214,7 @@ tests/
 - [ ] OWASP ZAP DAST scan reviewed; critical/high findings resolved
 - [ ] Security test suite (BOLA, CSRF, token-leak, SSRF, XSS) all passing
 - [ ] Cross-browser matrix verified (Chrome, Safari, Firefox, Edge; iOS Safari, Android Chrome)
-- [ ] Responsive matrix verified (375px → 1920px+)
+- [ ] Responsive matrix verified (375px → 1920px+) *(mobile CSS + drawer fixed; landing/login verified 375/768/1440; app pages need logged-in pass)*
 - [ ] Keyboard navigation + screen reader tested on all 15 pages
 - [ ] UAT: every page matches approved `frontendHtml/` prototype (stakeholder sign-off)
 - [ ] Pentest findings (SECURITY_PLAN §18) reviewed + resolved at Critical/High

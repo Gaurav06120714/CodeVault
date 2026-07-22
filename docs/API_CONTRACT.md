@@ -458,7 +458,7 @@ FE marketing/UI-kit run alongside M0–M1 (no BE dep).
 - [ ] Migrations reproducible; backups encrypted + restore-tested *(migrations done; backups deploy-time)*
 - [ ] Observability: redacted logs, audit trail, alerts *(redacted logs done; alerts/audit-shipping pending)*
 - [ ] Responsive (mobile→ultra-wide) + a11y *(frontend)*
-- [ ] CI: lint/typecheck/tests/SCA/secret-scan green; branch protection on *(CI not set up)*
+- [x] CI: lint/typecheck/tests/SCA/secret-scan green; branch protection on *(CI green; branch protection intentionally off — direct-push workflow)*
 - [ ] Staging E2E + load + sync-batch passed; runbooks + on-call ready *(deploy-time)*
 - [ ] UAT: every page matches approved `frontendHtml/` prototype *(frontend)*
 

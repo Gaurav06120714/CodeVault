@@ -588,7 +588,7 @@ tokens+tooling ─▶ UI kit ─▶ layouts/routing ─┬─▶ marketing (no A
 - [ ] Every data page has loading + empty + error + success states
 - [x] Toasts + ConfirmDialog replace all `alert()`/silent actions
 - [ ] React Query for all server data; RHF+Zod for all forms
-- [ ] Responsive matrix verified (mobile→ultra-wide); drawer/table/sub-nav transitions
+- [ ] Responsive matrix verified (mobile→ultra-wide); drawer/table/sub-nav transitions *(drawer + table/heatmap scroll + subnav done; app pages need logged-in visual pass)*
 - [ ] A11y: keyboard, focus traps, aria-live, aria-current, contrast AA
 - [x] Reduced-motion honored
 - [x] Public profile SSR/ISR + OG/metadata

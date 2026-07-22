@@ -507,7 +507,7 @@ GitHub publish ─┴─▶ Sync orchestrator ─▶ Scheduler/jobs ─▶ Sync 
 - [ ] HTTPS/HSTS, secure cookies, CORS allowlist, security headers *(secure cookies + CORS + helmet done; HTTPS/HSTS deploy-time)*
 - [x] Rate limits on auth/public/sync; OAuth state+redirect allowlist
 - [x] Token encryption verified; nothing sensitive in logs
-- [ ] `npm audit` clean / triaged *(not run in CI yet)*
+- [x] `npm audit` clean / triaged *(runs in CI on all services)*
 
 **Reliability**
 - [x] Health + readiness probes; graceful shutdown (drain jobs)
