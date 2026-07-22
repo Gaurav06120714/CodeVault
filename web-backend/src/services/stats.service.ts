@@ -82,29 +82,41 @@ async function fetchPlatformStats(
 }
 
 export class StatsService {
-  static async getAggregatedStats(userId: string) {
+  static async getAggregatedStats(userId: string, force = false) {
     const startTime = Date.now();
     const cacheKey = `stats:${userId}`;
 
-    // L1 — in-memory cache (fastest path, within a single process lifetime)
-    const mem = memoryCache.get(cacheKey);
-    if (mem && mem.expires > Date.now()) {
-      logger.debug(`[StatsService] Memory cache HIT for ${userId} (${Date.now() - startTime}ms)`);
-      return mem.data;
-    }
-
-    // L2 — aggregate Redis cache (shared across process restarts / replicas)
-    try {
-      const cached = await redis.get(cacheKey);
-      if (cached) {
-        const data = JSON.parse(cached);
-        // Repopulate L1 so the next request within this process is instant
-        memoryCache.set(cacheKey, { data, expires: Date.now() + STATS_TTL_MS });
-        logger.debug(`[StatsService] Redis aggregate cache HIT for ${userId}`);
-        return data;
+    if (!force) {
+      // L1 — in-memory cache (fastest path, within a single process lifetime)
+      const mem = memoryCache.get(cacheKey);
+      if (mem && mem.expires > Date.now()) {
+        logger.debug(`[StatsService] Memory cache HIT for ${userId} (${Date.now() - startTime}ms)`);
+        return mem.data;
       }
-    } catch (err) {
-      logger.warn('[StatsService] Redis aggregate cache read failed — proceeding with live fetch');
+
+      // L2 — aggregate Redis cache (shared across process restarts / replicas)
+      try {
+        const cached = await redis.get(cacheKey);
+        if (cached) {
+          const data = JSON.parse(cached);
+          // Repopulate L1 so the next request within this process is instant
+          memoryCache.set(cacheKey, { data, expires: Date.now() + STATS_TTL_MS });
+          logger.debug(`[StatsService] Redis aggregate cache HIT for ${userId}`);
+          return data;
+        }
+      } catch (err) {
+        logger.warn('[StatsService] Redis aggregate cache read failed — proceeding with live fetch');
+      }
+    } else {
+      // Force refresh — clear stale caches so per-platform fetches also skip Redis
+      logger.info(`[StatsService] Force refresh requested for ${userId}`);
+      memoryCache.delete(cacheKey);
+      try { await redis.del(cacheKey); } catch { /* non-fatal */ }
+      // Also clear per-platform caches
+      const connections = await ConnectionService.listConnections(userId);
+      for (const conn of connections) {
+        try { await redis.del(`stats:platform:${userId}:${conn.platform}`); } catch { /* non-fatal */ }
+      }
     }
 
     // L3 — live fetch from all connected platforms (concurrently, per-platform cached)

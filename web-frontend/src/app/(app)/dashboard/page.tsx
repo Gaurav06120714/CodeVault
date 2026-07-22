@@ -98,6 +98,95 @@ export default function DashboardPage() {
   const visibleSubs = showAllSubs || searchQuery.trim() || selectedTags.length > 0 || selectedPlatforms.length > 0 ? filteredSubs : filteredSubs.slice(0, VISIBLE_COUNT);
   const hasMore = !searchQuery.trim() && selectedTags.length === 0 && selectedPlatforms.length === 0 && filteredSubs.length > VISIBLE_COUNT;
 
+  const fetchStats = async (force = false) => {
+    try {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
+      const url = force ? `${API_URL}/stats?force=true` : `${API_URL}/stats`;
+      const res = await fetch(url, {
+        credentials: 'include'
+      });
+      
+      if (res.ok) {
+        const data = await res.json();
+        setStats(data);
+        
+        // Merge Heatmap
+        const mergedHeatmap: Record<string, number> = {};
+        let allRecent: any[] = [];
+        
+        Object.keys(data?.platforms || {}).forEach((pKey) => {
+          const p = data.platforms[pKey];
+          
+          // Heatmap
+          if (p.heatmap) {
+            const pHeatmap = typeof p.heatmap === 'string' ? JSON.parse(p.heatmap) : p.heatmap;
+            Object.entries(pHeatmap).forEach(([ts, count]) => {
+              const dateStr = new Date(parseInt(ts) * 1000).toISOString().split('T')[0];
+              mergedHeatmap[dateStr] = (mergedHeatmap[dateStr] || 0) + (count as number);
+            });
+          }
+          
+          // Recent
+          if (p.recent) {
+            const recents = p.recent.map((r: any) => ({
+              ...r,
+              platform: pKey
+            }));
+            allRecent = allRecent.concat(recents);
+          }
+        });
+
+        // Manual fallback: also count problems captured by the extension (git-service),
+        // so platforms whose stats API returns no calendar still show activity on the map.
+        try {
+          const GIT_URL = process.env.NEXT_PUBLIC_GIT_SERVICE_URL || (process.env.NODE_ENV === 'production' ? '/gitapi' : 'http://localhost:5050/api');
+          const pRes = await fetch(`${GIT_URL}/problems?limit=100`, {
+            credentials: 'include',
+          });
+          if (pRes.ok) {
+            const pData = await pRes.json();
+            (pData?.items || []).forEach((it: any) => {
+              if (!it?.solvedAt) return;
+              const dateStr = new Date(it.solvedAt).toISOString().split('T')[0];
+              mergedHeatmap[dateStr] = (mergedHeatmap[dateStr] || 0) + 1;
+            });
+          }
+        } catch {
+          /* git-service optional — heatmap still works from stats alone */
+        }
+
+        // Generate 365 cells
+        const cells = [];
+        const today = new Date();
+        for (let i = 364; i >= 0; i--) {
+          const d = new Date(today);
+          d.setDate(today.getDate() - i);
+          const dStr = d.toISOString().split('T')[0];
+          const count = mergedHeatmap[dStr] || 0;
+          
+          if (count >= 5) cells.push("l4");
+          else if (count >= 3) cells.push("l3");
+          else if (count >= 2) cells.push("l2");
+          else if (count >= 1) cells.push("l1");
+          else cells.push("");
+        }
+        setHeatmapCells(cells);
+        
+        // Sort recent
+        allRecent.sort((a, b) => b.timestamp - a.timestamp);
+        setRecentSubs(allRecent);
+        
+      } else if (res.status === 404) {
+        router.push("/connect");
+      }
+    } catch (err) {
+      setStatsError(true);
+      console.warn("Stats API unreachable — is web-backend (:4000) running?", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
 
@@ -111,94 +200,6 @@ export default function DashboardPage() {
     } catch (e) {
       console.error("Failed to parse user data", e);
     }
-
-    const fetchStats = async () => {
-      try {
-        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
-        const res = await fetch(`${API_URL}/stats`, {
-          credentials: 'include'
-        });
-        
-        if (res.ok) {
-          const data = await res.json();
-          setStats(data);
-          
-          // Merge Heatmap
-          const mergedHeatmap: Record<string, number> = {};
-          let allRecent: any[] = [];
-          
-          Object.keys(data?.platforms || {}).forEach((pKey) => {
-            const p = data.platforms[pKey];
-            
-            // Heatmap
-            if (p.heatmap) {
-              const pHeatmap = typeof p.heatmap === 'string' ? JSON.parse(p.heatmap) : p.heatmap;
-              Object.entries(pHeatmap).forEach(([ts, count]) => {
-                const dateStr = new Date(parseInt(ts) * 1000).toISOString().split('T')[0];
-                mergedHeatmap[dateStr] = (mergedHeatmap[dateStr] || 0) + (count as number);
-              });
-            }
-            
-            // Recent
-            if (p.recent) {
-              const recents = p.recent.map((r: any) => ({
-                ...r,
-                platform: pKey
-              }));
-              allRecent = allRecent.concat(recents);
-            }
-          });
-
-          // Manual fallback: also count problems captured by the extension (git-service),
-          // so platforms whose stats API returns no calendar still show activity on the map.
-          try {
-            const GIT_URL = process.env.NEXT_PUBLIC_GIT_SERVICE_URL || (process.env.NODE_ENV === 'production' ? '/gitapi' : 'http://localhost:5050/api');
-            const pRes = await fetch(`${GIT_URL}/problems?limit=100`, {
-              credentials: 'include',
-            });
-            if (pRes.ok) {
-              const pData = await pRes.json();
-              (pData?.items || []).forEach((it: any) => {
-                if (!it?.solvedAt) return;
-                const dateStr = new Date(it.solvedAt).toISOString().split('T')[0];
-                mergedHeatmap[dateStr] = (mergedHeatmap[dateStr] || 0) + 1;
-              });
-            }
-          } catch {
-            /* git-service optional — heatmap still works from stats alone */
-          }
-
-          // Generate 365 cells
-          const cells = [];
-          const today = new Date();
-          for (let i = 364; i >= 0; i--) {
-            const d = new Date(today);
-            d.setDate(today.getDate() - i);
-            const dStr = d.toISOString().split('T')[0];
-            const count = mergedHeatmap[dStr] || 0;
-            
-            if (count >= 5) cells.push("l4");
-            else if (count >= 3) cells.push("l3");
-            else if (count >= 2) cells.push("l2");
-            else if (count >= 1) cells.push("l1");
-            else cells.push("");
-          }
-          setHeatmapCells(cells);
-          
-          // Sort recent
-          allRecent.sort((a, b) => b.timestamp - a.timestamp);
-          setRecentSubs(allRecent);
-          
-        } else if (res.status === 404) {
-          router.push("/connect");
-        }
-      } catch (err) {
-        setStatsError(true);
-        console.warn("Stats API unreachable — is web-backend (:4000) running?", err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
 
     fetchStats();
   }, [router]);
@@ -327,7 +328,32 @@ export default function DashboardPage() {
 
         {/* GitHub-style heatmap */}
         <section className="panel">
-          <h2 className="h">Submission activity <span className="tag">last 12 months</span></h2>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <h2 className="h">Submission activity <span className="tag">last 12 months</span></h2>
+            <button
+              type="button"
+              onClick={() => { setIsLoading(true); fetchStats(true); }}
+              title="Force refresh from platforms"
+              style={{
+                background: 'none',
+                border: '1px solid var(--border, #e0dcd6)',
+                borderRadius: '8px',
+                padding: '5px 10px',
+                cursor: 'pointer',
+                color: 'var(--muted)',
+                fontSize: '12px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+                transition: 'color .2s, border-color .2s',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.color = 'var(--accent, #d8431f)'; e.currentTarget.style.borderColor = 'var(--accent, #d8431f)'; }}
+              onMouseLeave={e => { e.currentTarget.style.color = 'var(--muted)'; e.currentTarget.style.borderColor = 'var(--border, #e0dcd6)'; }}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+              Refresh
+            </button>
+          </div>
           <div className="heat" role="img" aria-label="Submission heatmap over the last 12 months" aria-hidden="true">
             {heatmapCells.map((cls, i) => (
               <i key={i} className={cls || undefined}></i>
