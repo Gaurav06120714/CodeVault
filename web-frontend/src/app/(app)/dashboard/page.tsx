@@ -119,11 +119,16 @@ export default function DashboardPage() {
           
           // Heatmap
           if (p.heatmap) {
+            console.log(`[Heatmap Debug] Platform ${pKey} raw heatmap:`, p.heatmap);
+            console.log(`[Heatmap Debug] Platform ${pKey} typeof:`, typeof p.heatmap);
             const pHeatmap = typeof p.heatmap === 'string' ? JSON.parse(p.heatmap) : p.heatmap;
+            console.log(`[Heatmap Debug] Platform ${pKey} parsed:`, pHeatmap);
+            
             Object.entries(pHeatmap).forEach(([ts, count]) => {
               const dateStr = new Date(parseInt(ts) * 1000).toISOString().split('T')[0];
               mergedHeatmap[dateStr] = (mergedHeatmap[dateStr] || 0) + (count as number);
             });
+            console.log(`[Heatmap Debug] Platform ${pKey} merged size:`, Object.keys(mergedHeatmap).length);
           }
           
           // Recent
@@ -158,18 +163,39 @@ export default function DashboardPage() {
         // Generate 365 cells
         const cells = [];
         const today = new Date();
+        let renderedColored = 0;
+        
+        // Expose debug info
+        let debugStr = `Total entries: ${Object.keys(mergedHeatmap).length}`;
+        debugStr += ` | First 3 entries: ${Object.entries(mergedHeatmap).slice(0, 3).map(([k,v])=>k+':'+v).join(', ')}`;
+        
         for (let i = 364; i >= 0; i--) {
           const d = new Date(today);
           d.setDate(today.getDate() - i);
-          const dStr = d.toISOString().split('T')[0];
-          const count = mergedHeatmap[dStr] || 0;
+          // Always use local date formatting to prevent timezone shift bugs!
+          const year = d.getFullYear();
+          const month = String(d.getMonth() + 1).padStart(2, '0');
+          const day = String(d.getDate()).padStart(2, '0');
+          const dStrLocal = `${year}-${month}-${day}`;
+          
+          const dStrUtc = d.toISOString().split('T')[0];
+          
+          // Let's check both UTC and local just in case
+          const count = mergedHeatmap[dStrUtc] || mergedHeatmap[dStrLocal] || 0;
           
           if (count >= 5) cells.push("l4");
           else if (count >= 3) cells.push("l3");
           else if (count >= 2) cells.push("l2");
           else if (count >= 1) cells.push("l1");
           else cells.push("");
+          
+          if (count > 0) renderedColored++;
         }
+        
+        debugStr += ` | Colored generated: ${renderedColored}`;
+        (window as any).__HEATMAP_DEBUG = debugStr;
+        
+        console.log(`[Heatmap Debug] Generated ${cells.length} cells, ${renderedColored} are colored`);
         setHeatmapCells(cells);
         
         // Sort recent
@@ -366,6 +392,11 @@ export default function DashboardPage() {
             <i style={{ background: "#f0764f" }}></i>
             <i style={{ background: "#d8431f" }}></i> More
           </div>
+          {typeof window !== 'undefined' && (window as any).__HEATMAP_DEBUG && (
+            <div style={{ marginTop: '10px', fontSize: '10px', color: 'red', fontFamily: 'monospace' }}>
+              {(window as any).__HEATMAP_DEBUG}
+            </div>
+          )}
         </section>
 
         {/* platform breakdown */}
