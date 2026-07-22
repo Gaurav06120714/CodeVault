@@ -11,6 +11,7 @@ function GoogleCallbackHandler() {
   const router = useRouter();
   const [status, setStatus] = useState<"loading" | "error">("loading");
   const [errorMsg, setErrorMsg] = useState("");
+  const [waking, setWaking] = useState(false);
 
   useEffect(() => {
     const code = searchParams.get("code");
@@ -30,7 +31,8 @@ function GoogleCallbackHandler() {
       return;
     }
 
-    const exchangeCode = async () => {
+    const exchangeCode = async (attempt = 0) => {
+      const MAX_ATTEMPTS = 6;
       try {
         // Google requires the exact redirect_uri used in the authorize step.
         const redirectUri = `${window.location.origin}/login/callback/google`;
@@ -40,6 +42,15 @@ function GoogleCallbackHandler() {
           credentials: "include",
           body: JSON.stringify({ code, redirectUri }),
         });
+
+        // 503 = the proxy couldn't reach the backend (cold-booting) — the request
+        // never processed, so the single-use code is still valid; wait and retry.
+        if (res.status === 503 && attempt < MAX_ATTEMPTS) {
+          setWaking(true);
+          await new Promise((r) => setTimeout(r, 3000));
+          return exchangeCode(attempt + 1);
+        }
+
         if (!res.ok) {
           const data = await res.json().catch(() => ({}));
           throw new Error(data.message || `Authentication failed (${res.status})`);
@@ -48,6 +59,12 @@ function GoogleCallbackHandler() {
         localStorage.setItem("user", JSON.stringify(data.user));
         router.push("/dashboard");
       } catch (err: any) {
+        // Network error (also typically a cold boot) — code still valid; retry.
+        if (attempt < MAX_ATTEMPTS) {
+          setWaking(true);
+          await new Promise((r) => setTimeout(r, 3000));
+          return exchangeCode(attempt + 1);
+        }
         setStatus("error");
         setErrorMsg(err.message || "Something went wrong during authentication.");
       }
@@ -76,7 +93,9 @@ function GoogleCallbackHandler() {
         borderTopColor: "var(--brand, #f1543f)", borderRadius: "50%",
         animation: "spin 0.8s linear infinite",
       }} />
-      <p style={{ color: "var(--muted, #6f6d61)" }}>Signing you in…</p>
+      <p style={{ color: "var(--muted, #6f6d61)", textAlign: "center", maxWidth: 320 }}>
+        {waking ? "Waking up the server — this can take up to a minute on the first sign-in…" : "Signing you in…"}
+      </p>
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
