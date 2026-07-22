@@ -743,6 +743,7 @@ export default function SettingsPage() {
         cancelLabel="Keep account"
         danger
         busy={deleting}
+        confirmPhrase={user.handle || user.githubLogin || "delete my account"}
         onConfirm={handleDeleteAccount}
         onCancel={() => setPendingDelete(false)}
       />

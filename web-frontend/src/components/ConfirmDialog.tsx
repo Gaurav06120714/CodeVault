@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export type ConfirmDialogProps = {
   open: boolean;
@@ -11,6 +11,11 @@ export type ConfirmDialogProps = {
   /** Style the confirm button as a destructive action. */
   danger?: boolean;
   busy?: boolean;
+  /**
+   * GitHub-style safety: when set, the user must type this exact phrase before the
+   * confirm button enables — prevents accidental destructive actions.
+   */
+  confirmPhrase?: string;
   onConfirm: () => void;
   onCancel: () => void;
 };
@@ -29,22 +34,34 @@ export function ConfirmDialog({
   cancelLabel = "Cancel",
   danger = false,
   busy = false,
+  confirmPhrase,
   onConfirm,
   onCancel,
 }: ConfirmDialogProps) {
   const confirmRef = useRef<HTMLButtonElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [typed, setTyped] = useState("");
+
+  // Reset the typed phrase whenever the dialog opens/closes.
+  useEffect(() => {
+    if (open) setTyped("");
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;
-    confirmRef.current?.focus();
+    // If a phrase is required, focus the input; otherwise the confirm button.
+    (confirmPhrase ? inputRef.current : confirmRef.current)?.focus();
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onCancel();
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [open, onCancel]);
+  }, [open, onCancel, confirmPhrase]);
 
   if (!open) return null;
+
+  const phraseOk = !confirmPhrase || typed.trim() === confirmPhrase;
+  const confirmDisabled = busy || !phraseOk;
 
   return (
     <div
@@ -81,9 +98,32 @@ export function ConfirmDialog({
         <h2 id="confirm-dialog-title" style={{ margin: "0 0 8px", fontSize: 18, fontWeight: 700 }}>
           {title}
         </h2>
-        <p id="confirm-dialog-message" style={{ margin: "0 0 20px", color: "var(--muted, #555)", fontSize: 14.5, lineHeight: 1.5 }}>
+        <p id="confirm-dialog-message" style={{ margin: "0 0 16px", color: "var(--muted, #555)", fontSize: 14.5, lineHeight: 1.5 }}>
           {message}
         </p>
+
+        {confirmPhrase && (
+          <div style={{ marginBottom: 20 }}>
+            <label htmlFor="confirm-phrase" style={{ display: "block", fontSize: 13, color: "var(--muted, #555)", marginBottom: 6 }}>
+              Type <b style={{ color: "var(--ink, #1a1a1a)", fontFamily: "var(--font-mono, monospace)" }}>{confirmPhrase}</b> to confirm
+            </label>
+            <input
+              ref={inputRef}
+              id="confirm-phrase"
+              type="text"
+              className="txt"
+              value={typed}
+              onChange={(e) => setTyped(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter" && phraseOk && !busy) onConfirm(); }}
+              autoComplete="off"
+              autoCapitalize="off"
+              spellCheck={false}
+              aria-label={`Type ${confirmPhrase} to confirm`}
+              style={{ width: "100%" }}
+            />
+          </div>
+        )}
+
         <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
           <button type="button" className="btn" onClick={onCancel} disabled={busy}>
             {cancelLabel}
@@ -93,8 +133,8 @@ export function ConfirmDialog({
             type="button"
             className={danger ? "btn" : "btn brand"}
             onClick={onConfirm}
-            disabled={busy}
-            style={danger ? { background: "var(--danger, #c0392b)", color: "#fff", borderColor: "transparent" } : undefined}
+            disabled={confirmDisabled}
+            style={danger ? { background: "var(--danger, #c0392b)", color: "#fff", borderColor: "transparent", opacity: confirmDisabled ? 0.55 : 1 } : { opacity: confirmDisabled ? 0.55 : 1 }}
           >
             {busy ? "Working…" : confirmLabel}
           </button>
