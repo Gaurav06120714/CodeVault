@@ -25,7 +25,7 @@ function setRefreshCookie(res: Response, refreshToken: string): void {
     httpOnly: true,
     secure: COOKIE_SECURE,
     sameSite: COOKIE_SAMESITE,
-    path: '/api/auth',  // only sent to auth endpoints
+    path: '/',  // sent to all endpoints including /gitapi
     maxAge: REFRESH_COOKIE_MAX_AGE,
   });
 }
@@ -36,7 +36,7 @@ function clearRefreshCookie(res: Response): void {
     httpOnly: true,
     secure: COOKIE_SECURE,
     sameSite: COOKIE_SAMESITE,
-    path: '/api/auth',
+    path: '/',
   });
 }
 
@@ -46,7 +46,7 @@ function setAccessCookie(res: Response, accessToken: string): void {
     httpOnly: true,
     secure: COOKIE_SECURE,
     sameSite: COOKIE_SAMESITE,
-    path: '/api',  // sent to all API endpoints
+    path: '/',  // sent to all endpoints including /gitapi
     maxAge: ACCESS_COOKIE_MAX_AGE,
   });
 }
@@ -57,7 +57,7 @@ function clearAccessCookie(res: Response): void {
     httpOnly: true,
     secure: COOKIE_SECURE,
     sameSite: COOKIE_SAMESITE,
-    path: '/api',
+    path: '/',
   });
 }
 
