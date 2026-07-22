@@ -59,7 +59,7 @@ export async function proxy(
       lastErr = err; // connection refused / reset while the upstream is booting — retry
     }
   }
-  if (!upstream) {
+  if (!upstream || GATEWAY_ERRORS.has(upstream.status)) {
     return new Response(
       JSON.stringify({ message: "Upstream unavailable (service may be waking up — try again in a minute)" }),
       { status: 503, headers: { "content-type": "application/json" } }
