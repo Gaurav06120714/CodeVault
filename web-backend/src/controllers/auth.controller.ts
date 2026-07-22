@@ -7,7 +7,7 @@ import { signToken } from '../utils/jwt';
 const REFRESH_COOKIE = 'cv_refresh';
 const ACCESS_COOKIE = 'cv_access';
 const REFRESH_COOKIE_MAX_AGE = 30 * 24 * 60 * 60 * 1000; // 30 days — long "stay signed in"
-const ACCESS_COOKIE_MAX_AGE = 60 * 60 * 1000; // 1 hour (matches the access JWT)
+const ACCESS_COOKIE_MAX_AGE = 7 * 24 * 60 * 60 * 1000; // 7 days (matches the access JWT)
 
 // Cross-site hosting (frontend + backend on different sites, e.g. app.fly.dev vs api.fly.dev)
 // needs SameSite=None + Secure so the session cookie survives cross-origin requests.

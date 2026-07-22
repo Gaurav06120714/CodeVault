@@ -19,6 +19,9 @@ export default function SettingsPage() {
   const [toast, setToast] = useState<string | null>(null);
   const [pendingDelete, setPendingDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [pendingDisconnect, setPendingDisconnect] = useState<string | null>(null);
+  const [pendingDisconnectAll, setPendingDisconnectAll] = useState(false);
+  const [disconnectingAll, setDisconnectingAll] = useState(false);
 
   const handleExport = async () => {
     try {
@@ -248,11 +251,29 @@ export default function SettingsPage() {
   useEffect(() => { loadConnections(); }, [loadConnections]);
 
   const disconnectPlatform = async (platform: string) => {
+    setPendingDisconnect(null);
     await apiFetch(`${API_URL}/platforms/${platform}`, {
       method: "DELETE",
       credentials: 'include',
     }).catch(() => {});
     loadConnections();
+  };
+
+  const handleDisconnectAll = async () => {
+    setDisconnectingAll(true);
+    try {
+      const rows = connections || [];
+      await Promise.all(
+        rows.map((c) =>
+          apiFetch(`${API_URL}/platforms/${c.platform}`, { method: "DELETE", credentials: "include" }).catch(() => {})
+        )
+      );
+      setPendingDisconnectAll(false);
+      loadConnections();
+      setToast("All platforms disconnected.");
+    } finally {
+      setDisconnectingAll(false);
+    }
   };
 
   useEffect(() => {
@@ -451,7 +472,7 @@ export default function SettingsPage() {
                   {expired ? (
                     <Link className="btn brand sm right" href="/connect">Reconnect</Link>
                   ) : (
-                    <button className="btn danger sm right" type="button" onClick={() => disconnectPlatform(c.platform)}>Disconnect</button>
+                    <button className="btn danger sm right" type="button" onClick={() => setPendingDisconnect(c.platform)}>Disconnect</button>
                   )}
                 </div>
               );
@@ -716,7 +737,7 @@ export default function SettingsPage() {
               <div className="n">Disconnect all platforms</div>
               <div className="m">Stops all syncing. Your GitHub repos are kept.</div>
             </div>
-            <button className="btn danger right" type="button">Disconnect all</button>
+            <button className="btn danger right" type="button" onClick={() => setPendingDisconnectAll(true)}>Disconnect all</button>
           </div>
           <div className="row">
             <div className="rt">
@@ -746,6 +767,28 @@ export default function SettingsPage() {
         confirmPhrase={user.handle || user.githubLogin || "delete my account"}
         onConfirm={handleDeleteAccount}
         onCancel={() => setPendingDelete(false)}
+      />
+      <ConfirmDialog
+        open={!!pendingDisconnect}
+        title="Disconnect platform"
+        message={`Disconnect ${pendingDisconnect ?? "this platform"}? Its stats stop updating; your GitHub repos are kept. You can reconnect anytime.`}
+        confirmLabel="Disconnect"
+        cancelLabel="Keep connected"
+        danger
+        onConfirm={() => pendingDisconnect && disconnectPlatform(pendingDisconnect)}
+        onCancel={() => setPendingDisconnect(null)}
+      />
+      <ConfirmDialog
+        open={pendingDisconnectAll}
+        title="Disconnect all platforms?"
+        message="This stops all syncing across every connected platform. Your GitHub repos are kept. You can reconnect later."
+        confirmLabel="Disconnect all"
+        cancelLabel="Keep connected"
+        danger
+        busy={disconnectingAll}
+        confirmPhrase="disconnect all"
+        onConfirm={handleDisconnectAll}
+        onCancel={() => setPendingDisconnectAll(false)}
       />
     </>
   );
