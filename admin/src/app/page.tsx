@@ -40,7 +40,7 @@ export default function OverviewPage() {
   const [state, setState] = useState<"loading" | "ok" | "denied">("loading");
 
   useEffect(() => {
-    fetch("/api/overview")
+    fetch("/admin/api/overview")
       .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
       .then((d: Overview) => { setData(d); setState("ok"); })
       .catch(() => setState("denied"));

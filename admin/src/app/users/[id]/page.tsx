@@ -78,7 +78,7 @@ export default function UserDetailPage() {
   const [actionLoading, setActionLoading] = useState(false);
 
   const load = () => {
-    fetch(`/api/users/${id}`)
+    fetch(`/admin/api/users/${id}`)
       .then((r) => {
         if (r.status === 404) { setState("not_found"); return null; }
         if (!r.ok) { setState("denied"); return null; }
@@ -98,7 +98,7 @@ export default function UserDetailPage() {
   const doAction = async (body: Record<string, string>) => {
     setActionLoading(true);
     try {
-      const res = await fetch(`/api/users/${id}`, {
+      const res = await fetch(`/admin/api/users/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),

@@ -23,6 +23,20 @@ export async function proxy(
   targetBase: string | undefined,
   path: string[]
 ): Promise<Response> {
+  return proxyTo(req, targetBase, `api/${path.join("/")}`);
+}
+
+/**
+ * Forward a request to `${targetBase}/${fullPath}` verbatim (method, headers,
+ * cookies, body), with cold-boot retries and Set-Cookie relay. Used by the /api
+ * and /gitapi handlers (fullPath = "api/…") and the /admin handler (fullPath =
+ * "admin/…") so the admin console is served same-origin and shares the cookie.
+ */
+export async function proxyTo(
+  req: NextRequest,
+  targetBase: string | undefined,
+  fullPath: string
+): Promise<Response> {
   const base = withScheme(targetBase);
   if (!base) {
     return new Response(
@@ -31,7 +45,7 @@ export async function proxy(
     );
   }
 
-  const url = `${base}/api/${path.join("/")}${req.nextUrl.search}`;
+  const url = `${base}/${fullPath}${req.nextUrl.search}`;
 
   const headers = new Headers(req.headers);
   headers.delete("host");

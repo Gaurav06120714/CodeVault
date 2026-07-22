@@ -25,7 +25,7 @@ export default function UsersPage() {
   const take = 25;
 
   const load = (query: string, offset: number) => {
-    fetch(`/api/users?query=${encodeURIComponent(query)}&skip=${offset}`)
+    fetch(`/admin/api/users?query=${encodeURIComponent(query)}&skip=${offset}`)
       .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
       .then((d: { items: AdminUser[]; total: number }) => {
         setItems(d.items);

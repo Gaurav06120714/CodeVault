@@ -60,7 +60,7 @@ export default function SyncsPage() {
     const params = new URLSearchParams();
     if (status) params.set("status", status);
     params.set("skip", String(offset));
-    fetch(`/api/syncs?${params}`)
+    fetch(`/admin/api/syncs?${params}`)
       .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
       .then((d: { items: SyncItem[]; total: number }) => {
         setItems(d.items);

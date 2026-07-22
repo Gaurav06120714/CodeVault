@@ -59,7 +59,7 @@ export default function LogsPage() {
 
   const load = (type: string, offset: number) => {
     setState("loading");
-    fetch(`/api/logs?type=${type}&skip=${offset}`)
+    fetch(`/admin/api/logs?type=${type}&skip=${offset}`)
       .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
       .then((d) => {
         if (type === "audit") setAudits(d.items);

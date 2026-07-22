@@ -32,7 +32,7 @@ export default function HealthPage() {
 
   const load = () => {
     setChecking(true);
-    fetch("/api/health")
+    fetch("/admin/api/health")
       .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
       .then((d: { results: PlatformResult[]; checkedAt: string }) => {
         setResults(d.results);

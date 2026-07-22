@@ -1,8 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Standalone admin console. Runs on its own port (3100); reads the shared cv_access cookie
-  // (cookies are host-scoped, so a session on localhost:3000 is visible here on localhost).
+  // Standalone admin console served under /admin so it's SAME-ORIGIN with the main app
+  // (the frontend proxies /admin/* to this service). basePath prefixes every route,
+  // API route, and asset with /admin so the shared cv_access cookie is sent to it.
+  basePath: "/admin",
 
   // Lean production image for Docker/Fly (bundles a minimal Node server). See docs/DEPLOY.md.
   // Required: the Dockerfile copies `.next/standalone`; without this, `next build`

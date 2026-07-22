@@ -88,6 +88,10 @@ services:
         value: https://codevault-backend-ig6c.onrender.com
       - key: GIT_URL
         value: https://codevault-git-ig6c.onrender.com
+      # Admin console is served same-origin at /admin (frontend proxies to it), so the
+      # cv_access cookie is shared. Point at the admin service's public URL.
+      - key: ADMIN_URL
+        value: https://codevault-admin-ig6c.onrender.com
 
   # Admin console (standalone Next.js app). Verifies the same user JWT via JWT_SECRET
   # and gates access to the GitHub logins listed in ADMIN_GITHUB_LOGINS.
