@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { PlatformChip } from "@/components/PlatformChip";
 import { CodeVaultLoader } from "@/components/CodeVaultLoader";
-import { PLATFORMS, problemUrlFor } from "@/constants/platforms";
+import { PLATFORMS, PLATFORM_ORDER, problemUrlFor } from "@/constants/platforms";
 import { ExtensionInstallCard } from "@/components/ExtensionInstallCard";
 
 // dd/mm/yyyy
@@ -19,6 +19,8 @@ export default function DashboardPage() {
   const [stats, setStats] = useState<any>(null);
   const [statsError, setStatsError] = useState(false);
   const [heatmapCells, setHeatmapCells] = useState<string[]>([]);
+  const [platformHeatmaps, setPlatformHeatmaps] = useState<Record<string, string[]>>({});
+  const [activeHeatTab, setActiveHeatTab] = useState<string>("all");
   const [recentSubs, setRecentSubs] = useState<any[]>([]);
 
   const [isLoading, setIsLoading] = useState(true);
@@ -110,19 +112,22 @@ export default function DashboardPage() {
         const data = await res.json();
         setStats(data);
         
-        // Merge Heatmap
+        // Build per-platform + merged heatmaps
         const mergedHeatmap: Record<string, number> = {};
+        const perPlatformHeatmapData: Record<string, Record<string, number>> = {};
         let allRecent: any[] = [];
         
         Object.keys(data?.platforms || {}).forEach((pKey) => {
           const p = data.platforms[pKey];
           
-          // Heatmap
+          // Heatmap — build both merged and per-platform
           if (p.heatmap) {
             const pHeatmap = typeof p.heatmap === 'string' ? JSON.parse(p.heatmap) : p.heatmap;
+            if (!perPlatformHeatmapData[pKey]) perPlatformHeatmapData[pKey] = {};
             Object.entries(pHeatmap).forEach(([ts, count]) => {
               const dateStr = new Date(parseInt(ts) * 1000).toISOString().split('T')[0];
               mergedHeatmap[dateStr] = (mergedHeatmap[dateStr] || 0) + (count as number);
+              perPlatformHeatmapData[pKey][dateStr] = (perPlatformHeatmapData[pKey][dateStr] || 0) + (count as number);
             });
           }
           
@@ -155,32 +160,37 @@ export default function DashboardPage() {
           /* git-service optional — heatmap still works from stats alone */
         }
 
-        // Generate 365 cells
-        const cells = [];
-        const today = new Date();
-        
-        for (let i = 364; i >= 0; i--) {
-          const d = new Date(today);
-          d.setDate(today.getDate() - i);
-          // Always use local date formatting to prevent timezone shift bugs!
-          const year = d.getFullYear();
-          const month = String(d.getMonth() + 1).padStart(2, '0');
-          const day = String(d.getDate()).padStart(2, '0');
-          const dStrLocal = `${year}-${month}-${day}`;
-          
-          const dStrUtc = d.toISOString().split('T')[0];
-          
-          // Let's check both UTC and local just in case
-          const count = mergedHeatmap[dStrUtc] || mergedHeatmap[dStrLocal] || 0;
-          
-          if (count >= 5) cells.push("l4");
-          else if (count >= 3) cells.push("l3");
-          else if (count >= 2) cells.push("l2");
-          else if (count >= 1) cells.push("l1");
-          else cells.push("");
-        }
-        
-        setHeatmapCells(cells);
+        // Helper: generate 365 cells from a date→count map
+        const buildCells = (hmap: Record<string, number>): string[] => {
+          const cells: string[] = [];
+          const today = new Date();
+          for (let i = 364; i >= 0; i--) {
+            const d = new Date(today);
+            d.setDate(today.getDate() - i);
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            const dStrLocal = `${year}-${month}-${day}`;
+            const dStrUtc = d.toISOString().split('T')[0];
+            const count = hmap[dStrUtc] || hmap[dStrLocal] || 0;
+            if (count >= 5) cells.push("l4");
+            else if (count >= 3) cells.push("l3");
+            else if (count >= 2) cells.push("l2");
+            else if (count >= 1) cells.push("l1");
+            else cells.push("");
+          }
+          return cells;
+        };
+
+        // Build merged heatmap cells
+        setHeatmapCells(buildCells(mergedHeatmap));
+
+        // Build per-platform heatmap cells
+        const perPlatCells: Record<string, string[]> = {};
+        Object.keys(perPlatformHeatmapData).forEach((pKey) => {
+          perPlatCells[pKey] = buildCells(perPlatformHeatmapData[pKey]);
+        });
+        setPlatformHeatmaps(perPlatCells);
         
         // Sort recent
         allRecent.sort((a, b) => b.timestamp - a.timestamp);
@@ -336,7 +346,7 @@ export default function DashboardPage() {
           </section>
         )}
 
-        {/* GitHub-style heatmap */}
+        {/* GitHub-style heatmap with per-platform tabs */}
         <section className="panel">
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <h2 className="h">Submission activity <span className="tag">last 12 months</span></h2>
@@ -364,18 +374,65 @@ export default function DashboardPage() {
               Refresh
             </button>
           </div>
-          <div className="heat" role="img" aria-label="Submission heatmap over the last 12 months" aria-hidden="true">
-            {heatmapCells.map((cls, i) => (
-              <i key={i} className={cls || undefined}></i>
-            ))}
-          </div>
-          <div className="heat-legend">
-            Less <i style={{ background: "#efe7df" }}></i>
-            <i style={{ background: "#fbd6c6" }}></i>
-            <i style={{ background: "#f5a888" }}></i>
-            <i style={{ background: "#f0764f" }}></i>
-            <i style={{ background: "#d8431f" }}></i> More
-          </div>
+
+          {/* Platform tabs */}
+          {Object.keys(platformHeatmaps).length > 0 && (
+            <div className="heat-tabs">
+              <button
+                type="button"
+                className={`heat-tab ${activeHeatTab === "all" ? "active" : ""}`}
+                onClick={() => setActiveHeatTab("all")}
+              >
+                <span className="tab-dot" style={{ background: "linear-gradient(135deg, #f1543f, #e0457b)" }} />
+                All Platforms
+              </button>
+              {PLATFORM_ORDER.filter(pid => platformHeatmaps[pid]).map(pid => {
+                const config = PLATFORMS[pid];
+                if (!config) return null;
+                return (
+                  <button
+                    key={pid}
+                    type="button"
+                    className={`heat-tab ${activeHeatTab === pid ? "active" : ""}`}
+                    onClick={() => setActiveHeatTab(pid)}
+                  >
+                    <span className="tab-dot" style={{ background: config.color }} />
+                    {config.name}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
+          {(() => {
+            const activeCells = activeHeatTab === "all" ? heatmapCells : (platformHeatmaps[activeHeatTab] || []);
+            const heatClass = activeHeatTab === "all" ? "heat" : `heat heat-${PLATFORMS[activeHeatTab]?.iconClass || ""}`;
+
+            // Color scales for the legend per platform
+            const legendColors: Record<string, string[]> = {
+              all:        ["#efe7df", "#fbd6c6", "#f5a888", "#f0764f", "#d8431f"],
+              leetcode:   ["#efe7df", "#ffe4b5", "#ffc14d", "#ffa116", "#d48400"],
+              codeforces: ["#efe7df", "#b8ddf5", "#6cb8e6", "#1f8acb", "#14608e"],
+              codechef:   ["#efe7df", "#d9c4ac", "#b89070", "#7a5230", "#5a3a1e"],
+              hackerrank: ["#efe7df", "#a8e6c3", "#4fcf8a", "#1aa260", "#117a44"],
+            };
+            const colors = legendColors[activeHeatTab] || legendColors.all;
+
+            return (
+              <>
+                <div className={heatClass} role="img" aria-label={`Submission heatmap – ${activeHeatTab === "all" ? "all platforms" : PLATFORMS[activeHeatTab]?.name}`} aria-hidden="true">
+                  {activeCells.map((cls, i) => (
+                    <i key={i} className={cls || undefined}></i>
+                  ))}
+                </div>
+                <div className="heat-legend">
+                  Less {colors.map((c, i) => (
+                    <i key={i} style={{ background: c }}></i>
+                  ))} More
+                </div>
+              </>
+            );
+          })()}
         </section>
 
         {/* platform breakdown */}

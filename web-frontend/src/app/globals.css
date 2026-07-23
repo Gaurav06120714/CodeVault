@@ -220,6 +220,19 @@ svg.ico.sm{width:14px;height:14px}
 .heat-legend{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--faint);margin-top:12px;justify-content:flex-end}
 .heat-legend i{width:10px;height:10px;border-radius:3px}
 
+/* Per-platform heatmap color scales */
+.heat-lc i.l1{background:#ffe4b5}.heat-lc i.l2{background:#ffc14d}.heat-lc i.l3{background:#ffa116}.heat-lc i.l4{background:#d48400}
+.heat-cf i.l1{background:#b8ddf5}.heat-cf i.l2{background:#6cb8e6}.heat-cf i.l3{background:#1f8acb}.heat-cf i.l4{background:#14608e}
+.heat-cc i.l1{background:#d9c4ac}.heat-cc i.l2{background:#b89070}.heat-cc i.l3{background:#7a5230}.heat-cc i.l4{background:#5a3a1e}
+.heat-hr i.l1{background:#a8e6c3}.heat-hr i.l2{background:#4fcf8a}.heat-hr i.l3{background:#1aa260}.heat-hr i.l4{background:#117a44}
+
+/* Heatmap tab switcher */
+.heat-tabs{display:flex;gap:4px;margin-bottom:14px;flex-wrap:wrap}
+.heat-tab{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:8px;border:1px solid var(--border-2);background:var(--card);font-family:inherit;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;transition:all .15s ease;white-space:nowrap}
+.heat-tab:hover{background:var(--paper);color:var(--ink)}
+.heat-tab.active{background:var(--brand-soft);color:var(--brand-d);border-color:var(--brand-soft)}
+.heat-tab .tab-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+
 /* Platform bar lists */
 .pf{display:flex;flex-direction:column;gap:12px}
 .pf-row{display:grid;grid-template-columns:104px 1fr 40px;align-items:center;gap:10px;font-size:13px}
@@ -577,6 +590,15 @@ html[data-theme="dark"] .pill-d.rate { background: var(--subtle-2); color: var(-
 html[data-theme="dark"] .tag.auth { background: var(--subtle-2); color: var(--muted); }
 /* Only override the background for empty cells (which have no class) */
 html[data-theme="dark"] .heat i:not([class]) { background: #2a2620; }
+/* Per-platform heatmap empty cells in dark mode */
+html[data-theme="dark"] .heat-lc i:not([class]),
+html[data-theme="dark"] .heat-cf i:not([class]),
+html[data-theme="dark"] .heat-cc i:not([class]),
+html[data-theme="dark"] .heat-hr i:not([class]) { background: #2a2620; }
+/* Heatmap tabs dark mode */
+html[data-theme="dark"] .heat-tab { background: var(--subtle); border-color: var(--border); }
+html[data-theme="dark"] .heat-tab:hover { background: var(--subtle-2); }
+html[data-theme="dark"] .heat-tab.active { background: rgba(241,84,63,.15); border-color: rgba(241,84,63,.3); }
 html[data-theme="dark"] .btn-secondary,
 html[data-theme="dark"] .btn-following { color: var(--ink); }
 html[data-theme="dark"] .cmd-skel-av,
