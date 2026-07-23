@@ -143,6 +143,11 @@
   .pk{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--border);border-radius:11px;margin-bottom:8px;background:var(--card)}
   .pk .nm{flex:1;min-width:0;font-weight:600;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
+  /* section tab bar */
+  .ctabs{display:flex;gap:4px;flex-wrap:wrap;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:4px}
+  .ctabs a{font-size:13px;font-weight:600;color:var(--muted);padding:8px 13px;border-radius:8px;cursor:pointer;transition:.12s}
+  .ctabs a:hover{color:var(--ink)}
+  .ctabs a.active{background:var(--brand);color:#fff}
   /* tabs (views) */
   .view{display:none;flex-direction:column;gap:18px}
   .view.on{display:flex}
@@ -222,20 +227,15 @@
 <div class="app">
   <!-- SIDEBAR -->
   <aside class="side" id="side">
-    <a class="brand" href="overview.html">
-      <span class="mark">CC</span>
-      <span>CodeContest<small>by CodeVault</small></span>
-    </a>
+    <a class="brand" href="landing.html"><span class="mark">CV</span> CodeVault</a>
     <nav class="nav" aria-label="Primary">
-      <div class="sec">Compete</div>
-      <a class="active" data-view="dash"><svg class="ico"><use href="#ic-grid"/></svg> Dashboard</a>
-      <a data-view="create"><svg class="ico"><use href="#ic-plus"/></svg> Create Contest</a>
-      <a data-view="live"><svg class="ico"><use href="#ic-swords"/></svg> Live &amp; Rivalry</a>
-      <a data-view="history"><svg class="ico"><use href="#ic-history"/></svg> Contest History</a>
-      <div class="sec">Analyze</div>
-      <a data-view="compare"><svg class="ico"><use href="#ic-users"/></svg> Compare Friend</a>
-      <a data-view="analysis"><svg class="ico"><use href="#ic-trophy"/></svg> Post-contest</a>
-      <a data-view="ai"><svg class="ico"><use href="#ic-bot"/></svg> AI Assistant</a>
+      <a href="overview.html"><svg class="ico" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg> Overview</a>
+      <a href="analytics.html"><svg class="ico" viewBox="0 0 24 24"><line x1="4" y1="20" x2="4" y2="11"/><line x1="10" y1="20" x2="10" y2="4"/><line x1="16" y1="20" x2="16" y2="14"/><line x1="3" y1="20" x2="21" y2="20"/></svg> Analytics</a>
+      <a class="active" aria-current="page" href="codecontest.html"><svg class="ico" viewBox="0 0 24 24"><path d="M6 9a6 6 0 0 0 12 0V4H6z"/><path d="M6 5H3v2a3 3 0 0 0 3 3M18 5h3v2a3 3 0 0 1-3 3M9 21h6M12 15v6"/></svg> CodeContest</a>
+      <a href="repositories.html"><svg class="ico" viewBox="0 0 24 24"><polyline points="9 8 5 12 9 16"/><polyline points="15 8 19 12 15 16"/></svg> Repositories</a>
+      <a href="public-profile.html"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="9" r="3.2"/><path d="M5.5 20c.7-3 3.3-5 6.5-5s5.8 2 6.5 5"/></svg> Public profile</a>
+      <a href="sync-status.html"><svg class="ico" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.6-6.4"/><polyline points="21 3 21 9 15 9"/></svg> Sync status</a>
+      <a href="settings.html"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2.1 2.1M16.9 16.9 19 19M19 5l-2.1 2.1M7.1 16.9 5 19"/></svg> Settings</a>
     </nav>
     <div class="side-foot">
       <div class="av">G</div>
@@ -258,6 +258,17 @@
     </div>
 
     <div class="content">
+
+      <!-- CodeContest section tabs -->
+      <div class="ctabs" id="ctabs">
+        <a class="active" data-view="dash">Dashboard</a>
+        <a data-view="create">Create</a>
+        <a data-view="live">Live &amp; Rivalry</a>
+        <a data-view="history">History</a>
+        <a data-view="compare">Compare Friend</a>
+        <a data-view="analysis">Post-contest</a>
+        <a data-view="ai">AI Assistant</a>
+      </div>
 
       <!-- ══════════ DASHBOARD ══════════ -->
       <section class="view on" id="v-dash">
@@ -555,12 +566,12 @@ const titles = {
 function go(v){
   document.querySelectorAll('.view').forEach(s=>s.classList.remove('on'));
   document.getElementById('v-'+v).classList.add('on');
-  document.querySelectorAll('.nav a[data-view]').forEach(a=>a.classList.toggle('active',a.dataset.view===v));
+  document.querySelectorAll('.ctabs a[data-view]').forEach(a=>a.classList.toggle('active',a.dataset.view===v));
   document.getElementById('pageTitle').textContent = titles[v][0];
   document.getElementById('pageSub').textContent = titles[v][1];
   closeNav(); window.scrollTo(0,0);
 }
-document.querySelectorAll('.nav a[data-view]').forEach(a=>a.onclick=()=>go(a.dataset.view));
+document.querySelectorAll('.ctabs a[data-view]').forEach(a=>a.onclick=()=>go(a.dataset.view));
 
 /* ─────────── theme ─────────── */
 function applyTheme(t){document.documentElement.setAttribute('data-theme',t);document.getElementById('themeIcon').setAttribute('href',t==='dark'?'#ic-sun':'#ic-moon');try{localStorage.setItem('cc-theme',t)}catch(e){}}
