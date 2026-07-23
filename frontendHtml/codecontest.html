@@ -181,10 +181,25 @@
   .cmprow .v.win{color:var(--green)}
 
   .empty{padding:26px;text-align:center;color:var(--faint);font-size:13.5px}
+
+  /* live contest room */
+  .room-top{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+  .ptabs{display:flex;gap:6px;flex-wrap:wrap}
+  .ptabs button{border:1px solid var(--border-2);background:var(--card);font-family:inherit;font-size:12.5px;font-weight:600;color:var(--muted);padding:7px 12px;border-radius:9px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+  .ptabs button.on{background:var(--brand-soft);border-color:var(--brand);color:var(--brand-d)}
+  .ptabs button .tick{color:var(--green)}
+  .room{display:grid;grid-template-columns:1.4fr 1fr;gap:16px;align-items:start}
+  .stmt{font-size:13.5px;line-height:1.6;color:var(--ink-2);margin-top:12px}
+  .stmt b{color:var(--ink)}
+  .stmt code,.stmt pre{font-family:var(--mono);font-size:12.5px;background:var(--paper);border:1px solid var(--border);border-radius:8px;padding:2px 6px}
+  .stmt pre{display:block;padding:10px 12px;margin:8px 0;white-space:pre-wrap}
+  .editor{width:100%;min-height:200px;font-family:var(--mono);font-size:13px;line-height:1.6;color:var(--ink);background:var(--paper);border:1px solid var(--border-2);border-radius:11px;padding:12px 14px;resize:vertical;tab-size:4}
+  .editor:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-soft)}
+  .room-chat{max-height:260px}
   .scrim{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:55}
 
   /* responsive */
-  @media(max-width:1040px){.g-2,.g-3{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}.badges{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:1040px){.g-2,.g-3{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}.badges{grid-template-columns:repeat(2,1fr)}.room{grid-template-columns:1fr}}
   @media(max-width:820px){
     .app{grid-template-columns:1fr}
     .side{position:fixed;left:0;top:0;z-index:60;transform:translateX(-100%);transition:transform .22s}
@@ -346,9 +361,14 @@
             </div>
 
             <div class="field">
-              <label class="fl">Problems <span class="sub" style="color:var(--faint)">(add 4–6)</span></label>
+              <label class="fl">Problems <span class="sub" style="color:var(--faint)">(paste 4–6 problem links)</span></label>
+              <div class="row" style="gap:8px;margin-bottom:10px">
+                <input class="in" id="probLink" placeholder="Paste a problem URL — e.g. leetcode.com/problems/two-sum" style="flex:1;min-width:0" onkeydown="if(event.key==='Enter'){addProblemFromLink();event.preventDefault();}"/>
+                <button class="btn brand sm" onclick="addProblemFromLink()"><svg class="ico sm"><use href="#ic-plus"/></svg> Add</button>
+              </div>
+              <div id="linkErr" class="sub" style="color:var(--rose-d);margin:-4px 0 8px;display:none">Couldn't read that link — check the URL.</div>
               <div id="probList"></div>
-              <button class="btn sm" id="addProbBtn" onclick="addProblem()"><svg class="ico sm"><use href="#ic-plus"/></svg> Add problem from platform</button>
+              <button class="btn ghost sm" id="addProbBtn" onclick="addProblem()">or pick a sample problem</button>
             </div>
 
             <div class="field"><label class="fl">Invite friends</label>
@@ -377,35 +397,64 @@
         </div>
       </section>
 
-      <!-- ══════════ LIVE & RIVALRY ══════════ -->
+      <!-- ══════════ LIVE CONTEST ROOM ══════════ -->
       <section class="view" id="v-live">
-        <div class="grid g-2">
-          <div class="card">
-            <h3><svg class="ico sm"><use href="#ic-clock"/></svg> Weekend Graph Sprint <span class="pill live"><span class="dot"></span> LIVE</span></h3>
-            <div class="desc">CodeVault + LeetCode · practice mode timer</div>
-            <div class="row" style="justify-content:center;flex-direction:column;gap:6px;text-align:center;padding:8px 0">
-              <div class="timer" id="liveTimer">00:42:18</div>
-              <div class="sub" style="color:var(--faint)">time remaining</div>
-            </div>
-            <div class="row" style="justify-content:center;gap:8px">
-              <button class="btn sm" id="pauseBtn" onclick="toggleTimer()">Pause</button>
-              <button class="btn sm" onclick="resetTimer()">Restart</button>
-            </div>
+        <!-- top bar: title + timer + controls -->
+        <div class="card room-top">
+          <div>
+            <h3 style="margin:0"><svg class="ico sm"><use href="#ic-clock"/></svg> Weekend Graph Sprint <span class="pill live"><span class="dot"></span> LIVE</span></h3>
+            <div class="sub" style="color:var(--faint)">Solve the pasted problems right here · discuss in chat</div>
           </div>
-          <div class="card">
-            <h3><svg class="ico sm"><use href="#ic-swords"/></svg> Your progress</h3>
-            <div class="desc">2 of 5 problems solved · 240 pts</div>
-            <div id="myProblems"></div>
+          <div class="row" style="gap:10px">
+            <div style="text-align:right"><div class="timer" id="liveTimer" style="font-size:26px">00:42:18</div><div class="sub" style="color:var(--faint)">time left</div></div>
+            <button class="btn sm" id="pauseBtn" onclick="toggleTimer()">Pause</button>
+            <button class="btn sm" onclick="resetTimer()">Restart</button>
           </div>
         </div>
 
-        <div class="card">
-          <h3><svg class="ico sm"><use href="#ic-trophy"/></svg> Live leaderboard</h3>
-          <div class="desc">Rank · score · progress · completed · time on current problem</div>
-          <div class="tbl-wrap"><table>
-            <thead><tr><th>#</th><th>Participant</th><th>Score</th><th>Progress</th><th>Solved</th><th>Time</th></tr></thead>
-            <tbody id="liveLb"></tbody>
-          </table></div>
+        <!-- problem tabs -->
+        <div class="ptabs" id="ptabs"></div>
+
+        <div class="room">
+          <!-- LEFT: problem statement + code editor -->
+          <div class="card">
+            <div class="row" style="justify-content:space-between;flex-wrap:wrap;gap:8px">
+              <h3 style="margin:0"><span class="plat lc" id="curPlat">LC</span> <span id="curTitle">Number of Islands</span> <span class="diff med" id="curDiff">MEDIUM</span></h3>
+              <a class="btn ghost sm" id="curSrc" href="#" target="_blank" rel="noopener">source ↗</a>
+            </div>
+            <div class="stmt" id="stmt"></div>
+
+            <div class="row" style="justify-content:space-between;margin:14px 0 8px">
+              <label class="fl" style="margin:0">Your solution — write it in CodeVault</label>
+              <select id="lang" style="width:150px"><option>Python</option><option>C++</option><option>Java</option><option>JavaScript</option></select>
+            </div>
+            <textarea id="editor" class="editor" spellcheck="false" placeholder="# write your code here...">class Solution:
+    def numIslands(self, grid):
+        # your code here
+        pass</textarea>
+            <div class="row" style="gap:8px;margin-top:10px;flex-wrap:wrap">
+              <button class="btn sm" onclick="runCode(false)">▶ Run</button>
+              <button class="btn brand sm" onclick="runCode(true)">Submit</button>
+              <button class="btn sm" style="border-color:var(--brand-soft);color:var(--brand-d)" onclick="roomHint()">💡 AI hint</button>
+              <span id="verdict" class="pill" style="display:none"></span>
+            </div>
+          </div>
+
+          <!-- RIGHT: live chat + leaderboard -->
+          <div style="display:flex;flex-direction:column;gap:16px;min-width:0">
+            <div class="card" style="display:flex;flex-direction:column">
+              <h3><svg class="ico sm"><use href="#ic-users"/></svg> Live chat</h3>
+              <div class="chat room-chat" id="roomChat"></div>
+              <div class="row" style="gap:8px;margin-top:10px">
+                <input class="in" id="chatIn" placeholder="Message your friends…" style="flex:1" onkeydown="if(event.key==='Enter'){sendChat();event.preventDefault();}"/>
+                <button class="btn brand sm" onclick="sendChat()">Send</button>
+              </div>
+            </div>
+            <div class="card">
+              <h3><svg class="ico sm"><use href="#ic-trophy"/></svg> Leaderboard</h3>
+              <div id="liveLb"></div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -549,6 +598,10 @@ const catalog = [
   {n:'Merge Intervals', d:'med', plat:'cv'},
   {n:'Binary Search Basics', d:'easy', plat:'hr'},
 ];
+const STMT = {
+  'Number of Islands': `Given an <b>m × n</b> 2D binary grid of '1' (land) and '0' (water), <b>return the number of islands</b>. An island is surrounded by water and formed by connecting adjacent land cells horizontally or vertically.<pre>Input:  [["1","1","0"],["1","0","0"],["0","0","1"]]\nOutput: 2</pre><b>Constraints:</b> 1 ≤ m, n ≤ 300.`,
+};
+function defaultStmt(name){ return STMT[name] || `Solve <b>${name}</b>. Read the full statement on the source platform, write your solution below, and Submit to get a verdict. Examples and constraints appear here once the link is fetched.<pre>Input:  ...\nOutput: ...</pre>`; }
 const platName = {cv:'CodeVault',lc:'LeetCode',cf:'Codeforces',cc:'CodeChef',hr:'HackerRank'};
 const platCls  = {cv:'cv',lc:'lc',cf:'cf',cc:'cc',hr:'hr'};
 const platAbbr = {cv:'CV',lc:'LC',cf:'CF',cc:'CC',hr:'HR'};
@@ -611,13 +664,64 @@ function resPill(r){
   if(r==='2nd')return '<span class="pill wait">2nd</span>';
   return '<span class="pill" style="background:var(--paper);color:var(--muted)">'+r+'</span>';
 }
+/* ─────────── live contest room ─────────── */
+let curProb=0, solvedSet=new Set();
 function renderLive(){
+  // problem tabs (from the pasted/added problems)
+  document.getElementById('ptabs').innerHTML = probs.map((p,i)=>
+    `<button class="${i===curProb?'on':''}" onclick="selectProblem(${i})"><span class="plat ${platCls[p.plat]}" style="width:16px;height:16px;font-size:8px">${platAbbr[p.plat]}</span>Q${i+1}${solvedSet.has(i)?' <span class="tick">✓</span>':''}</button>`).join('')
+    || '<span class="sub" style="color:var(--faint)">Add problems in “Create” — they show up here to solve.</span>';
+  const p = probs[curProb];
+  if(p){
+    document.getElementById('curPlat').className = 'plat '+platCls[p.plat];
+    document.getElementById('curPlat').textContent = platAbbr[p.plat];
+    document.getElementById('curTitle').textContent = p.n;
+    const dl=document.getElementById('curDiff'); dl.className='diff '+p.d; dl.textContent=p.d.toUpperCase();
+    document.getElementById('curSrc').href = p.url || '#';
+    document.getElementById('stmt').innerHTML = p.stmt || defaultStmt(p.n);
+  }
+  // room leaderboard (compact list)
   const sorted=[...participants].sort((a,b)=>b.score-a.score);
-  document.getElementById('liveLb').innerHTML = sorted.map(lbRow).join('');
-  const mine=['Number of Islands|med|solved','Course Schedule|med|solved','Word Ladder|hard|active','Dijkstra Path|hard|todo','Merge Intervals|med|todo'];
-  document.getElementById('myProblems').innerHTML = mine.map(m=>{const[n,d,s]=m.split('|');
-    const stat = s==='solved'?'<span class="pill ok">Solved</span>':s==='active'?'<span class="pill live"><span class="dot"></span>Solving</span>':'<span class="pill" style="background:var(--paper);color:var(--muted)">To do</span>';
-    return `<div class="pk"><span class="plat lc">LC</span><span class="nm">${n}</span><span class="diff ${d}">${d.toUpperCase()}</span>${stat}</div>`}).join('');
+  document.getElementById('liveLb').innerHTML = sorted.map((pp,i)=>
+    `<div class="pk" style="border:none;padding:7px 0;margin:0">
+      <span class="rank ${i<3?['g1','g2','g3'][i]:''}">${i+1}</span>
+      <span class="av" style="background:${AVCOL[i%4]}">${pp.init}</span>
+      <span class="nm">${pp.name}${pp.me?' <span class="pill ok" style="margin-left:4px">You</span>':''}</span>
+      <span class="mono" style="color:var(--brand-d);font-weight:700">${pp.score}</span></div>`).join('');
+}
+function selectProblem(i){ curProb=i; renderLive(); }
+function runCode(submit){
+  const v=document.getElementById('verdict');
+  v.style.display='inline-flex';
+  v.className='pill wait'; v.textContent='Running…';
+  setTimeout(()=>{
+    if(submit){
+      v.className='pill ok'; v.textContent='✓ Accepted · +100';
+      solvedSet.add(curProb);
+      roomMsg('ai','Verdict','Accepted ✅ — nice! +100 points. On to the next one.');
+      renderLive();
+    } else {
+      v.className='pill ok'; v.textContent='Sample tests passed';
+    }
+  },600);
+}
+function roomHint(){
+  const p=probs[curProb];
+  roomMsg('me',null,`💡 Hint for Q${curProb+1} · ${p?p.n:''}`);
+  setTimeout(()=>roomMsg('ai','AI · hint',(HINTS.hint&&HINTS.hint.beginner)||'Scan each cell; on unvisited land, flood-fill its whole island and count it once. (Hints only during a live contest — full solutions unlock after.)'),300);
+}
+/* live chat */
+let roomChat=[{who:'ai',label:'Assistant',text:'Contest started! Discuss here — but no pasting full solutions during the live round 😉'},{who:'them',label:'Aishwarya',text:'bit stuck on Q3, is it BFS?'}];
+function roomMsg(who,label,text){ roomChat.push({who,label,text}); paintChat(); }
+function sendChat(){ const el=document.getElementById('chatIn'); const v=el.value.trim(); if(!v)return; roomChat.push({who:'me',label:'Gaurav',text:v}); el.value=''; paintChat();
+  setTimeout(()=>roomMsg('them','Rahul',['nice!','lol same','+1','try a hashmap','gg'][Math.floor(Math.random()*5)]),700); }
+function paintChat(){
+  const c=document.getElementById('roomChat');
+  c.innerHTML = roomChat.map(m=>{
+    const cls = m.who==='me'?'me':'ai';
+    return `<div class="msg ${cls}">${m.label?`<div class="lvl">${m.label}</div>`:''}${m.text}</div>`;
+  }).join('');
+  c.scrollTop=c.scrollHeight;
 }
 function renderHistory(){
   document.getElementById('histRows').innerHTML = history.map(h=>
@@ -642,8 +746,28 @@ function renderProbs(){
   document.getElementById('addProbBtn').disabled = probs.length>=6;
   renderLobby();
 }
-function addProblem(){ if(probs.length>=6)return; const c=catalog[probs.length%catalog.length]; probs.push({...c}); renderProbs(); }
-function rmProblem(i){ probs.splice(i,1); renderProbs(); }
+function addProblem(){ if(probs.length>=6)return; const c=catalog[probs.length%catalog.length]; probs.push({...c, stmt:defaultStmt(c.n)}); renderProbs(); }
+function rmProblem(i){ probs.splice(i,1); if(curProb>=probs.length)curProb=Math.max(0,probs.length-1); renderProbs(); renderLive(); }
+/* paste-a-link → detect platform + problem name, add it to the contest */
+function parseProblemLink(url){
+  let plat='cv';
+  if(/leetcode\.com/i.test(url))plat='lc'; else if(/codeforces\.com/i.test(url))plat='cf';
+  else if(/codechef\.com/i.test(url))plat='cc'; else if(/hackerrank\.com/i.test(url))plat='hr';
+  // grab the last meaningful slug segment as the title
+  let slug=(url.split('?')[0].replace(/\/+$/,'').split('/').pop()||'problem').replace(/[-_]/g,' ').trim();
+  const name=slug.replace(/\b\w/g,c=>c.toUpperCase());
+  const d=['easy','med','hard'][Math.floor(Math.random()*3)];
+  return {n:name||'Problem', d, plat, url};
+}
+function addProblemFromLink(){
+  const el=document.getElementById('probLink'); const err=document.getElementById('linkErr');
+  const url=el.value.trim();
+  if(!url || !/\.[a-z]{2,}/i.test(url)){ err.style.display='block'; return; }
+  if(probs.length>=6){ err.textContent='Max 6 problems.'; err.style.display='block'; return; }
+  err.style.display='none';
+  const p=parseProblemLink(url); p.stmt=defaultStmt(p.n);
+  probs.push(p); el.value=''; renderProbs(); renderLive();
+}
 function addFriend(){ const el=document.getElementById('inviteIn'); const v=el.value.trim(); if(!v)return; friends.push({id:v,init:v.replace('@','')[0].toUpperCase()}); el.value=''; renderFriends(); renderLobby(); }
 function rmFriend(i){ friends.splice(i,1); renderFriends(); renderLobby(); }
 function renderFriends(){
@@ -773,7 +897,7 @@ function resetTimer(){secs=42*60+18;running=true;document.getElementById('pauseB
 
 /* ─────────── init ─────────── */
 addProblem();addProblem();addProblem();addProblem();
-renderFriends();renderDash();renderLive();renderHistory();renderFinal();renderPerf();
+renderFriends();renderDash();renderLive();renderHistory();renderFinal();renderPerf();paintChat();
 paintTimer(); tid=setInterval(tick,1000);
 </script>
 </body>
