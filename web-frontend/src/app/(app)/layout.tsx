@@ -69,6 +69,7 @@ export default function AppLayout({
         <symbol id="ic-overview" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></symbol>
         <symbol id="ic-analytics" viewBox="0 0 24 24"><line x1="4" y1="20" x2="4" y2="11"/><line x1="10" y1="20" x2="10" y2="4"/><line x1="16" y1="20" x2="16" y2="14"/><line x1="3" y1="20" x2="21" y2="20"/></symbol>
         <symbol id="ic-repos" viewBox="0 0 24 24"><polyline points="9 8 5 12 9 16"/><polyline points="15 8 19 12 15 16"/></symbol>
+        <symbol id="ic-contest" viewBox="0 0 24 24"><path d="M6 9a6 6 0 0 0 12 0V4H6z"/><path d="M6 5H3v2a3 3 0 0 0 3 3M18 5h3v2a3 3 0 0 1-3 3M9 21h6M12 15v6"/></symbol>
         <symbol id="ic-profile" viewBox="0 0 24 24"><circle cx="12" cy="9" r="3.2"/><path d="M5.5 20c.7-3 3.3-5 6.5-5s5.8 2 6.5 5"/></symbol>
         <symbol id="ic-sync" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.6-6.4"/><polyline points="21 3 21 9 15 9"/></symbol>
         <symbol id="ic-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></symbol>
@@ -101,6 +102,10 @@ export default function AppLayout({
           <Link href="/analytics" className={pathname === "/analytics" ? "active" : ""}>
             <svg className="ico"><use href="#ic-analytics"/></svg>
             Analytics
+          </Link>
+          <Link href="/codecontest" className={pathname === "/codecontest" ? "active" : ""}>
+            <svg className="ico"><use href="#ic-contest"/></svg>
+            CodeContest
           </Link>
           <Link href="/public-profile" className={pathname === "/public-profile" ? "active" : ""}>
             <svg className="ico"><use href="#ic-profile"/></svg>
@@ -154,6 +159,7 @@ export default function AppLayout({
             let title = "Dashboard";
             if (pathname === "/repositories") title = "Repositories";
             else if (pathname === "/analytics") title = "Analytics";
+            else if (pathname === "/codecontest") title = "CodeContest";
             else if (pathname?.startsWith("/u/")) title = "Public profile";
             else if (pathname === "/public-profile") title = "Public profile";
             else if (pathname === "/messages") title = "Messages";
