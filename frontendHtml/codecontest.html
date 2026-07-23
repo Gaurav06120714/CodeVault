@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="description" content="CodeContest — create friendly coding contests with friends, compete live, compare stats, and get AI coding help. Part of CodeVault." />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23f1543f'/%3E%3Ctext x='16' y='22' font-family='monospace' font-size='15' fill='white' text-anchor='middle' font-weight='bold'%3ECC%3C/text%3E%3C/svg%3E" />
+<title>CodeContest · CodeVault</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --paper:#f8f6f1;--card:#fff;--ink:#1a160f;--ink-2:#3a352c;--muted:#6f6a5f;--faint:#7a7568;
+    --border:#ece7dc;--border-2:#e2dccd;
+    --brand:#f1543f;--brand-d:#d8431f;--brand-soft:#fdeae4;
+    --amber:#e8a200;--amber-d:#b07c00;--amber-soft:#fbeec8;
+    --rose:#e0457b;--rose-d:#c43368;--rose-soft:#fce3ee;
+    --green:#1aa260;--green-soft:#e2f4eb;--blue:#1f8acb;--blue-soft:#e2f0fa;
+    --mono:'JetBrains Mono',ui-monospace,monospace;
+    --r:14px;
+    --shadow:0 1px 2px rgba(30,20,10,.04),0 10px 28px -16px rgba(30,20,10,.18);
+  }
+  html[data-theme="dark"]{
+    --paper:#14120e;--card:#1c1a15;--ink:#f3efe6;--ink-2:#d8d2c5;--muted:#a49e90;--faint:#8f897c;
+    --border:#2c281f;--border-2:#38332a;
+    --brand-soft:#3a1f18;--amber-soft:#33280f;--rose-soft:#331825;--green-soft:#123024;--blue-soft:#0f2636;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 12px 30px -16px rgba(0,0,0,.7);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{max-width:100%;overflow-x:hidden}
+  body{font-family:'Inter',system-ui,sans-serif;color:var(--ink);background:var(--paper);-webkit-font-smoothing:antialiased;transition:background-color .2s,color .2s}
+  a{color:inherit;text-decoration:none}
+  .mono{font-family:var(--mono)}
+  :focus-visible{outline:2px solid var(--brand);outline-offset:2px;border-radius:6px}
+  svg.ico{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+  svg.ico.sm{width:14px;height:14px}
+
+  .app{display:grid;grid-template-columns:236px 1fr;min-height:100vh}
+
+  /* SIDEBAR */
+  .side{background:var(--card);border-right:1px solid var(--border);padding:20px 16px;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;width:236px;transition:background-color .2s,border-color .2s}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:16px;padding:6px 8px 4px}
+  .brand small{display:block;font-size:10px;color:var(--faint);font-weight:600;letter-spacing:.08em;text-transform:uppercase;margin-top:1px}
+  .mark{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,var(--brand),var(--rose));color:#fff;display:grid;place-items:center;font-family:var(--mono);font-weight:800;font-size:13px;flex:none}
+  .nav{display:flex;flex-direction:column;gap:3px;margin-top:16px}
+  .nav a{display:flex;align-items:center;gap:11px;padding:10px 11px;border-radius:9px;font-size:14px;color:var(--muted);font-weight:500;cursor:pointer;transition:.12s}
+  .nav a:hover{background:var(--paper);color:var(--ink)}
+  .nav a.active{background:var(--brand-soft);color:var(--brand-d);font-weight:600}
+  .nav .sec{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--faint);padding:14px 11px 4px}
+  .side-foot{margin-top:auto;border-top:1px solid var(--border);padding-top:14px;display:flex;align-items:center;gap:10px}
+  .side-foot .av{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--amber),var(--brand));color:#fff;display:grid;place-items:center;font-weight:700;font-size:14px}
+  .side-foot .who{font-size:13px;line-height:1.3}
+  .side-foot .who b{display:block}
+  .side-foot .who span{color:var(--faint);font-size:11.5px}
+  .side-foot .out{margin-left:auto;color:var(--faint);cursor:pointer;background:none;border:0;padding:6px;border-radius:8px;display:grid;place-items:center}
+  .side-foot .out:hover{color:var(--rose-d);background:var(--rose-soft)}
+
+  /* MAIN */
+  .main{display:flex;flex-direction:column;min-width:0}
+  .topbar{display:flex;align-items:center;gap:14px;padding:14px 28px;border-bottom:1px solid var(--border);background:color-mix(in srgb,var(--paper) 85%,transparent);backdrop-filter:blur(8px);position:sticky;top:0;z-index:10}
+  .menu-btn{display:none;width:38px;height:38px;border-radius:9px;border:1px solid var(--border-2);background:var(--card);place-items:center;cursor:pointer;color:var(--ink)}
+  .topbar h1{font-size:18px;letter-spacing:-.01em}
+  .topbar .sub{font-size:12.5px;color:var(--faint);margin-top:1px}
+  .spacer{margin-left:auto}
+  .ic-btn{width:36px;height:36px;border-radius:9px;border:1px solid var(--border-2);background:var(--card);display:grid;place-items:center;cursor:pointer;color:var(--ink-2)}
+  .ic-btn:hover{background:var(--paper);color:var(--ink)}
+  .content{padding:24px 28px 60px;display:flex;flex-direction:column;gap:18px}
+
+  /* buttons */
+  .btn{display:inline-flex;align-items:center;gap:7px;font-family:inherit;font-weight:600;font-size:13.5px;border-radius:9px;border:1px solid var(--border-2);background:var(--card);padding:9px 14px;cursor:pointer;transition:.12s;color:var(--ink)}
+  .btn:hover{background:var(--paper)}
+  .btn.brand{background:var(--brand);color:#fff;border-color:var(--brand)}
+  .btn.brand:hover{background:var(--brand-d)}
+  .btn.sm{padding:6px 11px;font-size:12.5px}
+  .btn.ghost{background:transparent;border-color:transparent;color:var(--muted)}
+  .btn.ghost:hover{color:var(--ink);background:var(--paper)}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+
+  /* cards + grid */
+  .card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:18px;transition:background-color .2s,border-color .2s}
+  .card h3{font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px;margin-bottom:4px}
+  .card .desc{font-size:12.5px;color:var(--faint);margin-bottom:14px}
+  .grid{display:grid;gap:16px}
+  .g-2{grid-template-columns:1fr 1fr}
+  .g-3{grid-template-columns:repeat(3,1fr)}
+  .row{display:flex;align-items:center;gap:12px}
+
+  /* stats */
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+  .stat{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px}
+  .stat .l{font-size:12.5px;color:var(--muted);font-weight:600;display:flex;align-items:center;gap:7px}
+  .stat .l .ico{color:var(--brand)}
+  .stat .l .ico.a{color:var(--amber)}.stat .l .ico.r{color:var(--rose)}.stat .l .ico.g{color:var(--green)}
+  .stat .n{font-size:27px;font-weight:800;letter-spacing:-.03em;margin-top:8px}
+  .stat .d{font-size:12px;color:var(--brand-d);font-weight:600;margin-top:2px}
+
+  /* pills / chips / tags */
+  .pill{font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+  .pill.live{background:var(--rose-soft);color:var(--rose-d)}
+  .pill.live .dot{width:7px;height:7px;border-radius:50%;background:var(--rose);animation:pulse 1.4s infinite}
+  .pill.ok{background:var(--green-soft);color:var(--green)}
+  .pill.wait{background:var(--amber-soft);color:var(--amber-d)}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+  .diff{font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:6px}
+  .diff.easy{background:var(--green-soft);color:var(--green)}
+  .diff.med{background:var(--amber-soft);color:var(--amber-d)}
+  .diff.hard{background:var(--rose-soft);color:var(--rose-d)}
+  .plat{width:22px;height:22px;border-radius:6px;display:grid;place-items:center;font-size:9px;font-weight:800;font-family:var(--mono);color:#fff;flex:none}
+  .lc{background:#ffa116}.cf{background:#1f8acb}.cc{background:#7a5230}.hr{background:#1aa260}.cv{background:linear-gradient(135deg,var(--brand),var(--rose))}
+
+  /* table */
+  table{width:100%;border-collapse:collapse;font-size:13.5px}
+  thead th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--faint);font-weight:700;padding:0 10px 12px}
+  tbody td{padding:11px 10px;border-top:1px solid var(--border)}
+  tbody tr:hover{background:var(--paper)}
+  .rank{width:26px;height:26px;border-radius:8px;display:grid;place-items:center;font-weight:800;font-size:12px;font-family:var(--mono);background:var(--paper);color:var(--muted)}
+  .rank.g1{background:linear-gradient(135deg,#f6c945,#e8a200);color:#fff}
+  .rank.g2{background:linear-gradient(135deg,#cdd2da,#9aa2ad);color:#fff}
+  .rank.g3{background:linear-gradient(135deg,#e2a06a,#c47a3f);color:#fff}
+  .who{display:inline-flex;align-items:center;gap:9px;font-weight:600}
+  .av{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:700;font-size:12px;flex:none}
+
+  /* progress bar */
+  .bar{height:8px;border-radius:5px;background:var(--paper);overflow:hidden;min-width:80px}
+  .bar i{display:block;height:100%;border-radius:5px;background:linear-gradient(90deg,var(--brand),var(--amber));transition:width .5s}
+
+  /* forms */
+  label.fl{display:block;font-size:12.5px;font-weight:600;margin-bottom:6px;color:var(--ink-2)}
+  .in,select,textarea{width:100%;font-family:inherit;font-size:14px;color:var(--ink);background:var(--card);border:1px solid var(--border-2);border-radius:10px;padding:10px 12px;transition:.12s}
+  .in:focus,select:focus,textarea:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-soft)}
+  .field{margin-bottom:14px}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .seg{display:inline-flex;background:var(--paper);border:1px solid var(--border-2);border-radius:10px;padding:3px;flex-wrap:wrap}
+  .seg button{border:0;background:none;font-family:inherit;font-size:13px;font-weight:600;color:var(--muted);padding:7px 13px;border-radius:7px;cursor:pointer}
+  .seg button.on{background:var(--card);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+  .chipin{display:flex;flex-wrap:wrap;gap:7px;align-items:center}
+  .fchip{display:inline-flex;align-items:center;gap:7px;background:var(--paper);border:1px solid var(--border-2);border-radius:999px;padding:4px 6px 4px 4px;font-size:12.5px;font-weight:600}
+  .fchip .x{cursor:pointer;color:var(--faint);width:16px;height:16px;display:grid;place-items:center;border-radius:50%}
+  .fchip .x:hover{background:var(--rose-soft);color:var(--rose-d)}
+
+  /* problem picker rows */
+  .pk{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--border);border-radius:11px;margin-bottom:8px;background:var(--card)}
+  .pk .nm{flex:1;min-width:0;font-weight:600;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+  /* tabs (views) */
+  .view{display:none;flex-direction:column;gap:18px}
+  .view.on{display:flex}
+
+  /* AI assistant */
+  .chat{display:flex;flex-direction:column;gap:12px;max-height:340px;overflow-y:auto;padding:4px}
+  .msg{max-width:88%;padding:11px 14px;border-radius:13px;font-size:13.5px;line-height:1.55}
+  .msg.ai{background:var(--paper);border:1px solid var(--border);align-self:flex-start;border-bottom-left-radius:4px}
+  .msg.me{background:var(--brand);color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
+  .msg .lvl{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--brand-d);margin-bottom:4px}
+  .msg.ai b{color:var(--ink)}
+
+  /* badges */
+  .badges{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+  .badge{text-align:center;padding:16px 10px;border:1px solid var(--border);border-radius:12px;background:var(--card)}
+  .badge .hex{width:46px;height:46px;margin:0 auto 10px;display:grid;place-items:center;color:#fff;font-size:20px;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%)}
+  .badge .bt{font-size:12.5px;font-weight:700}
+  .badge .bm{font-size:11px;color:var(--faint);margin-top:2px}
+
+  /* timer */
+  .timer{font-family:var(--mono);font-size:34px;font-weight:700;letter-spacing:-.02em}
+  .timer.low{color:var(--rose-d)}
+
+  /* compare columns */
+  .cmp{display:grid;grid-template-columns:1fr auto 1fr;gap:0;align-items:center}
+  .cmp .r{display:contents}
+  .cmprow{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:11px 0;border-top:1px solid var(--border);font-size:14px}
+  .cmprow .lab{text-align:center;font-size:11.5px;font-weight:700;color:var(--faint);text-transform:uppercase;letter-spacing:.03em;padding:0 12px}
+  .cmprow .v{font-weight:700}
+  .cmprow .v.l{text-align:right}
+  .cmprow .v.win{color:var(--green)}
+
+  .empty{padding:26px;text-align:center;color:var(--faint);font-size:13.5px}
+  .scrim{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:55}
+
+  /* responsive */
+  @media(max-width:1040px){.g-2,.g-3{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}.badges{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:820px){
+    .app{grid-template-columns:1fr}
+    .side{position:fixed;left:0;top:0;z-index:60;transform:translateX(-100%);transition:transform .22s}
+    body.nav-open .side{transform:none}
+    body.nav-open .scrim{display:block}
+    .menu-btn{display:grid}
+    .content{padding:16px 14px 48px}
+    .topbar{padding:12px 16px}
+    table{min-width:560px}
+    .tbl-wrap{overflow-x:auto}
+    .btn{min-height:42px}
+  }
+  @media(max-width:480px){.stats,.badges{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<!-- icon sprite -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="ic-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></symbol>
+  <symbol id="ic-plus" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></symbol>
+  <symbol id="ic-swords" viewBox="0 0 24 24"><path d="M14.5 17.5 3 6V3h3l11.5 11.5"/><path d="m13 19 6-6"/><path d="m16 16 4 4"/><path d="M19.5 17.5 21 19l-2 2-1.5-1.5"/><path d="M9.5 6.5 21 18V21h-3L6.5 9.5"/></symbol>
+  <symbol id="ic-users" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+  <symbol id="ic-bot" viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="12" rx="3"/><path d="M12 8V4M8 4h8"/><circle cx="8.5" cy="14" r="1"/><circle cx="15.5" cy="14" r="1"/></symbol>
+  <symbol id="ic-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></symbol>
+  <symbol id="ic-trophy" viewBox="0 0 24 24"><path d="M6 9a6 6 0 0 0 12 0V4H6z"/><path d="M6 5H3v2a3 3 0 0 0 3 3M18 5h3v2a3 3 0 0 1-3 3M9 21h6M12 15v6"/></symbol>
+  <symbol id="ic-flame" viewBox="0 0 24 24"><path d="M12 3c0 3-4 4-4 8a4 4 0 0 0 8 0c0-1.5-1-2.8-1-2.8S16 12 16 14"/><path d="M12 21a6 6 0 0 0 6-6c0-5-6-12-6-12"/></symbol>
+  <symbol id="ic-bolt" viewBox="0 0 24 24"><polygon points="13 2 4 14 11 14 10 22 20 9 13 9 13 2"/></symbol>
+  <symbol id="ic-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
+  <symbol id="ic-moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></symbol>
+  <symbol id="ic-menu" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></symbol>
+  <symbol id="ic-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></symbol>
+  <symbol id="ic-history" viewBox="0 0 24 24"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/><polyline points="12 7 12 12 15 14"/></symbol>
+  <symbol id="ic-x" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></symbol>
+  <symbol id="ic-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></symbol>
+</svg>
+
+<div class="scrim" id="scrim" onclick="closeNav()"></div>
+
+<div class="app">
+  <!-- SIDEBAR -->
+  <aside class="side" id="side">
+    <a class="brand" href="overview.html">
+      <span class="mark">CC</span>
+      <span>CodeContest<small>by CodeVault</small></span>
+    </a>
+    <nav class="nav" aria-label="Primary">
+      <div class="sec">Compete</div>
+      <a class="active" data-view="dash"><svg class="ico"><use href="#ic-grid"/></svg> Dashboard</a>
+      <a data-view="create"><svg class="ico"><use href="#ic-plus"/></svg> Create Contest</a>
+      <a data-view="live"><svg class="ico"><use href="#ic-swords"/></svg> Live &amp; Rivalry</a>
+      <a data-view="history"><svg class="ico"><use href="#ic-history"/></svg> Contest History</a>
+      <div class="sec">Analyze</div>
+      <a data-view="compare"><svg class="ico"><use href="#ic-users"/></svg> Compare Friend</a>
+      <a data-view="analysis"><svg class="ico"><use href="#ic-trophy"/></svg> Post-contest</a>
+      <a data-view="ai"><svg class="ico"><use href="#ic-bot"/></svg> AI Assistant</a>
+    </nav>
+    <div class="side-foot">
+      <div class="av">G</div>
+      <div class="who"><b>Gaurav</b><span>@gaurav · CodeVault</span></div>
+      <button class="out" title="Sign out"><svg class="ico sm"><use href="#ic-x"/></svg></button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="topbar">
+      <button class="menu-btn" onclick="openNav()" aria-label="Menu"><svg class="ico"><use href="#ic-menu"/></svg></button>
+      <div>
+        <h1 id="pageTitle">Dashboard</h1>
+        <div class="sub" id="pageSub">Your contests at a glance</div>
+      </div>
+      <div class="spacer"></div>
+      <button class="ic-btn" id="themeBtn" onclick="toggleTheme()" title="Toggle theme"><svg class="ico"><use href="#ic-moon" id="themeIcon"/></svg></button>
+      <button class="btn brand" onclick="go('create')"><svg class="ico sm"><use href="#ic-plus"/></svg> New Contest</button>
+    </div>
+
+    <div class="content">
+
+      <!-- ══════════ DASHBOARD ══════════ -->
+      <section class="view on" id="v-dash">
+        <div class="stats">
+          <div class="stat"><div class="l"><svg class="ico sm"><use href="#ic-trophy"/></svg> Contests played</div><div class="n">27</div><div class="d">+3 this week</div></div>
+          <div class="stat"><div class="l"><svg class="ico sm g"><use href="#ic-check"/></svg> Wins</div><div class="n">11</div><div class="d" style="color:var(--green)">41% win rate</div></div>
+          <div class="stat"><div class="l"><svg class="ico sm a"><use href="#ic-bolt"/></svg> Global rank</div><div class="n">#842</div><div class="d">Top 6%</div></div>
+          <div class="stat"><div class="l"><svg class="ico sm r"><use href="#ic-flame"/></svg> Streak</div><div class="n">14</div><div class="d" style="color:var(--rose-d)">days active</div></div>
+        </div>
+
+        <div class="grid g-2">
+          <div class="card">
+            <h3><svg class="ico sm"><use href="#ic-swords"/></svg> Active contest <span class="pill live"><span class="dot"></span> LIVE</span></h3>
+            <div class="desc">Weekend Graph Sprint · CodeVault + LeetCode · 5 problems</div>
+            <div class="row" style="justify-content:space-between">
+              <div><div class="timer" id="dashTimer">00:42:18</div><div class="sub" style="color:var(--faint)">time remaining</div></div>
+              <div style="text-align:right">
+                <div style="font-size:22px;font-weight:800">2<span style="color:var(--faint);font-size:15px">/5 solved</span></div>
+                <div class="pill ok" style="margin-top:6px">Rank #2 of 4</div>
+              </div>
+            </div>
+            <button class="btn brand" style="margin-top:16px;width:100%" onclick="go('live')">Enter contest room →</button>
+          </div>
+
+          <div class="card">
+            <h3><svg class="ico sm"><use href="#ic-trophy"/></svg> Live leaderboard</h3>
+            <div class="desc">Weekend Graph Sprint</div>
+            <div id="dashLb"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3><svg class="ico sm"><use href="#ic-history"/></svg> Recent contests</h3>
+          <div class="tbl-wrap"><table>
+            <thead><tr><th>Contest</th><th>Platform</th><th>Problems</th><th>Your rank</th><th>Result</th></tr></thead>
+            <tbody id="recentRows"></tbody>
+          </table></div>
+        </div>
+      </section>
+
+      <!-- ══════════ CREATE CONTEST ══════════ -->
+      <section class="view" id="v-create">
+        <div class="grid g-2">
+          <div class="card">
+            <h3><svg class="ico sm"><use href="#ic-plus"/></svg> Create a contest</h3>
+            <div class="desc">Set up a friendly contest and invite your friends.</div>
+
+            <div class="field"><label class="fl">Contest name</label><input class="in" id="cName" value="Weekend Graph Sprint"/></div>
+
+            <div class="two">
+              <div class="field"><label class="fl">Platform</label>
+                <select id="cPlat">
+                  <option value="cv">CodeVault (mixed)</option>
+                  <option value="lc">LeetCode</option>
+                  <option value="cf">Codeforces</option>
+                  <option value="cc">CodeChef</option>
+                  <option value="hr">HackerRank</option>
+                </select>
+              </div>
+              <div class="field"><label class="fl">Duration</label>
+                <div class="row" style="gap:8px">
+                  <input class="in" id="cDur" type="number" value="60" min="5" style="flex:1"/>
+                  <select id="cUnit" style="width:110px"><option value="min">minutes</option><option value="hr">hours</option></select>
+                </div>
+              </div>
+            </div>
+
+            <div class="field"><label class="fl">Difficulty filter</label>
+              <div class="seg" id="cDiff">
+                <button class="on" data-d="all">All</button>
+                <button data-d="easy">Easy</button>
+                <button data-d="med">Medium</button>
+                <button data-d="hard">Hard</button>
+              </div>
+            </div>
+
+            <div class="field">
+              <label class="fl">Problems <span class="sub" style="color:var(--faint)">(add 4–6)</span></label>
+              <div id="probList"></div>
+              <button class="btn sm" id="addProbBtn" onclick="addProblem()"><svg class="ico sm"><use href="#ic-plus"/></svg> Add problem from platform</button>
+            </div>
+
+            <div class="field"><label class="fl">Invite friends</label>
+              <div class="chipin" id="inviteBox">
+                <input class="in" id="inviteIn" placeholder="Friend's CodeVault / platform ID + Enter" style="flex:1;min-width:180px" onkeydown="if(event.key==='Enter'){addFriend();event.preventDefault();}"/>
+              </div>
+            </div>
+
+            <button class="btn brand" style="width:100%;margin-top:6px" onclick="startContest()"><svg class="ico sm"><use href="#ic-swords"/></svg> Open lobby &amp; start</button>
+          </div>
+
+          <div class="card">
+            <h3><svg class="ico sm"><use href="#ic-users"/></svg> Contest lobby</h3>
+            <div class="desc">Preview before you start.</div>
+            <div id="lobbyMeta"></div>
+            <div style="margin:14px 0 8px;font-size:12px;font-weight:700;color:var(--faint);text-transform:uppercase;letter-spacing:.04em">Participants</div>
+            <div id="lobbyPeeps"></div>
+
+            <div style="margin-top:16px;padding:12px;border:1px dashed var(--border-2);border-radius:11px">
+              <div class="row" style="justify-content:space-between">
+                <div><div style="font-size:12px;font-weight:700;color:var(--faint)">Shareable invite link</div><div class="mono" id="inviteLink" style="font-size:12px;color:var(--brand-d);margin-top:3px">codevault.dev/cc/gr-8fx2</div></div>
+                <button class="btn sm" onclick="copyLink()"><svg class="ico sm"><use href="#ic-copy"/></svg> <span id="copyTxt">Copy</span></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══════════ LIVE & RIVALRY ══════════ -->
+      <section class="view" id="v-live">
+        <div class="grid g-2">
+          <div class="card">
+            <h3><svg class="ico sm"><use href="#ic-clock"/></svg> Weekend Graph Sprint <span class="pill live"><span class="dot"></span> LIVE</span></h3>
+            <div class="desc">CodeVault + LeetCode · practice mode timer</div>
+            <div class="row" style="justify-content:center;flex-direction:column;gap:6px;text-align:center;padding:8px 0">
+              <div class="timer" id="liveTimer">00:42:18</div>
+              <div class="sub" style="color:var(--faint)">time remaining</div>
+            </div>
+            <div class="row" style="justify-content:center;gap:8px">
+              <button class="btn sm" id="pauseBtn" onclick="toggleTimer()">Pause</button>
+              <button class="btn sm" onclick="resetTimer()">Restart</button>
+            </div>
+          </div>
+          <div class="card">
+            <h3><svg class="ico sm"><use href="#ic-swords"/></svg> Your progress</h3>
+            <div class="desc">2 of 5 problems solved · 240 pts</div>
+            <div id="myProblems"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3><svg class="ico sm"><use href="#ic-trophy"/></svg> Live leaderboard</h3>
+          <div class="desc">Rank · score · progress · completed · time on current problem</div>
+          <div class="tbl-wrap"><table>
+            <thead><tr><th>#</th><th>Participant</th><th>Score</th><th>Progress</th><th>Solved</th><th>Time</th></tr></thead>
+            <tbody id="liveLb"></tbody>
+          </table></div>
+        </div>
+      </section>
+
+      <!-- ══════════ HISTORY ══════════ -->
+      <section class="view" id="v-history">
+        <div class="card">
+          <h3><svg class="ico sm"><use href="#ic-history"/></svg> Recent contests</h3>
+          <div class="desc">Your last 10 contests.</div>
+          <div class="tbl-wrap"><table>
+            <thead><tr><th>Contest</th><th>Date</th><th>Platform</th><th>Players</th><th>Rank</th><th>Result</th></tr></thead>
+            <tbody id="histRows"></tbody>
+          </table></div>
+        </div>
+      </section>
+
+      <!-- ══════════ COMPARE FRIEND ══════════ -->
+      <section class="view" id="v-compare">
+        <div class="card">
+          <h3><svg class="ico sm"><use href="#ic-users"/></svg> Compare with a friend</h3>
+          <div class="desc">Enter a CodeVault ID or any supported platform ID to load and compare their coding data.</div>
+          <div class="row" style="gap:8px;flex-wrap:wrap">
+            <input class="in" id="friendId" placeholder="e.g. @aish or leetcode:aishwarya" style="flex:1;min-width:200px"/>
+            <select id="friendPlat" style="width:150px"><option value="cv">CodeVault</option><option value="lc">LeetCode</option><option value="cf">Codeforces</option><option value="cc">CodeChef</option><option value="hr">HackerRank</option></select>
+            <button class="btn brand" onclick="loadFriend()">Load &amp; compare</button>
+          </div>
+        </div>
+
+        <div class="card" id="cmpCard" style="display:none">
+          <div class="cmprow" style="border-top:none">
+            <div class="who" style="justify-content:flex-end"><b id="meName">Gaurav</b><span class="av" style="background:linear-gradient(135deg,var(--brand),var(--rose))">G</span></div>
+            <div class="lab">vs</div>
+            <div class="who"><span class="av" id="frAv" style="background:linear-gradient(135deg,var(--blue),var(--green))">A</span><b id="frName">Aishwarya</b></div>
+          </div>
+          <div id="cmpRows"></div>
+          <div style="margin-top:18px">
+            <div style="font-size:12px;font-weight:700;color:var(--faint);text-transform:uppercase;letter-spacing:.04em;margin-bottom:10px">Platform performance</div>
+            <div id="cmpChart"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══════════ POST-CONTEST ANALYSIS ══════════ -->
+      <section class="view" id="v-analysis">
+        <div class="card">
+          <h3><svg class="ico sm"><use href="#ic-trophy"/></svg> Post-contest analysis</h3>
+          <div class="desc">Weekend Graph Sprint · 4 participants · 5 problems</div>
+          <div style="font-size:12px;font-weight:700;color:var(--faint);text-transform:uppercase;letter-spacing:.04em;margin:6px 0 10px">Score over time</div>
+          <div id="perfChart"></div>
+        </div>
+
+        <div class="card">
+          <h3><svg class="ico sm"><use href="#ic-bolt"/></svg> Badges awarded</h3>
+          <div class="desc">Fun awards from this contest.</div>
+          <div class="badges">
+            <div class="badge"><div class="hex" style="background:linear-gradient(135deg,var(--brand),var(--brand-d))">⚡</div><div class="bt">Fastest Solve</div><div class="bm">Aishwarya · 3m 12s</div></div>
+            <div class="badge"><div class="hex" style="background:linear-gradient(135deg,var(--amber),var(--amber-d))">📈</div><div class="bt">Most Consistent</div><div class="bm">Gaurav · all ≤ 20m</div></div>
+            <div class="badge"><div class="hex" style="background:linear-gradient(135deg,var(--rose),var(--rose-d))">🔥</div><div class="bt">Best Comeback</div><div class="bm">Rahul · last→2nd</div></div>
+            <div class="badge"><div class="hex" style="background:linear-gradient(135deg,var(--green),#0f7a48)">✨</div><div class="bt">Clean Coder</div><div class="bm">Priya · 0 wrong subs</div></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3><svg class="ico sm"><use href="#ic-users"/></svg> Final standings</h3>
+          <div class="tbl-wrap"><table>
+            <thead><tr><th>#</th><th>Participant</th><th>Score</th><th>Solved</th><th>Accuracy</th><th>Avg time</th></tr></thead>
+            <tbody id="finalRows"></tbody>
+          </table></div>
+        </div>
+      </section>
+
+      <!-- ══════════ AI ASSISTANT ══════════ -->
+      <section class="view" id="v-ai">
+        <div class="grid g-2">
+          <div class="card">
+            <h3><svg class="ico sm"><use href="#ic-bot"/></svg> AI coding assistant</h3>
+            <div class="desc">Get hints and approaches — full solutions only on request.</div>
+            <div class="field"><label class="fl">Problem</label>
+              <select id="aiProb">
+                <option>Number of Islands (Medium · Graphs)</option>
+                <option>Course Schedule (Medium · Topo sort)</option>
+                <option>Word Ladder (Hard · BFS)</option>
+                <option>Two Sum (Easy · Hashing)</option>
+              </select>
+            </div>
+            <div class="field"><label class="fl">Hint level</label>
+              <div class="seg" id="aiLevel">
+                <button class="on" data-l="beginner">Beginner</button>
+                <button data-l="intermediate">Intermediate</button>
+                <button data-l="advanced">Advanced</button>
+              </div>
+            </div>
+            <div class="row" style="flex-wrap:wrap;gap:8px">
+              <button class="btn sm" onclick="aiAsk('explain')">Explain problem</button>
+              <button class="btn sm" onclick="aiAsk('hint')">Give a hint</button>
+              <button class="btn sm" onclick="aiAsk('approach')">Suggest approach</button>
+              <button class="btn sm" onclick="aiAsk('mistake')">Analyze my mistake</button>
+              <button class="btn sm" style="border-color:var(--rose-soft);color:var(--rose-d)" onclick="aiAsk('solution')">Reveal full solution</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3><svg class="ico sm"><use href="#ic-bot"/></svg> Assistant</h3>
+            <div class="desc">Responses are mock samples — ready for real LLM wiring.</div>
+            <div class="chat" id="chat">
+              <div class="msg ai"><div class="lvl">Assistant</div>Pick a problem and a hint level, then tap a button. I'll nudge you toward the idea without spoiling it — unless you ask for the full solution. 🙂</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</div>
+
+<script>
+/* ─────────── mock data ─────────── */
+const AVCOL = ['linear-gradient(135deg,var(--brand),var(--rose))','linear-gradient(135deg,var(--blue),var(--green))','linear-gradient(135deg,var(--amber),var(--brand))','linear-gradient(135deg,var(--green),#0f7a48)'];
+const participants = [
+  {name:'Aishwarya', init:'A', score:340, solved:3, prog:60, time:'4m 02s'},
+  {name:'Gaurav',    init:'G', score:240, solved:2, prog:40, time:'6m 55s', me:true},
+  {name:'Rahul',     init:'R', score:200, solved:2, prog:40, time:'2m 10s'},
+  {name:'Priya',     init:'P', score:120, solved:1, prog:20, time:'8m 40s'},
+];
+const recent = [
+  {n:'Array Warmup', plat:'lc', probs:4, rank:1, res:'win'},
+  {n:'DP Deep Dive', plat:'cf', probs:6, rank:3, res:'lost'},
+  {n:'Weekly Blitz', plat:'cv', probs:5, rank:2, res:'2nd'},
+];
+const history = [
+  {n:'Array Warmup', d:'Jul 20', plat:'lc', players:4, rank:1, res:'win'},
+  {n:'DP Deep Dive', d:'Jul 18', plat:'cf', players:6, rank:3, res:'lost'},
+  {n:'Weekly Blitz', d:'Jul 14', plat:'cv', players:5, rank:2, res:'2nd'},
+  {n:'Greedy Games', d:'Jul 11', plat:'hr', players:3, rank:1, res:'win'},
+  {n:'String Sprint',d:'Jul 07', plat:'cc', players:4, rank:2, res:'2nd'},
+];
+const catalog = [
+  {n:'Number of Islands', d:'med', plat:'lc'},
+  {n:'Course Schedule', d:'med', plat:'lc'},
+  {n:'Two Sum', d:'easy', plat:'lc'},
+  {n:'Dijkstra Shortest Path', d:'hard', plat:'cf'},
+  {n:'Merge Intervals', d:'med', plat:'cv'},
+  {n:'Binary Search Basics', d:'easy', plat:'hr'},
+];
+const platName = {cv:'CodeVault',lc:'LeetCode',cf:'Codeforces',cc:'CodeChef',hr:'HackerRank'};
+const platCls  = {cv:'cv',lc:'lc',cf:'cf',cc:'cc',hr:'hr'};
+const platAbbr = {cv:'CV',lc:'LC',cf:'CF',cc:'CC',hr:'HR'};
+
+/* ─────────── view routing ─────────── */
+const titles = {
+  dash:['Dashboard','Your contests at a glance'],
+  create:['Create Contest','Set up and invite friends'],
+  live:['Live & Rivalry','Compete in real time'],
+  history:['Contest History','Your past contests'],
+  compare:['Compare Friend','Head-to-head stats'],
+  analysis:['Post-contest','Results, badges & graphs'],
+  ai:['AI Assistant','Hints & approaches, not spoilers'],
+};
+function go(v){
+  document.querySelectorAll('.view').forEach(s=>s.classList.remove('on'));
+  document.getElementById('v-'+v).classList.add('on');
+  document.querySelectorAll('.nav a[data-view]').forEach(a=>a.classList.toggle('active',a.dataset.view===v));
+  document.getElementById('pageTitle').textContent = titles[v][0];
+  document.getElementById('pageSub').textContent = titles[v][1];
+  closeNav(); window.scrollTo(0,0);
+}
+document.querySelectorAll('.nav a[data-view]').forEach(a=>a.onclick=()=>go(a.dataset.view));
+
+/* ─────────── theme ─────────── */
+function applyTheme(t){document.documentElement.setAttribute('data-theme',t);document.getElementById('themeIcon').setAttribute('href',t==='dark'?'#ic-sun':'#ic-moon');try{localStorage.setItem('cc-theme',t)}catch(e){}}
+function toggleTheme(){applyTheme(document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark')}
+(function(){let t='light';try{t=localStorage.getItem('cc-theme')|| (matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light')}catch(e){}applyTheme(t)})();
+
+/* ─────────── mobile drawer ─────────── */
+function openNav(){document.body.classList.add('nav-open')}
+function closeNav(){document.body.classList.remove('nav-open')}
+
+/* ─────────── render helpers ─────────── */
+function lbRow(p,i){
+  const medal = i<3?['g1','g2','g3'][i]:'';
+  return `<tr>
+    <td><span class="rank ${medal}">${i+1}</span></td>
+    <td><span class="who"><span class="av" style="background:${AVCOL[i%4]}">${p.init}</span>${p.name}${p.me?' <span class="pill ok" style="margin-left:4px">You</span>':''}</span></td>
+    <td class="mono">${p.score}</td>
+    <td><div class="row"><div class="bar" style="flex:1"><i style="width:${p.prog}%"></i></div><span class="mono" style="font-size:12px;color:var(--faint)">${p.prog}%</span></div></td>
+    <td class="mono">${p.solved}/5</td>
+    <td class="mono" style="color:var(--faint)">${p.time}</td>
+  </tr>`;
+}
+function renderDash(){
+  const sorted=[...participants].sort((a,b)=>b.score-a.score);
+  document.getElementById('dashLb').innerHTML = '<div class="tbl-wrap"><table><tbody>'+sorted.slice(0,4).map((p,i)=>
+    `<tr><td style="width:34px"><span class="rank ${i<3?['g1','g2','g3'][i]:''}">${i+1}</span></td>
+     <td><span class="who"><span class="av" style="background:${AVCOL[i%4]}">${p.init}</span>${p.name}</span></td>
+     <td class="mono" style="text-align:right;color:var(--brand-d);font-weight:700">${p.score}</td></tr>`).join('')+'</tbody></table></div>';
+  document.getElementById('recentRows').innerHTML = recent.map(r=>
+    `<tr><td style="font-weight:600">${r.n}</td>
+     <td><span class="who"><span class="plat ${platCls[r.plat]}">${platAbbr[r.plat]}</span>${platName[r.plat]}</span></td>
+     <td class="mono">${r.probs}</td><td class="mono">#${r.rank}</td>
+     <td>${resPill(r.res)}</td></tr>`).join('');
+}
+function resPill(r){
+  if(r==='win')return '<span class="pill ok">🏆 Win</span>';
+  if(r==='2nd')return '<span class="pill wait">2nd</span>';
+  return '<span class="pill" style="background:var(--paper);color:var(--muted)">'+r+'</span>';
+}
+function renderLive(){
+  const sorted=[...participants].sort((a,b)=>b.score-a.score);
+  document.getElementById('liveLb').innerHTML = sorted.map(lbRow).join('');
+  const mine=['Number of Islands|med|solved','Course Schedule|med|solved','Word Ladder|hard|active','Dijkstra Path|hard|todo','Merge Intervals|med|todo'];
+  document.getElementById('myProblems').innerHTML = mine.map(m=>{const[n,d,s]=m.split('|');
+    const stat = s==='solved'?'<span class="pill ok">Solved</span>':s==='active'?'<span class="pill live"><span class="dot"></span>Solving</span>':'<span class="pill" style="background:var(--paper);color:var(--muted)">To do</span>';
+    return `<div class="pk"><span class="plat lc">LC</span><span class="nm">${n}</span><span class="diff ${d}">${d.toUpperCase()}</span>${stat}</div>`}).join('');
+}
+function renderHistory(){
+  document.getElementById('histRows').innerHTML = history.map(h=>
+    `<tr><td style="font-weight:600">${h.n}</td><td class="mono" style="color:var(--faint)">${h.d}</td>
+     <td><span class="who"><span class="plat ${platCls[h.plat]}">${platAbbr[h.plat]}</span>${platName[h.plat]}</span></td>
+     <td class="mono">${h.players}</td><td class="mono">#${h.rank}</td><td>${resPill(h.res)}</td></tr>`).join('');
+}
+function renderFinal(){
+  const rows=[{n:'Aishwarya',s:340,so:3,acc:'92%',t:'5m'},{n:'Gaurav',s:240,so:2,acc:'88%',t:'7m'},{n:'Rahul',s:200,so:2,acc:'71%',t:'4m'},{n:'Priya',s:120,so:1,acc:'100%',t:'9m'}];
+  document.getElementById('finalRows').innerHTML = rows.map((r,i)=>
+    `<tr><td><span class="rank ${i<3?['g1','g2','g3'][i]:''}">${i+1}</span></td>
+     <td><span class="who"><span class="av" style="background:${AVCOL[i%4]}">${r.n[0]}</span>${r.n}</span></td>
+     <td class="mono">${r.s}</td><td class="mono">${r.so}/5</td><td class="mono">${r.acc}</td><td class="mono" style="color:var(--faint)">${r.t}</td></tr>`).join('');
+}
+
+/* ─────────── create contest ─────────── */
+let probs=[], friends=[{id:'@aishwarya',init:'A'},{id:'@rahul',init:'R'}];
+function renderProbs(){
+  document.getElementById('probList').innerHTML = probs.map((p,i)=>
+    `<div class="pk"><span class="plat ${platCls[p.plat]}">${platAbbr[p.plat]}</span><span class="nm">${p.n}</span><span class="diff ${p.d}">${p.d.toUpperCase()}</span><button class="btn ghost sm" onclick="rmProblem(${i})"><svg class="ico sm"><use href="#ic-x"/></svg></button></div>`).join('')
+    || '<div class="empty" style="padding:14px">No problems yet — add 4 to 6.</div>';
+  document.getElementById('addProbBtn').disabled = probs.length>=6;
+  renderLobby();
+}
+function addProblem(){ if(probs.length>=6)return; const c=catalog[probs.length%catalog.length]; probs.push({...c}); renderProbs(); }
+function rmProblem(i){ probs.splice(i,1); renderProbs(); }
+function addFriend(){ const el=document.getElementById('inviteIn'); const v=el.value.trim(); if(!v)return; friends.push({id:v,init:v.replace('@','')[0].toUpperCase()}); el.value=''; renderFriends(); renderLobby(); }
+function rmFriend(i){ friends.splice(i,1); renderFriends(); renderLobby(); }
+function renderFriends(){
+  const box=document.getElementById('inviteBox');
+  box.querySelectorAll('.fchip').forEach(e=>e.remove());
+  friends.forEach((f,i)=>{const c=document.createElement('span');c.className='fchip';
+    c.innerHTML=`<span class="av" style="width:22px;height:22px;font-size:10px;background:${AVCOL[i%4]}">${f.init}</span>${f.id}<span class="x" onclick="rmFriend(${i})"><svg class="ico sm"><use href="#ic-x"/></svg></span>`;
+    box.insertBefore(c, document.getElementById('inviteIn'));});
+}
+function renderLobby(){
+  const plat=document.getElementById('cPlat').value, dur=document.getElementById('cDur').value, unit=document.getElementById('cUnit').value;
+  document.getElementById('lobbyMeta').innerHTML =
+    `<div class="row" style="gap:8px;flex-wrap:wrap">
+      <span class="pill" style="background:var(--brand-soft);color:var(--brand-d)"><span class="plat ${platCls[plat]}" style="width:16px;height:16px;font-size:8px">${platAbbr[plat]}</span> ${platName[plat]}</span>
+      <span class="pill wait"><svg class="ico sm"><use href="#ic-clock"/></svg> ${dur} ${unit}</span>
+      <span class="pill ok">${probs.length} problems</span>
+    </div>`;
+  const all=[{id:'@gaurav (you)',init:'G'},...friends];
+  document.getElementById('lobbyPeeps').innerHTML = all.map((f,i)=>
+    `<div class="pk"><span class="av" style="background:${AVCOL[i%4]}">${f.init}</span><span class="nm">${f.id}</span><span class="pill ok">Ready</span></div>`).join('');
+}
+function startContest(){ if(probs.length<4){alert('Add at least 4 problems to start.');return;} go('live'); }
+function copyLink(){ const t=document.getElementById('inviteLink').textContent; navigator.clipboard?.writeText('https://'+t).catch(()=>{}); const c=document.getElementById('copyTxt'); c.textContent='Copied!'; setTimeout(()=>c.textContent='Copy',1500); }
+['cPlat','cDur','cUnit'].forEach(id=>document.getElementById(id).addEventListener('input',renderLobby));
+document.querySelectorAll('#cDiff button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#cDiff button').forEach(x=>x.classList.remove('on'));b.classList.add('on')});
+
+/* ─────────── compare friend ─────────── */
+function loadFriend(){
+  const name=(document.getElementById('friendId').value.trim()||'Aishwarya').replace(/^@/,'').replace(/^.*:/,'');
+  const disp=name.charAt(0).toUpperCase()+name.slice(1);
+  document.getElementById('frName').textContent=disp;
+  document.getElementById('frAv').textContent=disp[0].toUpperCase();
+  const me={solved:1248,diff:'42/560/148',rating:1720,streak:14,contests:27,acc:'86%'};
+  const fr={solved:1360,diff:'55/610/95', rating:1810,streak:9, contests:31,acc:'82%'};
+  const rows=[
+    ['Problems solved', me.solved, fr.solved, 'num'],
+    ['Difficulty (E/M/H)', me.diff, fr.diff, 'txt'],
+    ['Rating (UCPR)', me.rating, fr.rating, 'num'],
+    ['Current streak', me.streak+'d', fr.streak+'d', 'num'],
+    ['Contests played', me.contests, fr.contests, 'num'],
+    ['Accuracy', me.acc, fr.acc, 'pct'],
+  ];
+  const parse=v=>parseFloat(String(v));
+  document.getElementById('cmpRows').innerHTML = rows.map(([lab,a,b,type])=>{
+    let aw='',bw='';
+    if(type!=='txt'){ if(parse(a)>parse(b))aw='win'; else if(parse(b)>parse(a))bw='win'; }
+    return `<div class="cmprow"><div class="v l ${aw}">${a}</div><div class="lab">${lab}</div><div class="v ${bw}">${b}</div></div>`;
+  }).join('');
+  document.getElementById('cmpChart').innerHTML = barCompare(
+    [['LeetCode',612,680],['Codeforces',341,410],['CodeChef',184,150],['HackerRank',111,120]]
+  );
+  document.getElementById('cmpCard').style.display='block';
+}
+function barCompare(data){
+  const max=Math.max(...data.flatMap(d=>[d[1],d[2]]));
+  return '<div style="display:flex;flex-direction:column;gap:12px">'+data.map(([lab,a,b])=>`
+    <div><div class="row" style="justify-content:space-between;font-size:12px;margin-bottom:5px"><span style="font-weight:600">${lab}</span><span class="mono" style="color:var(--faint)">${a} vs ${b}</span></div>
+    <div class="row" style="gap:6px"><div class="bar" style="flex:1"><i style="width:${a/max*100}%;background:var(--brand)"></i></div>
+    <div class="bar" style="flex:1"><i style="width:${b/max*100}%;background:var(--blue)"></i></div></div></div>`).join('')+
+    '<div class="row" style="gap:16px;font-size:12px;margin-top:4px"><span class="row" style="gap:6px"><span style="width:12px;height:8px;border-radius:3px;background:var(--brand);display:inline-block"></span>You</span><span class="row" style="gap:6px"><span style="width:12px;height:8px;border-radius:3px;background:var(--blue);display:inline-block"></span>Friend</span></div></div>';
+}
+
+/* ─────────── performance line chart (SVG) ─────────── */
+function lineChart(series){
+  const W=560,H=200,pad=28,max=400;
+  const x=i=>pad+i*((W-pad*2)/(series[0].pts.length-1));
+  const y=v=>H-pad-(v/max)*(H-pad*2);
+  const colors=['var(--brand)','var(--blue)','var(--amber)','var(--green)'];
+  let g='';
+  for(let v=0;v<=max;v+=100){g+=`<line x1="${pad}" y1="${y(v)}" x2="${W-pad}" y2="${y(v)}" stroke="var(--border)" stroke-width="1"/><text x="4" y="${y(v)+3}" font-size="9" fill="var(--faint)">${v}</text>`;}
+  series.forEach((s,si)=>{
+    const pl=s.pts.map((p,i)=>`${x(i)},${y(p)}`).join(' ');
+    g+=`<polyline points="${pl}" fill="none" stroke="${colors[si]}" stroke-width="2.5" stroke-linejoin="round"/>`;
+    g+=s.pts.map((p,i)=>`<circle cx="${x(i)}" cy="${y(p)}" r="3" fill="${colors[si]}"/>`).join('');
+  });
+  const leg=series.map((s,i)=>`<span class="row" style="gap:6px;font-size:12px"><span style="width:12px;height:3px;border-radius:2px;background:${colors[i]};display:inline-block"></span>${s.name}</span>`).join('');
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto">${g}</svg><div class="row" style="gap:16px;flex-wrap:wrap;margin-top:8px">${leg}</div>`;
+}
+function renderPerf(){
+  document.getElementById('perfChart').innerHTML = lineChart([
+    {name:'Aishwarya',pts:[0,120,120,240,340]},
+    {name:'Gaurav',   pts:[0,100,180,180,240]},
+    {name:'Rahul',    pts:[0,0,100,200,200]},
+    {name:'Priya',    pts:[0,0,0,120,120]},
+  ]);
+}
+
+/* ─────────── AI assistant (mock) ─────────── */
+const HINTS = {
+  explain:{beginner:"This asks you to count separate groups of connected '1' cells in a grid. Think of each group as one island — cells touching up/down/left/right belong together.",
+    intermediate:"You're counting connected components in a 2D grid graph. Each land cell is a node; edges connect 4-directional land neighbours.",
+    advanced:"Connected-components over an implicit grid graph. Cost is O(R·C); the interesting part is the traversal choice and in-place visited marking."},
+  hint:{beginner:"Try scanning every cell. When you find land you haven't visited, that's a new island — then 'flood' outward to mark the rest.",
+    intermediate:"Iterate cells; on unvisited land, start a DFS/BFS that sinks the whole island (mark visited), and increment your count once.",
+    advanced:"Sink-the-island: mutate the grid to '0' as you visit to avoid a separate visited array. Watch recursion depth on huge grids — prefer an explicit stack/BFS."},
+  approach:{beginner:"1) Loop over cells. 2) If it's land, add 1 to your answer. 3) Turn that island and all its neighbours into water so you don't count them again.",
+    intermediate:"For each cell: if land, count++ and run flood-fill (DFS/BFS) marking connected land as visited. Return count.",
+    advanced:"Options: DFS (simple, stack risk), BFS (safe depth), or Union-Find (good if the grid streams / you need dynamic connectivity). Complexity O(R·C) either way."},
+  mistake:{beginner:"A common slip: counting the same island twice. Make sure you mark every connected land cell as visited before moving on.",
+    intermediate:"Check your bounds and that you only move in 4 directions (not diagonals, unless asked). Off-by-one on row/col limits is the usual bug.",
+    advanced:"If it TLE'd: you may be re-scanning visited cells or using recursion that stack-overflows. Convert to iterative BFS and mark visited on enqueue, not dequeue."},
+  solution:null,
+};
+let aiLevel='beginner';
+document.querySelectorAll('#aiLevel button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#aiLevel button').forEach(x=>x.classList.remove('on'));b.classList.add('on');aiLevel=b.dataset.l});
+function chatPush(html,cls,label){const c=document.getElementById('chat');const d=document.createElement('div');d.className='msg '+cls;d.innerHTML=(label?`<div class="lvl">${label}</div>`:'')+html;c.appendChild(d);c.scrollTop=c.scrollHeight;}
+function aiAsk(kind){
+  const prob=document.getElementById('aiProb').value.split(' (')[0];
+  const qlabel={explain:'Explain',hint:'Hint',approach:'Approach',mistake:'Analyze mistake',solution:'Full solution'}[kind];
+  chatPush(`${qlabel} · <b>${prob}</b> · <i>${aiLevel}</i>`,'me');
+  setTimeout(()=>{
+    if(kind==='solution'){
+      chatPush(`Here's the full approach for <b>${prob}</b> (you asked, so here it is): iterate the grid; on unvisited land, BFS/DFS to sink the whole island and add 1 to the count. Time O(R·C), space O(min(R,C)) for BFS. Want the code in Python or C++?`,'ai','Full solution');
+    } else {
+      chatPush(HINTS[kind][aiLevel],'ai',aiLevel+' · '+qlabel);
+    }
+  },250);
+}
+
+/* ─────────── practice-mode timer ─────────── */
+let secs=42*60+18, running=true, tid=null;
+function fmt(s){const h=String(Math.floor(s/3600)).padStart(2,'0'),m=String(Math.floor(s%3600/60)).padStart(2,'0'),x=String(s%60).padStart(2,'0');return `${h}:${m}:${x}`;}
+function paintTimer(){const t=fmt(secs);['liveTimer','dashTimer'].forEach(id=>{const el=document.getElementById(id);if(el){el.textContent=t;el.classList.toggle('low',secs<300);}});}
+function tick(){if(running&&secs>0){secs--;paintTimer();}}
+function toggleTimer(){running=!running;document.getElementById('pauseBtn').textContent=running?'Pause':'Resume';}
+function resetTimer(){secs=42*60+18;running=true;document.getElementById('pauseBtn').textContent='Pause';paintTimer();}
+
+/* ─────────── init ─────────── */
+addProblem();addProblem();addProblem();addProblem();
+renderFriends();renderDash();renderLive();renderHistory();renderFinal();renderPerf();
+paintTimer(); tid=setInterval(tick,1000);
+</script>
+</body>
+</html>
