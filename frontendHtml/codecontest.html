@@ -403,9 +403,10 @@
         <div class="card room-top">
           <div>
             <h3 style="margin:0"><svg class="ico sm"><use href="#ic-clock"/></svg> Weekend Graph Sprint <span class="pill live"><span class="dot"></span> LIVE</span></h3>
-            <div class="sub" style="color:var(--faint)">Solve the pasted problems right here · discuss in chat</div>
+            <div class="sub" style="color:var(--faint)">🔒 Everything stays in CodeVault during the contest — no leaving to the source site</div>
           </div>
-          <div class="row" style="gap:10px">
+          <div class="row" style="gap:10px;flex-wrap:wrap">
+            <span class="pill ok" id="integrity" title="Focus integrity — tab switches are detected">🛡️ Focus OK</span>
             <div style="text-align:right"><div class="timer" id="liveTimer" style="font-size:26px">00:42:18</div><div class="sub" style="color:var(--faint)">time left</div></div>
             <button class="btn sm" id="pauseBtn" onclick="toggleTimer()">Pause</button>
             <button class="btn sm" onclick="resetTimer()">Restart</button>
