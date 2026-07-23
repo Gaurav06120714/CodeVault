@@ -1,0 +1,31 @@
+name: Keep-alive (prevent Render cold starts)
+
+# Pings the services on a schedule so Render's free tier doesn't spin them down
+# (which is what causes the "Authentication Failed / Upstream unavailable" on the
+# first login after idle). Also runnable on demand.
+#
+# ⚠️ Free-tier note: Render free web services share ~750 instance-hours/month.
+# Keeping all three awake 24/7 (~2,190 hrs) will exceed that. To stay within the
+# budget, either (a) ping only the backend, or (b) restrict the cron to your
+# active hours (e.g. "*/12 8-23 * * *"). Adjust the schedule/targets below.
+on:
+  schedule:
+    - cron: "*/12 * * * *" # every 12 minutes
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Warm the services
+        run: |
+          # Backend health is what login needs warm; give cold boots up to 60s.
+          curl -sS -m 60 -o /dev/null -w "backend:  %{http_code} (%{time_total}s)\n" \
+            https://codevault-backend-ig6c.onrender.com/api/health || true
+          curl -sS -m 60 -o /dev/null -w "git:      %{http_code} (%{time_total}s)\n" \
+            https://codevault-git-ig6c.onrender.com/health || true
+          curl -sS -m 60 -o /dev/null -w "frontend: %{http_code} (%{time_total}s)\n" \
+            https://codevault-ig6c.onrender.com/ || true
