@@ -106,11 +106,7 @@ export default function AppLayout({
             <svg className="ico"><use href="#ic-profile"/></svg>
             Public profile
           </Link>
-          <Link href="/messages" className={pathname === "/messages" ? "active" : ""}>
-            <svg className="ico"><use href="#ic-mail"/></svg>
-            Messages
-            <MessagesBadge />
-          </Link>
+
           <Link href="/sync-status" className={pathname === "/sync-status" ? "active" : ""}>
             <svg className="ico"><use href="#ic-sync"/></svg>
             Sync status
@@ -168,6 +164,10 @@ export default function AppLayout({
                 <button className="ic-btn" title="Refresh" onClick={() => window.location.reload()}>
                   <svg className="ico"><use href="#ic-sync"/></svg>
                 </button>
+                <Link href="/messages" className="ic-btn" title="Messages" style={{ position: "relative" }}>
+                  <svg className="ico"><use href="#ic-mail"/></svg>
+                  <MessagesBadge topbar />
+                </Link>
                 <NotificationBell />
               </>
             );
