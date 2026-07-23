@@ -1,6 +1,7 @@
 import axios from 'axios';
 import logger from '../../lib/logger';
 import { redis } from '../../lib/redis';
+import { mapLimit } from '../../utils/concurrency';
 
 // CodeChef exposes no public API, so we scrape the public profile page
 // (https://www.codechef.com/users/<username>). The page embeds:
@@ -90,7 +91,7 @@ export class CodeChefService {
           recent = recent.slice(0, 15);
 
           // Fetch tags for each problem concurrently
-          await Promise.all(recent.map(async (sub) => {
+          await mapLimit(recent, 4, async (sub) => {
             const cacheKey = `tag_cache:codechef:${sub.titleSlug}`;
             let tags: string[] | null = null;
             
@@ -137,7 +138,7 @@ export class CodeChefService {
             }
             
             sub.tags = tags || [];
-          }));
+          });
         }
       } catch (e) {
         logger.warn({ username }, 'Failed to fetch CodeChef recent submissions');

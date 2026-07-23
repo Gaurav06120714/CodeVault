@@ -1,6 +1,7 @@
 import axios from 'axios';
 import logger from '../../lib/logger';
 import { redis } from '../../lib/redis';
+import { mapLimit } from '../../utils/concurrency';
 
 export class HackerRankService {
   static async getStats(username: string) {
@@ -51,7 +52,7 @@ export class HackerRankService {
       }
 
       // Fetch tags for each problem concurrently
-      await Promise.all(recent.map(async (sub) => {
+      await mapLimit(recent, 4, async (sub) => {
         const cacheKey = `tag_cache:hackerrank:${sub.titleSlug}`;
         let tags: string[] | null = null;
 
@@ -93,7 +94,7 @@ export class HackerRankService {
         }
 
         sub.tags = tags || [];
-      }));
+      });
 
       const topics: Record<string, number> = {};
       const heatmap: Record<string, number> = {};

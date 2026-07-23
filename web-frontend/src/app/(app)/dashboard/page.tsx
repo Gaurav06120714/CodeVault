@@ -119,16 +119,11 @@ export default function DashboardPage() {
           
           // Heatmap
           if (p.heatmap) {
-            console.log(`[Heatmap Debug] Platform ${pKey} raw heatmap:`, p.heatmap);
-            console.log(`[Heatmap Debug] Platform ${pKey} typeof:`, typeof p.heatmap);
             const pHeatmap = typeof p.heatmap === 'string' ? JSON.parse(p.heatmap) : p.heatmap;
-            console.log(`[Heatmap Debug] Platform ${pKey} parsed:`, pHeatmap);
-            
             Object.entries(pHeatmap).forEach(([ts, count]) => {
               const dateStr = new Date(parseInt(ts) * 1000).toISOString().split('T')[0];
               mergedHeatmap[dateStr] = (mergedHeatmap[dateStr] || 0) + (count as number);
             });
-            console.log(`[Heatmap Debug] Platform ${pKey} merged size:`, Object.keys(mergedHeatmap).length);
           }
           
           // Recent
