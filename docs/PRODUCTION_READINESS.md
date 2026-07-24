@@ -113,7 +113,7 @@ docker compose -f docker-compose.prod.yml ps
 - [ ] Delete duplicate `codevault` frontend service
 - [ ] Automated Postgres backups + a tested restore
 - [ ] Back up `ENCRYPTION_KEY` and `JWT_SECRET` outside the host
-- [ ] `healthCheckPath` set (`/api/health` backend, `/health` git-service)
+- [x] `healthCheckPath` set (`/api/health` backend, `/health` git-service)
 - [ ] Uptime monitor + alerts (e.g. UptimeRobot / BetterStack)
 
 **Application**
@@ -131,7 +131,7 @@ docker compose -f docker-compose.prod.yml ps
 **Security (already scaffolded in `security/`)**
 - [ ] Helmet + CORS locked to the production origin
 - [ ] Secure, HttpOnly, SameSite cookies over HTTPS only
-- [ ] Run the CI SAST (CodeQL) + `npm audit` gates on every deploy
+- [x] Run the CI SAST (CodeQL) + `npm audit` gates on every deploy
 
 ---
 
