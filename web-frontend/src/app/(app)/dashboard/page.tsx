@@ -18,9 +18,8 @@ export default function DashboardPage() {
   const [user, setUser] = useState<{ id: string; githubLogin: string; displayName: string | null } | null>(null);
   const [stats, setStats] = useState<any>(null);
   const [statsError, setStatsError] = useState(false);
-  const [heatmapCells, setHeatmapCells] = useState<string[]>([]);
   const [platformHeatmaps, setPlatformHeatmaps] = useState<Record<string, string[]>>({});
-  const [activeHeatTab, setActiveHeatTab] = useState<string>("all");
+  const [activeHeatTab, setActiveHeatTab] = useState<string>("");
   const [recentSubs, setRecentSubs] = useState<any[]>([]);
 
   const [isLoading, setIsLoading] = useState(true);
@@ -141,25 +140,6 @@ export default function DashboardPage() {
           }
         });
 
-        // Manual fallback: also count problems captured by the extension (git-service),
-        // so platforms whose stats API returns no calendar still show activity on the map.
-        try {
-          const GIT_URL = process.env.NEXT_PUBLIC_GIT_SERVICE_URL || (process.env.NODE_ENV === 'production' ? '/gitapi' : 'http://localhost:5050/api');
-          const pRes = await fetch(`${GIT_URL}/problems?limit=100`, {
-            credentials: 'include',
-          });
-          if (pRes.ok) {
-            const pData = await pRes.json();
-            (pData?.items || []).forEach((it: any) => {
-              if (!it?.solvedAt) return;
-              const dateStr = new Date(it.solvedAt).toISOString().split('T')[0];
-              mergedHeatmap[dateStr] = (mergedHeatmap[dateStr] || 0) + 1;
-            });
-          }
-        } catch {
-          /* git-service optional — heatmap still works from stats alone */
-        }
-
         // Helper: generate 365 cells from a date→count map
         const buildCells = (hmap: Record<string, number>): string[] => {
           const cells: string[] = [];
@@ -182,15 +162,18 @@ export default function DashboardPage() {
           return cells;
         };
 
-        // Build merged heatmap cells
-        setHeatmapCells(buildCells(mergedHeatmap));
-
         // Build per-platform heatmap cells
         const perPlatCells: Record<string, string[]> = {};
         Object.keys(perPlatformHeatmapData).forEach((pKey) => {
           perPlatCells[pKey] = buildCells(perPlatformHeatmapData[pKey]);
         });
         setPlatformHeatmaps(perPlatCells);
+        
+        // Default to first available platform
+        const firstAvailable = PLATFORM_ORDER.find(pid => perPlatCells[pid]);
+        if (firstAvailable) {
+          setActiveHeatTab(firstAvailable);
+        }
         
         // Sort recent
         allRecent.sort((a, b) => b.timestamp - a.timestamp);
@@ -378,14 +361,6 @@ export default function DashboardPage() {
           {/* Platform tabs */}
           {Object.keys(platformHeatmaps).length > 0 && (
             <div className="heat-tabs">
-              <button
-                type="button"
-                className={`heat-tab ${activeHeatTab === "all" ? "active" : ""}`}
-                onClick={() => setActiveHeatTab("all")}
-              >
-                <span className="tab-dot" style={{ background: "linear-gradient(135deg, #f1543f, #e0457b)" }} />
-                All Platforms
-              </button>
               {PLATFORM_ORDER.filter(pid => platformHeatmaps[pid]).map(pid => {
                 const config = PLATFORMS[pid];
                 if (!config) return null;
@@ -404,23 +379,22 @@ export default function DashboardPage() {
             </div>
           )}
 
-          {(() => {
-            const activeCells = activeHeatTab === "all" ? heatmapCells : (platformHeatmaps[activeHeatTab] || []);
-            const heatClass = activeHeatTab === "all" ? "heat" : `heat heat-${PLATFORMS[activeHeatTab]?.iconClass || ""}`;
+          {activeHeatTab && platformHeatmaps[activeHeatTab] && (() => {
+            const activeCells = platformHeatmaps[activeHeatTab];
+            const heatClass = `heat heat-${PLATFORMS[activeHeatTab]?.iconClass || ""}`;
 
             // Color scales for the legend per platform
             const legendColors: Record<string, string[]> = {
-              all:        ["#efe7df", "#fbd6c6", "#f5a888", "#f0764f", "#d8431f"],
               leetcode:   ["#efe7df", "#ffe4b5", "#ffc14d", "#ffa116", "#d48400"],
               codeforces: ["#efe7df", "#b8ddf5", "#6cb8e6", "#1f8acb", "#14608e"],
               codechef:   ["#efe7df", "#d9c4ac", "#b89070", "#7a5230", "#5a3a1e"],
               hackerrank: ["#efe7df", "#a8e6c3", "#4fcf8a", "#1aa260", "#117a44"],
             };
-            const colors = legendColors[activeHeatTab] || legendColors.all;
+            const colors = legendColors[activeHeatTab] || ["#efe7df", "#fbd6c6", "#f5a888", "#f0764f", "#d8431f"];
 
             return (
               <>
-                <div className={heatClass} role="img" aria-label={`Submission heatmap – ${activeHeatTab === "all" ? "all platforms" : PLATFORMS[activeHeatTab]?.name}`} aria-hidden="true">
+                <div className={heatClass} role="img" aria-label={`Submission heatmap – ${PLATFORMS[activeHeatTab]?.name}`} aria-hidden="true">
                   {activeCells.map((cls, i) => (
                     <i key={i} className={cls || undefined}></i>
                   ))}

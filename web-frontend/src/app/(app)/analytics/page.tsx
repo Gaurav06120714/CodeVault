@@ -95,8 +95,18 @@ export default function AnalyticsPage() {
   // --- MERGE DEEP DATA (only for the active platform(s)) ---
   const mergedLanguages: Record<string, number> = {};
   const mergedTopics: Record<string, number> = {};
+  const mergedHeatmap: Record<string, number> = {};
 
   activeKeys.map((k) => stats.platforms[k]).forEach((p: any) => {
+    // Merge Heatmap
+    if (p.heatmap) {
+      const pHeatmap = typeof p.heatmap === 'string' ? JSON.parse(p.heatmap) : p.heatmap;
+      Object.entries(pHeatmap).forEach(([ts, count]) => {
+        const dateStr = new Date(parseInt(ts) * 1000).toISOString().split('T')[0];
+        mergedHeatmap[dateStr] = (mergedHeatmap[dateStr] || 0) + (count as number);
+      });
+    }
+
     // Merge Languages
     if (p.languages) {
       if (Array.isArray(p.languages)) { // LeetCode format: [{ languageName, problemsSolved }]
@@ -127,8 +137,31 @@ export default function AnalyticsPage() {
         });
       }
     }
-    
   });
+
+  // Helper: generate 365 cells from a date→count map
+  const buildCells = (hmap: Record<string, number>): string[] => {
+    const cells: string[] = [];
+    const today = new Date();
+    for (let i = 364; i >= 0; i--) {
+      const d = new Date(today);
+      d.setDate(today.getDate() - i);
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      const dStrLocal = `${year}-${month}-${day}`;
+      const dStrUtc = d.toISOString().split('T')[0];
+      const count = hmap[dStrUtc] || hmap[dStrLocal] || 0;
+      if (count >= 5) cells.push("l4");
+      else if (count >= 3) cells.push("l3");
+      else if (count >= 2) cells.push("l2");
+      else if (count >= 1) cells.push("l1");
+      else cells.push("");
+    }
+    return cells;
+  };
+
+  const activeCells = buildCells(mergedHeatmap);
 
   // Per-platform monthly submission bars (one chart per active platform).
   const perPlatformMonthly = activeKeys.map((k) => ({
@@ -205,6 +238,38 @@ export default function AnalyticsPage() {
             <div className="d pink">Peak {cfPeak.toLocaleString()}</div>
           </div>
         )}
+      </section>
+
+      <section className="panel" style={{ marginBottom: 16 }}>
+        <h2 className="h">
+          Submission activity <span className="tag">last 12 months</span>
+        </h2>
+        {(() => {
+          const legendColors: Record<string, string[]> = {
+            all:        ["#efe7df", "#fbd6c6", "#f5a888", "#f0764f", "#d8431f"],
+            leetcode:   ["#efe7df", "#ffe4b5", "#ffc14d", "#ffa116", "#d48400"],
+            codeforces: ["#efe7df", "#b8ddf5", "#6cb8e6", "#1f8acb", "#14608e"],
+            codechef:   ["#efe7df", "#d9c4ac", "#b89070", "#7a5230", "#5a3a1e"],
+            hackerrank: ["#efe7df", "#a8e6c3", "#4fcf8a", "#1aa260", "#117a44"],
+          };
+          const colors = legendColors[activePlatform] || legendColors.all;
+          const heatClass = activePlatform === "all" ? "heat" : `heat heat-${activePlatform}`;
+
+          return (
+            <>
+              <div className={heatClass} role="img" aria-label="Submission heatmap" aria-hidden="true">
+                {activeCells.map((cls, i) => (
+                  <i key={i} className={cls || undefined}></i>
+                ))}
+              </div>
+              <div className="heat-legend">
+                Less {colors.map((c, i) => (
+                  <i key={i} style={{ background: c }}></i>
+                ))} More
+              </div>
+            </>
+          );
+        })()}
       </section>
 
       <div className="grid g-2">
