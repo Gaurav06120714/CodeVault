@@ -214,7 +214,7 @@ svg.ico.sm{width:14px;height:14px}
 .sw.e{background:var(--green)}.sw.m{background:var(--amber)}.sw.h{background:var(--brand)}
 
 /* Heatmap */
-.heat{display:grid;grid-auto-flow:column;grid-template-rows:repeat(7,1fr);gap:3px}
+.heat{display:grid;grid-auto-flow:column;grid-template-rows:repeat(7,11px);grid-auto-columns:11px;gap:3px;justify-content:center;overflow-x:auto;padding-bottom:8px}
 .heat i{width:11px;height:11px;border-radius:3px;background:#efe7df}
 .heat i.l1{background:#fbd6c6}.heat i.l2{background:#f5a888}.heat i.l3{background:#f0764f}.heat i.l4{background:#d8431f}
 .heat-legend{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--faint);margin-top:12px;justify-content:flex-end}
