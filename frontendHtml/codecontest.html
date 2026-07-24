@@ -421,7 +421,7 @@
           <div class="card">
             <div class="row" style="justify-content:space-between;flex-wrap:wrap;gap:8px">
               <h3 style="margin:0"><span class="plat lc" id="curPlat">LC</span> <span id="curTitle">Number of Islands</span> <span class="diff med" id="curDiff">MEDIUM</span></h3>
-              <a class="btn ghost sm" id="curSrc" href="#" target="_blank" rel="noopener">source ↗</a>
+              <span class="pill" id="curSrc" style="background:var(--paper);color:var(--muted)" title="Source link is disabled while the contest is live">🔒 In-app only</span>
             </div>
             <div class="stmt" id="stmt"></div>
 
@@ -446,8 +446,9 @@
             <div class="card" style="display:flex;flex-direction:column">
               <h3><svg class="ico sm"><use href="#ic-users"/></svg> Live chat</h3>
               <div class="chat room-chat" id="roomChat"></div>
+              <div id="chatErr" class="sub" style="color:var(--rose-d);margin-top:8px;display:none">🛡️ Blocked — that looks like full code. Sharing solutions is disabled during a live contest.</div>
               <div class="row" style="gap:8px;margin-top:10px">
-                <input class="in" id="chatIn" placeholder="Message your friends…" style="flex:1" onkeydown="if(event.key==='Enter'){sendChat();event.preventDefault();}"/>
+                <input class="in" id="chatIn" placeholder="Message your friends… (hints ok, full code blocked)" style="flex:1" onkeydown="if(event.key==='Enter'){sendChat();event.preventDefault();}"/>
                 <button class="btn brand sm" onclick="sendChat()">Send</button>
               </div>
             </div>
@@ -623,6 +624,7 @@ function go(v){
   document.querySelectorAll('.ctabs a[data-view]').forEach(a=>a.classList.toggle('active',a.dataset.view===v));
   document.getElementById('pageTitle').textContent = titles[v][0];
   document.getElementById('pageSub').textContent = titles[v][1];
+  liveActive = (v==='live'); if(liveActive && typeof updateIntegrity==='function') updateIntegrity();
   closeNav(); window.scrollTo(0,0);
 }
 document.querySelectorAll('.ctabs a[data-view]').forEach(a=>a.onclick=()=>go(a.dataset.view));
@@ -678,7 +680,7 @@ function renderLive(){
     document.getElementById('curPlat').textContent = platAbbr[p.plat];
     document.getElementById('curTitle').textContent = p.n;
     const dl=document.getElementById('curDiff'); dl.className='diff '+p.d; dl.textContent=p.d.toUpperCase();
-    document.getElementById('curSrc').href = p.url || '#';
+    document.getElementById('curSrc').title = p.url ? ('Source: '+p.url+' — opens only after the contest') : 'In-app only';
     document.getElementById('stmt').innerHTML = p.stmt || defaultStmt(p.n);
   }
   // room leaderboard (compact list)
@@ -714,8 +716,49 @@ function roomHint(){
 /* live chat */
 let roomChat=[{who:'ai',label:'Assistant',text:'Contest started! Discuss here — but no pasting full solutions during the live round 😉'},{who:'them',label:'Aishwarya',text:'bit stuck on Q3, is it BFS?'}];
 function roomMsg(who,label,text){ roomChat.push({who,label,text}); paintChat(); }
-function sendChat(){ const el=document.getElementById('chatIn'); const v=el.value.trim(); if(!v)return; roomChat.push({who:'me',label:'Gaurav',text:v}); el.value=''; paintChat();
-  setTimeout(()=>roomMsg('them','Rahul',['nice!','lol same','+1','try a hashmap','gg'][Math.floor(Math.random()*5)]),700); }
+/* AI/LLM guard: block full-code messages in the live chat (hints/discussion ok) */
+function looksLikeCode(t){
+  const codey=/(def\s|class\s|public\s|private\s|void\s|int\s|for\s*\(|while\s*\(|if\s*\(|=>|System\.out|cout\s*<<|printf|print\(|console\.log|return\s|#include|import\s|function\s)/;
+  const braces=/[{};]/.test(t);
+  const lines=t.split('\n');
+  return (lines.length>=3 && codey.test(t)) || (codey.test(t) && braces && t.length>40) || /```/.test(t);
+}
+function sendChat(){
+  const el=document.getElementById('chatIn'); const err=document.getElementById('chatErr');
+  const v=el.value.trim(); if(!v)return;
+  if(looksLikeCode(v)){
+    err.style.display='block';
+    roomMsg('ai','🛡️ AI integrity','I blocked a message that looked like a full solution. During a live contest you can share hints and discuss ideas — full code unlocks after the round.');
+    el.value='';
+    return;
+  }
+  err.style.display='none';
+  roomChat.push({who:'me',label:'Gaurav',text:v}); el.value=''; paintChat();
+  setTimeout(()=>roomMsg('them','Rahul',['nice!','lol same','+1','try a hashmap','gg'][Math.floor(Math.random()*5)]),700);
+}
+
+/* Anti-cheat: detect leaving the contest tab → warn, then penalize the score */
+let liveActive=false, tabSwitches=0, focusPenalty=0;
+function updateIntegrity(){
+  const el=document.getElementById('integrity'); if(!el)return;
+  if(tabSwitches===0){ el.className='pill ok'; el.textContent='🛡️ Focus OK'; }
+  else if(tabSwitches<2){ el.className='pill wait'; el.textContent=`⚠️ ${tabSwitches} tab switch`; }
+  else { el.className='pill live'; el.innerHTML=`<span class="dot"></span>⚠️ ${tabSwitches} switches · −${focusPenalty}`; }
+}
+function onTabAway(){
+  if(!liveActive) return;
+  tabSwitches++;
+  if(tabSwitches===1){
+    roomMsg('ai','⚠️ Focus warning','You left the contest tab. Problems stay inside CodeVault during a live round — please don’t switch to other sites. Next time costs points.');
+  } else {
+    focusPenalty+=25;
+    const me=participants.find(p=>p.me); if(me){ me.score=Math.max(0,me.score-25); }
+    roomMsg('ai','⛔ Penalty',`Tab switch #${tabSwitches} detected — 25 points deducted (total −${focusPenalty}). Keep solving in CodeVault.`);
+    renderLive(); renderDash();
+  }
+  updateIntegrity();
+}
+document.addEventListener('visibilitychange',()=>{ if(document.hidden) onTabAway(); });
 function paintChat(){
   const c=document.getElementById('roomChat');
   c.innerHTML = roomChat.map(m=>{

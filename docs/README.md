@@ -24,6 +24,7 @@
 | [TEAM_PLAN.md](TEAM_PLAN.md) | Ownership split (Aishwarya ↔ Gaurav) and git workflow. |
 | [TECH_STACK.md](TECH_STACK.md) | Canonical stack + versions and upgrade rationale. |
 | [MOBILE_APP.md](MOBILE_APP.md) | **Mobile app (Expo Go)** — feature parity, auth, layout, and how to run it. |
+| [CONTEST_LIVE_AI_ROADMAP.md](CONTEST_LIVE_AI_ROADMAP.md) | **CodeContest** — paste-link contests solved in-app, live rooms + chat, AI hints, anti-cheat, and the own-LLM plan (with checklist). |
 | [FAQ.md](FAQ.md) | Common questions about the product and approach. |
 
 ## 🏗 Architecture & build plans

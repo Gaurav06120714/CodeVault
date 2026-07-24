@@ -42,3 +42,16 @@ This document outlines the detailed technical roadmap for the future development
 - [~] Daily job to refresh public stats for all active users. *Scheduler runs auto-sync; a dedicated stats-refresh job may still be needed.*
 - [ ] Build the Notifications panel UI. *Pending (A).*
 - [~] Notifications on sync/token failure. *Service emits them; API route is **not mounted** yet — wire `notification.routes` in web-backend. (A)*
+
+---
+
+## CodeContest (live contests + AI)
+
+Full plan, phases, and detailed checklist: **[CONTEST_LIVE_AI_ROADMAP.md](CONTEST_LIVE_AI_ROADMAP.md)**.
+
+**Tasks:**
+- [x] Clickable prototype in `frontendHtml/codecontest.html` — paste-link problems, in-app viewer + editor, live room, chat, AI hints, and mock anti-cheat (in-app-only, code-block, tab-switch penalty).
+- [ ] Backend: `Contest`/`ContestProblem` models, URL parser, statement fetcher, realtime rooms (Socket.IO + Redis), Judge0/extension verdicts.
+- [ ] AI: provider-agnostic `ai.service` (hint / analyze / classifyMessage), live-hint vs post-analysis modes, chat full-code guard.
+- [ ] Anti-cheat (server-authoritative): in-app-only, focus/tab detection → warnings → score penalty.
+- [ ] Own LLM: start on an API, then self-host Qwen2.5-Coder (Ollama → vLLM); enable pgvector for RAG.
