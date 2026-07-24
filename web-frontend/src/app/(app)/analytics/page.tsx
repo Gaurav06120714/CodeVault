@@ -140,8 +140,8 @@ export default function AnalyticsPage() {
   });
 
   // Helper: generate 365 cells from a date→count map
-  const buildCells = (hmap: Record<string, number>): string[] => {
-    const cells: string[] = [];
+  const buildCells = (hmap: Record<string, number>): { cls: string; count: number; dateStr: string }[] => {
+    const cells: { cls: string; count: number; dateStr: string }[] = [];
     const today = new Date();
     for (let i = 364; i >= 0; i--) {
       const d = new Date(today);
@@ -152,11 +152,15 @@ export default function AnalyticsPage() {
       const dStrLocal = `${year}-${month}-${day}`;
       const dStrUtc = d.toISOString().split('T')[0];
       const count = hmap[dStrUtc] || hmap[dStrLocal] || 0;
-      if (count >= 5) cells.push("l4");
-      else if (count >= 3) cells.push("l3");
-      else if (count >= 2) cells.push("l2");
-      else if (count >= 1) cells.push("l1");
-      else cells.push("");
+      
+      let cls = "";
+      if (count >= 5) cls = "l4";
+      else if (count >= 3) cls = "l3";
+      else if (count >= 2) cls = "l2";
+      else if (count >= 1) cls = "l1";
+      
+      const dateStr = d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+      cells.push({ cls, count, dateStr });
     }
     return cells;
   };
@@ -258,8 +262,8 @@ export default function AnalyticsPage() {
           return (
             <>
               <div className={heatClass} role="img" aria-label="Submission heatmap" aria-hidden="true">
-                {activeCells.map((cls, i) => (
-                  <i key={i} className={cls || undefined}></i>
+                {activeCells.map((c, i) => (
+                  <i key={i} className={c.cls || undefined} title={`${c.count} submission${c.count === 1 ? '' : 's'} on ${c.dateStr}`}></i>
                 ))}
               </div>
               <div className="heat-legend">

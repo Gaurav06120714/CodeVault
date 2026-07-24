@@ -18,7 +18,7 @@ export default function DashboardPage() {
   const [user, setUser] = useState<{ id: string; githubLogin: string; displayName: string | null } | null>(null);
   const [stats, setStats] = useState<any>(null);
   const [statsError, setStatsError] = useState(false);
-  const [platformHeatmaps, setPlatformHeatmaps] = useState<Record<string, string[]>>({});
+  const [platformHeatmaps, setPlatformHeatmaps] = useState<Record<string, { cls: string; count: number; dateStr: string }[]>>({});
   const [activeHeatTab, setActiveHeatTab] = useState<string>("");
   const [recentSubs, setRecentSubs] = useState<any[]>([]);
 
@@ -141,8 +141,8 @@ export default function DashboardPage() {
         });
 
         // Helper: generate 365 cells from a date→count map
-        const buildCells = (hmap: Record<string, number>): string[] => {
-          const cells: string[] = [];
+        const buildCells = (hmap: Record<string, number>): { cls: string; count: number; dateStr: string }[] => {
+          const cells: { cls: string; count: number; dateStr: string }[] = [];
           const today = new Date();
           for (let i = 364; i >= 0; i--) {
             const d = new Date(today);
@@ -153,17 +153,21 @@ export default function DashboardPage() {
             const dStrLocal = `${year}-${month}-${day}`;
             const dStrUtc = d.toISOString().split('T')[0];
             const count = hmap[dStrUtc] || hmap[dStrLocal] || 0;
-            if (count >= 5) cells.push("l4");
-            else if (count >= 3) cells.push("l3");
-            else if (count >= 2) cells.push("l2");
-            else if (count >= 1) cells.push("l1");
-            else cells.push("");
+            
+            let cls = "";
+            if (count >= 5) cls = "l4";
+            else if (count >= 3) cls = "l3";
+            else if (count >= 2) cls = "l2";
+            else if (count >= 1) cls = "l1";
+            
+            const dateStr = d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+            cells.push({ cls, count, dateStr });
           }
           return cells;
         };
 
         // Build per-platform heatmap cells
-        const perPlatCells: Record<string, string[]> = {};
+        const perPlatCells: Record<string, { cls: string; count: number; dateStr: string }[]> = {};
         Object.keys(perPlatformHeatmapData).forEach((pKey) => {
           perPlatCells[pKey] = buildCells(perPlatformHeatmapData[pKey]);
         });
@@ -395,8 +399,8 @@ export default function DashboardPage() {
             return (
               <>
                 <div className={heatClass} role="img" aria-label={`Submission heatmap – ${PLATFORMS[activeHeatTab]?.name}`} aria-hidden="true">
-                  {activeCells.map((cls, i) => (
-                    <i key={i} className={cls || undefined}></i>
+                  {activeCells.map((c, i) => (
+                    <i key={i} className={c.cls || undefined} title={`${c.count} submission${c.count === 1 ? '' : 's'} on ${c.dateStr}`}></i>
                   ))}
                 </div>
                 <div className="heat-legend">
