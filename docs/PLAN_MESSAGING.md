@@ -39,3 +39,9 @@ model Message {
 ## 4. Open Questions for Review
 - Should we restrict messaging so that you can only message people who follow you (to prevent spam), or keep it completely open?
 - Do you want real-time WebSockets (instant chat) for Version 1, or is simple HTTP polling acceptable to start?
+
+## ✅ Status checklist
+- [x] DB & schema (Message model)
+- [x] Backend (`message.service` + routes)
+- [x] Frontend (messages page + unread badge)
+- [x] Shipped in production

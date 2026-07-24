@@ -72,3 +72,11 @@ extension, cloud, DevSecOps, attack prevention, testing, etc.).
 Keep this index in sync — when you add a doc here, add its row above **in the same commit**.
 
 </div>
+
+## ✅ Documentation coverage
+- [x] Getting started & feature catalog
+- [x] Architecture & build plans
+- [x] Security docs
+- [x] Operations / deploy / runbooks
+- [x] Business & admin
+- [x] CodeContest (live + AI) roadmap

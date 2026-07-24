@@ -75,3 +75,13 @@ Push to `main` → Render **auto-deploys** the changed services (Blueprints have
 
 > Prefer a truly-always-on (no sleep) free host later? The repo also ships `docker-compose.prod.yml`
 > + `Caddyfile` for an Oracle Cloud "Always Free" VM — see the git history of this file.
+
+## ✅ Deploy checklist
+- [x] Render account + Blueprint created
+- [x] Secrets set (JWT_SECRET, ENCRYPTION_KEY, GitHub/Google OAuth)
+- [x] Database schema created
+- [x] OAuth callback pointed at the live URL
+- [x] All services show Deployed / Live on Render
+- [x] Admin served same-origin at /admin
+- [ ] Browser extension pointed at the live backend
+- [ ] Keep-alive / paid tier so services don't cold-start on login

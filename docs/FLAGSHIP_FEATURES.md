@@ -86,3 +86,8 @@ uniquely possible because CodeVault holds the actual submitted code — not just
 **Business Model:** A premium practice feature for individuals, plus a **fraud-resistant assessment
 product** sold to companies for candidate screening — a test that can't be beaten by memorizing a
 leaked question bank because every variant is freshly generated per candidate.
+
+## ✅ Build status checklist
+- [ ] Flash Arenas (live multiplayer) — *clickable prototype only in `frontendHtml/codecontest.html`*
+- [ ] SkillProof Capsules (verifiable credential)
+- [ ] Adaptive Variant Forge (transfer score)

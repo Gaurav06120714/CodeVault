@@ -282,3 +282,16 @@ Feature-parity client mirroring the web app against the same backends (owner: Ga
 | Problem detail (full question/solution) | 🟠 | stub — next phase |
 
 Full doc: [MOBILE_APP.md](MOBILE_APP.md).
+
+## ✅ Feature status checklist
+- [x] Authentication & accounts (GitHub, Google, email magic-link)
+- [x] Platform connections (LeetCode, Codeforces, CodeChef, HackerRank)
+- [x] Path A — public stats & analytics (dashboard, heatmap)
+- [x] Path B — code sync to GitHub
+- [x] Follow system
+- [x] Messaging
+- [x] Public profile `/u/[username]`
+- [x] Mobile app (Expo)
+- [x] Admin console (`/admin`)
+- [x] Dark mode + mobile responsiveness
+- [ ] Notifications panel UI + mounted notifications API route

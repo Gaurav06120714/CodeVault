@@ -73,3 +73,11 @@ Roll back a stage immediately on any SEV1, sustained 5xx > 5%, or p95 breaching 
 - **Support/contact:** publish a support email + link it in the app footer.
 - **Platform ToS:** monitor LeetCode/Codeforces/CodeChef/HackerRank ToS; keep the token-storage
   and scraping disclosure current in the CodeVault Terms of Service (see COMPLIANCE.md).
+
+## ✅ Runbook readiness checklist
+- [x] Incident response process documented
+- [x] Top-5 incident runbooks written
+- [x] Staged rollout plan
+- [x] Kill-switch + rollback documented
+- [ ] On-call roster / PagerDuty configured
+- [ ] Quarterly restore drill executed

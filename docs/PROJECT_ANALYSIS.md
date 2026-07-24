@@ -66,3 +66,11 @@ Instead of asking users for session cookies and running fragile backend scrapers
 
 ## Summary
 CodeVault is an excellent project with a massive total addressable market. The UI/UX is already top-tier. To transition from a "cool prototype" to a "production-ready startup", the absolute next step is to **abandon backend session-cookie scraping** and begin building the **CodeVault Browser Extension**.
+
+## ✅ Risk-mitigation checklist
+- [x] Secrets never in logs (pino redaction added)
+- [x] Scraping fragility softened (8s timeouts + snapshot fallback)
+- [x] Session tokens encrypted at rest (AES-256-GCM)
+- [ ] KMS envelope encryption + key rotation
+- [ ] GitHub API abuse-limit strategy (backoff/quotas)
+- [ ] Pentest / OWASP ZAP DAST sign-off

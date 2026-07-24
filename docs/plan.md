@@ -260,3 +260,12 @@ Path B v2 — capture the user's **own accepted** code in-browser and feed git-s
 ## ✅ Definition of done (per file)
 
 A file is "done" when it: implements the responsibility above, exports a clean typed interface, contains no logic that belongs in another layer or service, reads secrets only from env, and is covered by at least a basic test where it holds logic (services, generators, utils).
+
+## ✅ Build-order checklist
+- [x] Web backend (routes / controllers / services)
+- [x] Database (schema / migrations / RLS)
+- [x] Web frontend
+- [x] git-service (sync / publish)
+- [x] Browser extension
+- [x] Mobile app
+- [x] Admin console

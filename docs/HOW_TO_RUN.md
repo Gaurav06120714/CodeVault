@@ -223,3 +223,12 @@ npx expo start --lan          # scan the QR in Expo Go
 Requires web-backend (:4000) and git-service (:5050) running and reachable on the LAN. Login is email
 magic-link (token prints to the web-backend console when SMTP is unconfigured). Full guide:
 [MOBILE_APP.md](MOBILE_APP.md).
+
+## ✅ Setup checklist (tick as you go)
+- [ ] Node 20 + Docker installed
+- [ ] Postgres + Redis running (docker compose)
+- [ ] web-backend `.env` filled + running (:4000)
+- [ ] git-service `.env` filled + running (:5050)
+- [ ] web-frontend running (:3000)
+- [ ] Prisma migrations applied
+- [ ] Signed in via GitHub OAuth

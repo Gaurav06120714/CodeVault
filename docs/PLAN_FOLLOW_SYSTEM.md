@@ -38,3 +38,9 @@ Update the `User` model to include relations to `Follows`.
 ## 4. Open Questions for Review
 - Should users receive an in-app notification or email when someone follows them?
 - Do we need a "Private Account" feature where follow requests must be explicitly approved, or are all profiles strictly public like GitHub/Twitter?
+
+## ✅ Status checklist
+- [x] DB & schema (Follow model)
+- [x] Backend (`follow.service` + routes)
+- [x] Frontend (follow button, follower/following lists)
+- [x] Shipped in production

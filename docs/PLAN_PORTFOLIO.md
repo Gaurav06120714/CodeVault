@@ -28,3 +28,9 @@ Create a shareable public portfolio page so users can share their competitive pr
 ## 4. Open Questions for Review
 - Do we want to allow users to hide specific platforms from their public profile, or is it an all-or-nothing "public/private" switch?
 - Should the public profile show the user's recent submissions log, or just the high-level aggregated stats and heatmap?
+
+## ✅ Status checklist
+- [x] DB & schema (public profile fields, handle)
+- [x] Backend (`public.service`, `/api/public`)
+- [x] Frontend (`/u/[username]` with SSR/ISR + OG metadata)
+- [x] Shipped in production

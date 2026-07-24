@@ -159,3 +159,11 @@ Amplifiers. Kept happy on generous free tier because their shared profiles and w
 - **Guardrails:** never sell or expose individual user data; keep the free profile genuinely valuable; keep AI cost bounded; keep pricing fair by geography.
 
 > **In one line:** grow for free on the back of shareable, code-backed profiles; monetize power users with Pro, and monetize the network with institutions and recruiters who pay to *trust and search* what the community built.
+
+## ✅ Go-to-market checklist
+- [x] Value proposition & user segments defined
+- [x] Pricing tiers defined (Free / Pro / Teams)
+- [ ] Payment integration (Stripe / Razorpay)
+- [ ] Pro feature gating in the product
+- [ ] Pricing/landing page live
+- [ ] Funnel / conversion analytics

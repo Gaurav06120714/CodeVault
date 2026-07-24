@@ -98,3 +98,12 @@ npx expo start --lan          # scan the QR in Expo Go
   (the login response carries it). One-line backend add would fix bootstrap hydration.
 - Problem detail is a stub — full question/solution rendering from git-service is next-phase.
 - Options like message-thread pagination and follow/unfollow toggles are minimal.
+
+## ✅ Mobile app checklist
+- [x] Expo app scaffolded (`mobile/`)
+- [x] Auth (shared session / secure store)
+- [x] Analytics & stats parity
+- [x] Sync status
+- [x] Messaging
+- [ ] Push notifications
+- [ ] App-store / TestFlight build & release

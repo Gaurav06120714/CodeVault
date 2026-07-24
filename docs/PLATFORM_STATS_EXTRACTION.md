@@ -331,3 +331,12 @@ A: Source code is **private** on most platforms. LeetCode and Codeforces don't e
 
 **Q: Is there any rate limiting?**
 A: Yes, all platforms have some form of rate limiting. CodeVault mitigates this by caching stats in Redis for 10 minutes. For normal usage (a few users refreshing their dashboards), rate limits are never hit.
+
+## ✅ Extraction status checklist
+- [x] LeetCode (internal GraphQL)
+- [x] Codeforces (public REST API)
+- [x] CodeChef (HTML scrape)
+- [x] HackerRank (REST)
+- [x] Per-problem tag enrichment + Redis cache (7-day)
+- [x] Request timeouts + concurrency cap on tag fetches
+- [x] Snapshot fallback on upstream failure

@@ -43,3 +43,9 @@ This approach focuses on delivering fully functional features end-to-end.
 Regardless of the chosen plan, we will verify our work by:
 1. **Automated/API Testing:** Testing the REST endpoints using Postman or cURL to ensure correct data fetching and syncing.
 2. **Manual UI Verification:** Running the `web-frontend` dev server to ensure the UI correctly integrates with the backends and displays the expected data.
+
+## ✅ Status checklist
+- [x] Core build complete (backend, database, frontend, extension)
+- [x] Auth + platform sync + GitHub publish
+- [x] Deployed & verified on Render
+- [ ] Advanced features (CodeContest, own LLM) — see CONTEST_LIVE_AI_ROADMAP.md
