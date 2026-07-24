@@ -21,6 +21,7 @@ export default function DashboardPage() {
   const [platformHeatmaps, setPlatformHeatmaps] = useState<Record<string, { cls: string; count: number; dateStr: string }[]>>({});
   const [activeHeatTab, setActiveHeatTab] = useState<string>("");
   const [recentSubs, setRecentSubs] = useState<any[]>([]);
+  const [hoveredCell, setHoveredCell] = useState<{ x: number, y: number, text: string } | null>(null);
 
   const [isLoading, setIsLoading] = useState(true);
   const [copied, setCopied] = useState(false);
@@ -400,9 +401,50 @@ export default function DashboardPage() {
               <>
                 <div className={heatClass} role="img" aria-label={`Submission heatmap – ${PLATFORMS[activeHeatTab]?.name}`} aria-hidden="true">
                   {activeCells.map((c, i) => (
-                    <i key={i} className={c.cls || undefined} title={`${c.count} submission${c.count === 1 ? '' : 's'} on ${c.dateStr}`}></i>
+                    <i 
+                      key={i} 
+                      className={c.cls || undefined} 
+                      onMouseEnter={(e) => {
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        setHoveredCell({
+                          x: rect.left + rect.width / 2,
+                          y: rect.top,
+                          text: `${c.count} submission${c.count === 1 ? '' : 's'} on ${c.dateStr}`
+                        });
+                      }}
+                      onMouseLeave={() => setHoveredCell(null)}
+                    ></i>
                   ))}
                 </div>
+                {hoveredCell && (
+                  <div style={{
+                    position: 'fixed',
+                    top: hoveredCell.y - 8,
+                    left: hoveredCell.x,
+                    transform: 'translate(-50%, -100%)',
+                    background: 'var(--tooltip-bg, #222)',
+                    color: '#fff',
+                    padding: '6px 10px',
+                    borderRadius: '6px',
+                    fontSize: '12px',
+                    fontWeight: 500,
+                    pointerEvents: 'none',
+                    zIndex: 9999,
+                    whiteSpace: 'nowrap',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+                  }}>
+                    {hoveredCell.text}
+                    <div style={{
+                      position: 'absolute',
+                      bottom: '-4px',
+                      left: '50%',
+                      transform: 'translateX(-50%)',
+                      borderWidth: '4px 4px 0',
+                      borderStyle: 'solid',
+                      borderColor: 'var(--tooltip-bg, #222) transparent transparent transparent'
+                    }} />
+                  </div>
+                )}
                 <div className="heat-legend">
                   Less {colors.map((c, i) => (
                     <i key={i} style={{ background: c }}></i>
