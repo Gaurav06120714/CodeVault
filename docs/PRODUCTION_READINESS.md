@@ -124,8 +124,8 @@ docker compose -f docker-compose.prod.yml ps
 - [ ] Correct OAuth callback/redirect URLs for the production domain
 
 **Repo hygiene**
-- [ ] Remove empty stubs: `web-backend/src/services/platforms/{leetcode,codeforces,index}.service.ts`
-- [ ] Remove scratch files: `web-backend/debug_codechef.js`, `web-backend/test_codechef.js`
+- [x] Remove empty stubs: `web-backend/src/services/platforms/{leetcode,codeforces,index}.service.ts`
+- [x] Remove scratch files: `web-backend/debug_codechef.js`, `web-backend/test_codechef.js`
 - [ ] Keep secrets out of git (gitleaks already runs in CI ✅)
 
 **Security (already scaffolded in `security/`)**
